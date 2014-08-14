@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<resourceDescriptor critical="false" date="2014-08-14-07:00" description="JPL Dynamic Scripts adapter plugin for MagicDraw
+Provider Name: JPL, California Institute of Technology" group="JPL Resource" homePage="http://mbse.jpl.nasa.gov" id="72516" mdVersionMax="higher" mdVersionMin="12.5" name="gov.nasa.jpl.dynamicScripts.magicdraw" product="govnasajpldynamicScriptsmagicdraw" restartMagicdraw="true" type="Plugin">
+    <version human="1" internal="1" resource="10"/>
+    <provider email="nicolas.f.rouquette@jpl.nasa.gov" homePage="http://mbse.jpl.nasa.gov" name="JPL"/>
+    <edition>Reader</edition>
+    <edition>Community</edition>
+    <edition>Standard</edition>
+    <edition>Professional Java</edition>
+    <edition>Professional C++</edition>
+    <edition>Professional C#</edition>
+    <edition>Professional ArcStyler</edition>
+    <edition>Professional EFFS ArcStyler</edition>
+    <edition>OptimalJ</edition>
+    <edition>Professional</edition>
+    <edition>Architect</edition>
+    <edition>Enterprise</edition>
+    <installation>
+        <file from="icons/CustomLinkIcon.png" to="icons/CustomLinkIcon.png"/>
+        <file from="icons/JPL.small.png" to="icons/JPL.small.png"/>
+        <file from="plugin.xml" to="plugin.xml"/>
+    </installation>
+</resourceDescriptor>
+

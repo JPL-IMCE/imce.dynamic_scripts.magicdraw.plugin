@@ -7,7 +7,7 @@
 	<property name="scripts.dir" 		location="."/>
 	<property name="project.dir" 		location="."/>
 	<property name="scripts.name" 		value="gov.nasa.jpl.dynamicScripts.magicdraw"/>
-	<property name="scripts.resource"	value="data/resourcemanager/MDR_Profile_gov_nasa_jpl_dynamicScripts_magicdraw_76633_descriptor.xml"/>
+	<property name="scripts.resource"	value="data/resourcemanager/MDR_Plugin_govnasajpldynamicScriptsmagicdraw_72516_descriptor.xml"/>
 	<property name="scripts.archive"		value="JPLDynamicScriptsMagicDrawPlugin"/>
 
 	<import file="${md.install.dir}/data/eclipse/zip.xml"/>	
