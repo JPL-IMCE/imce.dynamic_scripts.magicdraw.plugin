@@ -158,7 +158,7 @@
 			</fileset>
 		</jar>
 
-		<jar destfile="${scripts.dir}/lib.srcs/${scripts.name}.jar">
+		<jar destfile="${scripts.dir}/lib.srcs/${scripts.name}-sources.jar">
 			<fileset dir="${scripts.dir}/src/">
 				<include name="**/*.java" />
 				<include name="**/*.scala" />
