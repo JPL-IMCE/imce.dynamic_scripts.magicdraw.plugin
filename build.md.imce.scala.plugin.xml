@@ -243,8 +243,9 @@
 		<element name="binary-includes" optional="true" />
 		<sequential>
 			<delete failonerror="false" quiet="true">
-				<fileset dir="@{plugin.dir}/root/imce.scripts/@{plugin.name}">
-					<include name="*.jar" />
+				<fileset dir="@{plugin.dir}/root/plugins/@{plugin.name}">
+					<include name="lib.*/**/*.jar" />
+					<include name="lib.*/**/*.zip" />
 					<include name="lib/**/*.jar" />
 					<include name="lib/**/*.dll" />
 					<include name="lib/**/*.jnilib" />
@@ -267,9 +268,10 @@
 				</fileset>
 			</delete>
 
-			<copy todir="@{plugin.dir}/root/imce.scripts/@{plugin.name}" verbose="true" failonerror="false">
+			<copy todir="@{plugin.dir}/root/plugins/@{plugin.name}" verbose="true" failonerror="false">
 				<fileset dir="@{plugin.dir}">
-					<include name="*.jar" />
+					<include name="lib.*/**/*.jar" />
+					<include name="lib.*/**/*.zip" />
 					<include name="lib/**/*.jar" />
 					<include name="lib/**/*.dll" />
 					<include name="lib/**/*.jnilib" />
@@ -281,10 +283,10 @@
 				</fileset>
 			</copy>
 			<chmod perm="ugo+rx" verbose="true" failonerror="true">
-				<fileset dir="@{plugin.dir}/root/imce.scripts/@{plugin.name}">
-					<include name="*.sh" />
-					<include name="*.bat" />
-					<include name="*.exe" />
+				<fileset dir="@{plugin.dir}/root/plugins/@{plugin.name}">
+					<include name="**/*.sh" />
+					<include name="**/*.bat" />
+					<include name="**/*.exe" />
 				</fileset>
 			</chmod>
 

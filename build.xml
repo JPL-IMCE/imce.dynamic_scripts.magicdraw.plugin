@@ -55,12 +55,8 @@
 			plugin.resource="${plugin.resource}"
 			plugin.archive="${plugin.archive}"
 			plugin.version="${THIS_JOB.version.human}">
-			<source-includes>
-				<include name="src/**/*.scala"/>
-			</source-includes>
-			<binary-includes>
-				<include name="bin/**/*.class"/>
-			</binary-includes>
+			<source-includes/>
+			<binary-includes/>
 		</md.plugin.zip>
 	</target>
 
