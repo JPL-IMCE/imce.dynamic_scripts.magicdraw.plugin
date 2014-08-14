@@ -4,22 +4,21 @@
 	<property name="memorySize" 		value="-Xmx3076M"/>
 	<property name="maxPermGenSize"	value="-XX:MaxPermSize=1024M" />
 	
-	<property name="scripts.dir" 		location="."/>
-	<property name="project.dir" 		location="."/>
-	<property name="scripts.name" 		value="gov.nasa.jpl.dynamicScripts.magicdraw"/>
-	<property name="scripts.resource"	value="data/resourcemanager/MDR_Plugin_govnasajpldynamicScriptsmagicdraw_72516_descriptor.xml"/>
-	<property name="scripts.archive"		value="JPLDynamicScriptsMagicDrawPlugin"/>
-
 	<import file="${md.install.dir}/data/eclipse/zip.xml"/>	
-	
 	<echoproperties prefix="md"/>
 	<echoproperties/>
 	
+	<property name="plugin.dir"	 		location="."/>
+	<property name="plugin.name" 		value="gov.nasa.jpl.dynamicScripts.magicdraw"/>
+	<property name="plugin.resource"		value="data/resourcemanager/MDR_Plugin_govnasajpldynamicScriptsmagicdraw_72516_descriptor.xml"/>
+	<property name="plugin.archive"		value="JPLDynamicScriptsMagicDrawPlugin"/>
+	<property name="plugin.jar"			value="lib/JPLDynamicScriptsMagicDrawPlugin.jar"/>
+
 	<property name="md.build.tools.dir"	location="${md.install.dir}/data/eclipse/resource/SMDP-PackageB" />
 	<!--
-	<import file="${md.build.tools.dir}/build.md.imce.scala.scripts.xml"/>
+	<import file="${md.build.tools.dir}/build.md.plugin.xml"/>
 	-->
-	<import file="./build.md.imce.scala.scripts.xml"/>
+	<import file="build.md.imce.scala.plugin.xml"/>
 	
 	<target name="all" depends="all.error,all.ok"/>
 	
@@ -32,50 +31,50 @@
 		<save.script.properties/>
 	</target>
 	
-	<fileset id="scripts.profiles" dir="${scripts.dir}/profiles">
+	<fileset id="plugin.profiles" dir="${plugin.dir}/profiles">
 		<include name="**/*.mdzip"/>
 	</fileset>
 
-	<fileset id="scripts.modelLibraries" dir="${scripts.dir}/modelLibraries">
+	<fileset id="plugin.modelLibraries" dir="${plugin.dir}/modelLibraries">
 		<include name="**/*.mdzip"/>
 	</fileset>
 
-	<fileset id="scripts.tests" dir="${scripts.dir}/testResources">
+	<fileset id="plugin.tests" dir="${plugin.dir}/testResources">
 		<include name="**/*.mdzip"/>
 		<include name="**/*.properties"/>
 	</fileset>
 
-	<fileset id="scripts.samples" dir="${scripts.dir}/samples">
+	<fileset id="plugin.samples" dir="${plugin.dir}/samples">
 		<include name="**/*.mdzip"/>
 	</fileset>
 	
 	<target name="zip">
-		<md.scripts.zip
-			scripts.dir="${scripts.dir}" 
-			scripts.name="${scripts.name}"
-			scripts.resource="${scripts.resource}"
-			scripts.archive="${scripts.archive}"
-			scripts.version="${THIS_JOB.version.human}">
+		<md.plugin.zip
+			plugin.dir="${plugin.dir}" 
+			plugin.name="${plugin.name}"
+			plugin.resource="${plugin.resource}"
+			plugin.archive="${plugin.archive}"
+			plugin.version="${THIS_JOB.version.human}">
 			<source-includes>
 				<include name="src/**/*.scala"/>
 			</source-includes>
 			<binary-includes>
 				<include name="bin/**/*.class"/>
 			</binary-includes>
-		</md.scripts.zip>
+		</md.plugin.zip>
 	</target>
 
 	<target name="install">
 		<md.install.zip
-			scripts.dir="${scripts.dir}" 
-			scripts.archive="${scripts.archive}"
-			scripts.version="${THIS_JOB.version.human}"
+			plugin.dir="${plugin.dir}" 
+			plugin.archive="${plugin.archive}"
+			plugin.version="${THIS_JOB.version.human}"
 			install.dir="${md.install.dir}"/>
 	</target>
 		
 	<target name="bundle">
 		<md.zip.all
-			bundle.dest.dir="${scripts.dir}/artifacts"
+			bundle.dest.dir="${plugin.dir}/artifacts"
 			bundle.name="${bundle.name}"
 			bundle.source.dir="${md.install.dir}"/>
 	</target>
