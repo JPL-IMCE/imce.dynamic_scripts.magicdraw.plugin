@@ -18,5 +18,6 @@
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_ANT_TARGETS" value="build,"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE" value="${none}"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${workspace_loc:/gov.nasa.jpl.dynamicScripts.magicdraw/build.xml}"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc:/gov.nasa.jpl.dynamicScripts.magicdraw}"/>
 <stringAttribute key="process_factory_id" value="org.eclipse.ant.ui.remoteAntProcessFactory"/>
 </launchConfiguration>
