@@ -114,14 +114,14 @@ case class DynamicPathCreatorForClassifiedInstanceDesignation( d: ClassifiedInst
       case ( linkView: LinkView, link: InstanceSpecification ) =>
         val iSource = linkView.getClient().getElement() match {
           case i: InstanceSpecification => i
-          case _                        => throw new IllegalArgumentException( s"Cannot find client InstanceSpecification" )
+          case _                        => Failure(new IllegalArgumentException( s"Cannot find client InstanceSpecification" ))
         }
         val iTarget = linkView.getSupplier().getElement() match {
           case i: InstanceSpecification => i
-          case _                        => throw new IllegalArgumentException( s"Cannot find supplier InstanceSpecification" )
+          case _                        => Failure(new IllegalArgumentException( s"Cannot find supplier InstanceSpecification" ))
         }
         method.invoke( null, linkView, link, null, iSource, iTarget )
       case ( _, _ ) =>
-        throw new IllegalArgumentException( s"Cannot find created LinkView for InstanceSpecification" )
+        Failure(new IllegalArgumentException( s"Cannot find created LinkView for InstanceSpecification" ))
     }
 }

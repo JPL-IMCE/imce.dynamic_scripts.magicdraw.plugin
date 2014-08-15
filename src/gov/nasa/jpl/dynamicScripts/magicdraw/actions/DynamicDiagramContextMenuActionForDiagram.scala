@@ -61,6 +61,8 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
 import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
+import scala.util.Failure
+import scala.util.Success
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -110,12 +112,21 @@ case class DynamicDiagramContextMenuActionForDiagram(
       log.info( s"${message} took ${currentTime - previousTime} ms" )
 
       r match {
-        case Some(MagicDrawValidationDataResults(title, runData, results)) => 
+			  case Failure(ex) => 
+			    val ex_message = message + s"\n${ex.getMessage()}"
+    			  log.error(ex_message, ex)
+			    guiLog.showError(ex_message, ex)
+
+			  case Success(None) => 
+			    ()
+			    
+        case Success(Some(MagicDrawValidationDataResults(title, runData, results))) => 
           Utilities.invokeAndWaitOnDispatcher(new Runnable() {
             override def run(): Unit = {
               ValidationResultsWindowManager.updateValidationResultsWindow(currentTime.toString(), title, runData, results)
             }
           })
+          
         case _ => 
           ()
       }
