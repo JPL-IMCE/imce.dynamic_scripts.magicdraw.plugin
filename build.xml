@@ -28,7 +28,7 @@
 	</target>
 		
 	<target name="all.ok" if="all.precondition.scala" depends="build,zip,install,bundle">
-		<save.script.properties/>
+		<save.job.properties/>
 	</target>
 	
 	<fileset id="plugin.profiles" dir="${plugin.dir}/profiles">
