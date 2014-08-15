@@ -87,7 +87,7 @@ case class DynamicShapeCreatorForMetaclassDesignation( project: Project, d: Meta
     }
     
   def invokeMethod(method: Method, das: DynamicActionScript, pe: PresentationElement, e: Element): Object = md match {
-    case u:UnresolvedMagicDrawMetaclassDesignation => throw u.error
+    case u:UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
     case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, r, pe, e)
   }
 }
@@ -99,7 +99,7 @@ case class DynamicShapeCreatorForStereotypedMetaclassDesignation( project: Proje
     case _:ResolvedMagicDrawStereotypeDesignation => true
   }
   def createElement(project: Project): Try[Element] = md match {
-    case u:UnresolvedMagicDrawStereotypeDesignation => Failure(u.error)
+    case u:UnresolvedMagicDrawStereotypeDesignation => Failure( u.error )
     case r:ResolvedMagicDrawStereotypeDesignation => r.createElement(project)
   }
   
@@ -114,7 +114,7 @@ case class DynamicShapeCreatorForStereotypedMetaclassDesignation( project: Proje
     }
     
   def invokeMethod(method: Method, das: DynamicActionScript, pe: PresentationElement, e: Element): Object = md match {
-    case u:UnresolvedMagicDrawMetaclassDesignation => throw u.error
+    case u:UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
     case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, r, pe, e)
   }
 }
@@ -126,7 +126,7 @@ case class DynamicShapeCreatorForClassifiedInstanceDesignation( project: Project
     case _:ResolvedMagicDrawClassifiedInstanceDesignation => true
   }
   def createElement(project: Project): Try[Element] = md match {
-    case u:UnresolvedMagicDrawClassifiedInstanceDesignation => Failure(u.error)
+    case u:UnresolvedMagicDrawClassifiedInstanceDesignation => Failure( u.error )
     case r:ResolvedMagicDrawClassifiedInstanceDesignation => r.createElement(project)
   }
   def lookupMethod(clazz: java.lang.Class[_], action: DynamicActionScript): Try[Method] = 
@@ -140,7 +140,7 @@ case class DynamicShapeCreatorForClassifiedInstanceDesignation( project: Project
     }
     
   def invokeMethod(method: Method, das: DynamicActionScript, pe: PresentationElement, e: Element): Object = md match {
-    case u:UnresolvedMagicDrawMetaclassDesignation => throw u.error
+    case u:UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
     case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, r, pe, e)
   }
 }
@@ -152,7 +152,7 @@ case class DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation( proje
     case _:ResolvedMagicDrawStereotypedClassifiedInstanceDesignation => true
   }
   def createElement(project: Project): Try[Element] = md match {
-    case u:UnresolvedMagicDrawStereotypedClassifiedInstanceDesignation => Failure(u.error)
+    case u:UnresolvedMagicDrawStereotypedClassifiedInstanceDesignation => Failure( u.error )
     case r:ResolvedMagicDrawStereotypedClassifiedInstanceDesignation => r.createElement(project)
   }
 
@@ -167,7 +167,7 @@ case class DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation( proje
     }
     
   def invokeMethod(method: Method, das: DynamicActionScript, pe: PresentationElement, e: Element): Object = md match {
-    case u:UnresolvedMagicDrawMetaclassDesignation => throw u.error
+    case u:UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
     case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, r, pe, e)
   }
 }

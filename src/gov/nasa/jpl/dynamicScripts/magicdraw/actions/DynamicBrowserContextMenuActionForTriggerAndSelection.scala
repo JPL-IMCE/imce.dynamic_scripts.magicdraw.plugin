@@ -42,13 +42,14 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.actions
 import java.awt.event.ActionEvent
 import java.lang.reflect.InvocationTargetException
 import java.net.MalformedURLException
-import java.util.Collection
 
 import javax.swing.KeyStroke
 
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.implicitConversions
 import scala.language.postfixOps
+import scala.util.Failure
+import scala.util.Success
 
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.Project
@@ -62,7 +63,7 @@ import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.utils.Utilities
 
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.BrowserContextMenuAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
@@ -125,12 +126,21 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
       log.info( s"${message} took ${currentTime - previousTime} ms" )
 
       r match {
-        case Some(MagicDrawValidationDataResults(title, runData, results)) => 
+			  case Failure(ex) => 
+			    val ex_message = message + s"\n${ex.getMessage()}"
+    			  log.error(ex_message, ex)
+			    guiLog.showError(ex_message, ex)
+
+			  case Success(None) => 
+			    ()
+			    
+        case Success(Some(MagicDrawValidationDataResults(title, runData, results))) => 
           Utilities.invokeAndWaitOnDispatcher(new Runnable() {
             override def run(): Unit = {
               ValidationResultsWindowManager.updateValidationResultsWindow(currentTime.toString(), title, runData, results)
             }
           })
+          
         case _ => 
           ()
       }

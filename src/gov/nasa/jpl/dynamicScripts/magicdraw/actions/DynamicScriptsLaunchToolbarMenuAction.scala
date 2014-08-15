@@ -43,20 +43,17 @@ import java.awt.event.ActionEvent
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.net.MalformedURLException
-
 import javax.swing.KeyStroke
-
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
 import com.nomagic.actions.NMAction
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.utils.MDLog
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.MainToolbarMenuAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
+import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -99,8 +96,19 @@ case class DynamicScriptsLaunchToolbarMenuAction( action: MainToolbarMenuAction,
 			log.info(s"${message} took ${currentTime - previousTime} ms")
 	
 			r match {
-			  case b: java.lang.Boolean => b.booleanValue()
-			  case _ => return
+			  case Failure(ex) => 
+			    val ex_message = message + s"\n${ex.getMessage()}"
+    			  log.error(ex_message, ex)
+			    guiLog.showError(ex_message, ex)
+
+			  case Success(None) => 
+			    ()
+			    
+			  case Success(Some( v: MagicDrawValidationDataResults)) => {
+			    
+			  }
+			  case _ => 
+			    ()
 			}
 
 		} catch {

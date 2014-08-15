@@ -43,6 +43,8 @@ import java.awt.Point
 import java.lang.reflect.InvocationTargetException
 import java.net.MalformedURLException
 
+import scala.collection.JavaConversions.seqAsJavaList
+import scala.language.implicitConversions
 import scala.util.Failure
 import scala.util.Success
 
@@ -50,9 +52,12 @@ import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.magicdraw.uml.symbols.manipulators.drawactions.AdditionalDrawAction
 import com.nomagic.magicdraw.utils.MDLog
+import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
+import com.nomagic.utils.Utilities
 
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
+import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -103,7 +108,25 @@ case class DynamicShapeFinalizationAction(
 			log.info(s"${message} took ${currentTime - previousTime} ms")
 	
 			r match {
+			  case Failure(ex) => 
+			    val ex_message = message + s"\n${ex.getMessage()}"
+    			  log.error(ex_message, ex)
+			    guiLog.showError(ex_message, ex)
+			    false
+			    
+			  case Success(None) => 
+			    true
+			    
+        case Success(Some(MagicDrawValidationDataResults(title, runData, results))) => 
+          Utilities.invokeAndWaitOnDispatcher(new Runnable() {
+            override def run(): Unit = {
+              ValidationResultsWindowManager.updateValidationResultsWindow(currentTime.toString(), title, runData, results)
+            }
+          })
+          false
+          
 			  case b: java.lang.Boolean => b.booleanValue()
+			  
 			  case _ => false
 			}
 
