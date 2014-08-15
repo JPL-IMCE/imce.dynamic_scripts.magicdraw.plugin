@@ -62,80 +62,94 @@ case class DynamicScriptsLaunchToolbarMenuAction( action: MainToolbarMenuAction,
   extends NMAction( id, action.name.hname, null.asInstanceOf[KeyStroke] ) {
 
   override def actionPerformed( ev: ActionEvent ): Unit = {
-		val log = MDLog.getPluginsLog()
-		
-		val previousTime = System.currentTimeMillis()
-	
-		val message = action.prettyPrint("")
-		val guiLog = Application.getInstance().getGUILog()
-		val localClassLoader = Thread.currentThread().getContextClassLoader()
-		try {		
-		  val scriptCL = ClassLoaderHelper.createDynamicScriptClassLoader(action)
-			Thread.currentThread().setContextClassLoader(scriptCL)
+    val log = MDLog.getPluginsLog()
 
-			val c = scriptCL.loadClass(action.className.jname)
-			if (c == null) {
-				val error = "${message}: class '${action.className.jname}' not found in project '${action.projectName.jname}'"
-				log.error(error)
-				guiLog.showError(error)
-				return
-			}
+    val previousTime = System.currentTimeMillis()
 
-			val m = lookupMethod(c, action) match {
-			  case Failure(t) => 
-				  val error = s"${message}: ${t.getMessage()}"
-				  log.error(error, t)
-				  guiLog.showError(error, t)
-				  return
-			  case Success(m) => m
-			}
+    val message = action.prettyPrint( "" )
+    val guiLog = Application.getInstance().getGUILog()
 
-			val r = m.invoke(null, action, ev)
-			
-			val currentTime = System.currentTimeMillis()
-			log.info(s"${message} took ${currentTime - previousTime} ms")
-	
-			r match {
-			  case Failure(ex) => 
-			    val ex_message = message + s"\n${ex.getMessage()}"
-    			  log.error(ex_message, ex)
-			    guiLog.showError(ex_message, ex)
+    ClassLoaderHelper.createDynamicScriptClassLoader( action ) match {
+      case Failure( ex ) =>
+        val error = "${message}: project not found '${menuAction.projectName.jname}'"
+        log.error( error )
+        guiLog.showError( error )
+        return
 
-			  case Success(None) => 
-			    ()
-			    
-			  case Success(Some( v: MagicDrawValidationDataResults)) => {
-			    
-			  }
-			  case _ => 
-			    ()
-			}
+      case Success( scriptCL ) => {
+        val localClassLoader = Thread.currentThread().getContextClassLoader()
+        try {
 
-		} catch {
-		  case ex: InvocationTargetException =>
-        val t = ex.getTargetException() match { case null => ex; case t => t }
-        val ex_message = message + s"\n${t.getMessage()}"
-    			log.error(ex_message, t)
-			  guiLog.showError(ex_message, t)
-			  return
-		  case ex @ (_:ClassNotFoundException | _:SecurityException | _:NoSuchMethodException | _:IllegalArgumentException  | _:IllegalAccessException  | _:MalformedURLException  | _:NoSuchMethodException) =>
-        val ex_message = message + s"\n${ex.getMessage()}"
-    			log.error(ex_message, ex)
-			  guiLog.showError(ex_message, ex)
-			  return
-		} finally {
-			Thread.currentThread().setContextClassLoader(localClassLoader)
-		}
+          Thread.currentThread().setContextClassLoader( scriptCL )
+
+          val c = scriptCL.loadClass( action.className.jname )
+          if ( c == null ) {
+            val error = "${message}: class '${menuAction.className.jname}' not found in project '${menuAction.projectName.jname}'"
+            log.error( error )
+            guiLog.showError( error )
+            return
+          }
+
+          val m = lookupMethod( c, action ) match {
+            case Failure( t ) =>
+              val error = s"${message}: ${t.getMessage()}"
+              log.error( error, t )
+              guiLog.showError( error, t )
+              return
+            case Success( m ) => m
+          }
+
+          val r = m.invoke( null, action, ev )
+
+          val currentTime = System.currentTimeMillis()
+          log.info( s"${message} took ${currentTime - previousTime} ms" )
+
+          r match {
+            case Failure( ex ) =>
+              val ex_message = message + s"\n${ex.getMessage()}"
+              log.error( ex_message, ex )
+              guiLog.showError( ex_message, ex )
+
+            case Success( None ) =>
+              ()
+
+            case Success( Some( v: MagicDrawValidationDataResults ) ) => {
+
+            }
+            case _ =>
+              ()
+          }
+
+        }
+        catch {
+          case ex: InvocationTargetException =>
+            val t = ex.getTargetException() match { case null => ex; case t => t }
+            val ex_message = message + s"\n${t.getMessage()}"
+            log.error( ex_message, t )
+            guiLog.showError( ex_message, t )
+            return
+          case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
+            val ex_message = message + s"\n${ex.getMessage()}"
+            log.error( ex_message, ex )
+            guiLog.showError( ex_message, ex )
+            return
+        }
+        finally {
+          Thread.currentThread().setContextClassLoader( localClassLoader )
+        }
+      }
+    }
   }
 
-  def lookupMethod(clazz: java.lang.Class[_], action: DynamicActionScript): Try[Method] = 
+  def lookupMethod( clazz: java.lang.Class[_], action: DynamicActionScript ): Try[Method] =
     try {
-			clazz.getMethod(action.methodName.sname, classOf[MainToolbarMenuAction], classOf[ActionEvent]) match {
-			  case m: Method => Success(m)
-			  case null => Failure(new IllegalArgumentException(s"method '${action.methodName.sname}()' not found in ${action.className.jname}"))
-			}
-    } catch {
-      case ex:NoSuchMethodException => Failure(new IllegalArgumentException(s"method '${action.methodName.sname}()' not found in ${action.className.jname}"))
+      clazz.getMethod( action.methodName.sname, classOf[MainToolbarMenuAction], classOf[ActionEvent] ) match {
+        case m: Method => Success( m )
+        case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
+      }
+    }
+    catch {
+      case ex: NoSuchMethodException => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
     }
 
 }

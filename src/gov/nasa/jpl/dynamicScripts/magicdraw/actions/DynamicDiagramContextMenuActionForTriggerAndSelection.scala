@@ -72,7 +72,7 @@ case class DynamicDiagramContextMenuActionForTriggerAndSelection(
   key: KeyStroke,
   group: String ) extends DefaultDiagramAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
 
-  override def toString(): String = 
+  override def toString(): String =
     s"${menuAction.name.hname}"
 
   override def actionPerformed( ev: ActionEvent ): Unit = {
@@ -82,67 +82,76 @@ case class DynamicDiagramContextMenuActionForTriggerAndSelection(
     val p = DynamicScriptsPlugin.getInstance()
     val sm = SessionManager.getInstance()
 
-    val message = menuAction.prettyPrint("")
-    
-    val localClassLoader = Thread.currentThread().getContextClassLoader()
-    try {
-      val scriptCL = ClassLoaderHelper.createDynamicScriptClassLoader( menuAction )
-      Thread.currentThread().setContextClassLoader( scriptCL )
+    val message = menuAction.prettyPrint( "" )
 
-      val c = scriptCL.loadClass( menuAction.className.jname )
-      if ( c == null ) {
-        val error = "${message}: class '${menuAction.className.jname}' not found in project '${menuAction.projectName.jname}'"
+    ClassLoaderHelper.createDynamicScriptClassLoader( menuAction ) match {
+      case Failure( ex ) =>
+        val error = "${message}: project not found '${menuAction.projectName.jname}'"
         log.error( error )
         guiLog.showError( error )
         return
+
+      case Success( scriptCL ) => {
+        val localClassLoader = Thread.currentThread().getContextClassLoader()
+        try {
+
+          Thread.currentThread().setContextClassLoader( scriptCL )
+
+          val c = scriptCL.loadClass( menuAction.className.jname )
+          if ( c == null ) {
+            val error = "${message}: class '${menuAction.className.jname}' not found in project '${menuAction.projectName.jname}'"
+            log.error( error )
+            guiLog.showError( error )
+            return
+          }
+
+          val m = c.getMethod( menuAction.methodName.sname, classOf[PresentationElement], classOf[Element], classOf[java.util.Collection[PresentationElement]] )
+          if ( m == null ) {
+            val error = "${message}: method '${menuAction.methodName.sname}(PresentationElement, Element, Collection<PresentationElement>)' not found in project/class '${menuAction.projectName.jname}/${action.className.jname}'"
+            log.error( error )
+            guiLog.showError( error )
+            return
+          }
+
+          val r = m.invoke( null, trigger, element, selected )
+
+          val currentTime = System.currentTimeMillis()
+          log.info( s"${message} took ${currentTime - previousTime} ms" )
+
+          r match {
+            case Failure( ex ) =>
+              val ex_message = message + s"\n${ex.getMessage()}"
+              log.error( ex_message, ex )
+              guiLog.showError( ex_message, ex )
+
+            case Success( None ) =>
+              ()
+
+            case Success( Some( MagicDrawValidationDataResults( title, runData, results ) ) ) =>
+              Utilities.invokeAndWaitOnDispatcher( new Runnable() {
+                override def run(): Unit = {
+                  ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString(), title, runData, results )
+                }
+              } )
+
+            case _ =>
+              ()
+          }
+
+        }
+        catch {
+          case ex: InvocationTargetException =>
+            val t = ex.getTargetException() match { case null => ex; case t => t }
+            log.error( message, t )
+            guiLog.showError( message, t )
+          case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
+            log.error( message, ex )
+            guiLog.showError( message, ex )
+        }
+        finally {
+          Thread.currentThread().setContextClassLoader( localClassLoader )
+        }
       }
-
-      val m = c.getMethod( menuAction.methodName.sname, classOf[PresentationElement], classOf[Element], classOf[java.util.Collection[PresentationElement]] )
-      if ( m == null ) {
-        val error = "${message}: method '${menuAction.methodName.sname}(PresentationElement, Element, Collection<PresentationElement>)' not found in project/class '${menuAction.projectName.jname}/${action.className.jname}'"
-        log.error( error )
-        guiLog.showError( error )
-        return
-      }
-
-      val r = m.invoke( null, trigger, element, selected )
-
-      val currentTime = System.currentTimeMillis()
-      log.info( s"${message} took ${currentTime - previousTime} ms" )
-
-      r match {
-			  case Failure(ex) => 
-			    val ex_message = message + s"\n${ex.getMessage()}"
-    			  log.error(ex_message, ex)
-			    guiLog.showError(ex_message, ex)
-
-			  case Success(None) => 
-			    ()
-			    
-        case Success(Some(MagicDrawValidationDataResults(title, runData, results))) => 
-          Utilities.invokeAndWaitOnDispatcher(new Runnable() {
-            override def run(): Unit = {
-              ValidationResultsWindowManager.updateValidationResultsWindow(currentTime.toString(), title, runData, results)
-            }
-          })
-          
-        case _ => 
-          ()
-      }
-
-    }
-    catch {
-      case ex: InvocationTargetException =>
-        val t = ex.getTargetException() match { case null => ex; case t => t }
-        log.error( message, t )
-        guiLog.showError( message, t )
-      case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
-        log.error( message, ex )
-        guiLog.showError( message, ex )
-    }
-    finally {
-      Thread.currentThread().setContextClassLoader( localClassLoader )
     }
   }
-
 }
