@@ -55,7 +55,9 @@
 			plugin.resource="${plugin.resource}"
 			plugin.archive="${plugin.archive}"
 			plugin.version="${THIS_JOB.version.human}">
-			<source-includes/>
+			<excludes>
+				<exclude name="build*.xml"/>
+			</excludes>
 			<binary-includes/>
 		</md.plugin.zip>
 	</target>
