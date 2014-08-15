@@ -239,6 +239,7 @@
 		<attribute name="plugin.resource" />
 		<attribute name="plugin.archive" />
 		<attribute name="plugin.version" />
+		<element name="excludes" optional="true" />
 		<element name="source-includes" optional="true" />
 		<element name="binary-includes" optional="true" />
 		<sequential>
@@ -270,6 +271,7 @@
 
 			<copy todir="@{plugin.dir}/root/plugins/@{plugin.name}" verbose="true" failonerror="false">
 				<fileset dir="@{plugin.dir}">
+					<excludes />
 					<include name="lib.*/**/*.jar" />
 					<include name="lib.*/**/*.zip" />
 					<include name="lib/**/*.jar" />
