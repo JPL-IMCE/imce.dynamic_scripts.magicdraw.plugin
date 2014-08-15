@@ -304,10 +304,16 @@
 				<fileset refid="plugin.samples" />
 			</copy>
 
-			<copy todir="@{plugin.dir}/testResources" verbose="true" failonerror="false">
+			<copy todir="@{plugin.dir}/root/testResources" verbose="true" failonerror="false">
 				<fileset refid="plugin.tests" />
 			</copy>
 
+			<copy todir="@{plugin.dir}/root" verbose="true" failonerror="false">
+				<fileset dir="@{plugin.dir}">
+					<include name="data/**/*"/>
+				</fileset>
+			</copy>
+			
 			<delete failonerror="false" quiet="true" file="@{plugin.dir}/artifacts/MD${MagicDraw.version}-@{plugin.archive}-v@{plugin.version}.zip" />
 
 			<zip destfile="@{plugin.dir}/artifacts/MD${MagicDraw.version}-@{plugin.archive}-v@{plugin.version}.zip">

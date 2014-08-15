@@ -47,6 +47,7 @@ import com.nomagic.actions.ActionsManager
 import com.nomagic.actions.NMAction
 import com.nomagic.magicdraw.actions.ConfiguratorWithPriority
 import com.nomagic.magicdraw.core.Application
+import com.nomagic.magicdraw.utils.MDLog
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -56,13 +57,17 @@ case class DynamicScriptsToolbarConfigurator() extends AMConfigurator {
   override def getPriority(): Int = ConfiguratorWithPriority.MEDIUM_PRIORITY
   
   override def configure(manager: ActionsManager): Unit = {
+    val log = MDLog.getPluginsLog()
     val category = manager.getActionFor(DynamicScriptsToolbarConfigurator.CATEGORY_ID) match {
       case null => 
+        log.info("DynamicScriptsToolbarConfigurator.configure (no manager")
         val c = new ActionsCategory(DynamicScriptsToolbarConfigurator.CATEGORY_ID, DynamicScriptsToolbarConfigurator.CATEGORY_NAME)
         c.setNested(true)
         manager.addCategory(c)
         c
-      case c:ActionsCategory => c
+      case c:ActionsCategory => 
+        log.info("DynamicScriptsToolbarConfigurator.configure (with manager")
+        c
     }
     
     category.addAction(new NMAction(DynamicScriptsToolbarConfigurator.RELOAD_ID, DynamicScriptsToolbarConfigurator.RELOAD_NAME, 0) {
