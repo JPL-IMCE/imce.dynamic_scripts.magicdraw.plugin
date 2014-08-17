@@ -154,6 +154,8 @@
 		<jar destfile="${plugin.dir}/lib/${plugin.name}.jar">
 			<fileset dir="${plugin.dir}/bin/">
 				<include name="**/*.class" />
+			</fileset>
+			<fileset dir="${plugin.dir}/src/">
 				<include name="**/*.properties" />
 			</fileset>
 		</jar>

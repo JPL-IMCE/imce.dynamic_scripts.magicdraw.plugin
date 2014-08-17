@@ -81,13 +81,13 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
   override def getFirstElement(): BaseElement = triggerElement
   override def getSelectedObject(): Object = triggerElement
   override def getSelectedObjects(): java.util.Collection[_] = selected
-  
+
   override def updateState(): Unit = {
     super.updateState()
-    setEnabled(ClassLoaderHelper.isDynamicActionScriptAvailable(menuAction))
+    setEnabled( ClassLoaderHelper.isDynamicActionScriptAvailable( menuAction ) )
   }
-  
-  override def toString(): String = 
+
+  override def toString(): String =
     s"${menuAction.name.hname}"
 
   override def actionPerformed( ev: ActionEvent ): Unit = {
@@ -97,67 +97,80 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
     val p = DynamicScriptsPlugin.getInstance()
     val sm = SessionManager.getInstance()
 
-    val message = menuAction.prettyPrint("")
-    
-    val localClassLoader = Thread.currentThread().getContextClassLoader()
-    try {
-      val scriptCL = ClassLoaderHelper.createDynamicScriptClassLoader( menuAction )
-      Thread.currentThread().setContextClassLoader( scriptCL )
+    val message = menuAction.prettyPrint( "" )
 
-      val c = scriptCL.loadClass( menuAction.className.jname )
-      if ( c == null ) {
-        val error = "${message}: class '${menuAction.className.jname}' not found in project '${menuAction.projectName.jname}'"
+    ClassLoaderHelper.createDynamicScriptClassLoader( menuAction ) match {
+      case Failure( ex ) =>
+        val error = "${message}: project not found '${menuAction.projectName.jname}'"
         log.error( error )
         guiLog.showError( error )
         return
-      }
 
-      val m = c.getMethod( menuAction.methodName.sname, classOf[Tree], classOf[Node], classOf[Element], classOf[java.util.Collection[Element]] )
-      if ( m == null ) {
-        val error = "${message}: method '${menuAction.methodName.sname}(Tree, Node, Element, Collection<Element>)' not found in project/class '${menuAction.projectName.jname}/${action.className.jname}'"
-        log.error( error )
-        guiLog.showError( error )
-        return
-      }
+      case Success( scriptCL ) => {
+        val localClassLoader = Thread.currentThread().getContextClassLoader()
+        try {
 
-      val r = m.invoke( null, tree, triggerNode, triggerElement, selected )
+          Thread.currentThread().setContextClassLoader( scriptCL )
 
-      val currentTime = System.currentTimeMillis()
-      log.info( s"${message} took ${currentTime - previousTime} ms" )
+          val c = scriptCL.loadClass( menuAction.className.jname )
+          if ( c == null ) {
+            val error = "${message}: class '${menuAction.className.jname}' not found in project '${menuAction.projectName.jname}'"
+            log.error( error )
+            guiLog.showError( error )
+            return
+          }
 
-      r match {
-			  case Failure(ex) => 
-			    val ex_message = message + s"\n${ex.getMessage()}"
-    			  log.error(ex_message, ex)
-			    guiLog.showError(ex_message, ex)
+          val m = ClassLoaderHelper.lookupMethod( c, menuAction, classOf[Tree], classOf[Node], classOf[Element], classOf[java.util.Collection[Element]] ) match {
+            case Failure( t ) =>
+              val error = message + ClassLoaderHelper.makeErrorMessageFor_lookupMethod_Failure( menuAction, t )
+              log.error( error, t )
+              guiLog.showError( error, t )
+              return
+            case Success( m ) => m
+          }
 
-			  case Success(None) => 
-			    ()
-			    
-        case Success(Some(MagicDrawValidationDataResults(title, runData, results))) => 
-          Utilities.invokeAndWaitOnDispatcher(new Runnable() {
-            override def run(): Unit = {
-              ValidationResultsWindowManager.updateValidationResultsWindow(currentTime.toString(), title, runData, results)
+          val r = m.invoke( null, tree, triggerNode, triggerElement, selected )
+
+          val currentTime = System.currentTimeMillis()
+          log.info( s"${message} took ${currentTime - previousTime} ms" )
+
+          r match {
+            case Failure( ex ) => {
+              val ex_message = message + s"\nExecution error: ${ex.getClass().getName()}\nMessage: ${ex.getMessage()}\n(do not submit!)"
+              log.error( ex_message, ex )
+              guiLog.showError( ex_message, ex )
             }
-          })
-          
-        case _ => 
-          ()
-      }
 
-    }
-    catch {
-      case ex: InvocationTargetException =>
-        val t = ex.getTargetException() match { case null => ex; case t => t }
-        log.error( message, t )
-        guiLog.showError( message, t )
-      case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
-        log.error( message, ex )
-        guiLog.showError( message, ex )
-    }
-    finally {
-      Thread.currentThread().setContextClassLoader( localClassLoader )
+            case Success( None ) =>
+              ()
+
+            case Success( Some( MagicDrawValidationDataResults( title, runData, results ) ) ) =>
+              Utilities.invokeAndWaitOnDispatcher( new Runnable() {
+                override def run(): Unit = {
+                  ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString(), title, runData, results )
+                }
+              } )
+
+            case _ =>
+              ()
+          }
+
+        }
+        catch {
+          case ex: InvocationTargetException =>
+            val t = ex.getTargetException() match { case null => ex; case t => t }
+            val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
+            log.error( ex_message, t )
+            guiLog.showError( ex_message, t )
+          case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
+            val ex_message = message + s"\nError: ${ex.getClass().getName()}\nMessage: ${ex.getMessage()}\n(do not submit!)"
+            log.error( ex_message, ex )
+            guiLog.showError( ex_message, ex )
+        }
+        finally {
+          Thread.currentThread().setContextClassLoader( localClassLoader )
+        }
+      }
     }
   }
-
 }

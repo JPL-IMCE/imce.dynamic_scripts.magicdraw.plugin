@@ -42,27 +42,28 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.actions
 import java.awt.event.ActionEvent
 import java.lang.reflect.InvocationTargetException
 import java.net.MalformedURLException
-import java.util.Collection
+
 import javax.swing.KeyStroke
+
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.implicitConversions
 import scala.language.postfixOps
+import scala.util.Failure
+import scala.util.Success
+
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.openapi.uml.SessionManager
 import com.nomagic.magicdraw.ui.actions.DefaultDiagramAction
-import com.nomagic.magicdraw.uml.symbols.PresentationElement
+import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
 import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.utils.Utilities
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
+
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
-import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
-import scala.util.Failure
-import scala.util.Success
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -73,7 +74,7 @@ case class DynamicDiagramContextMenuActionForDiagram(
   key: KeyStroke,
   group: String ) extends DefaultDiagramAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
 
-  override def toString(): String = 
+  override def toString(): String =
     s"${menuAction.name.hname}"
 
   override def actionPerformed( ev: ActionEvent ): Unit = {
@@ -83,67 +84,77 @@ case class DynamicDiagramContextMenuActionForDiagram(
     val p = DynamicScriptsPlugin.getInstance()
     val sm = SessionManager.getInstance()
 
-    val message = menuAction.prettyPrint("")
-    
-    val localClassLoader = Thread.currentThread().getContextClassLoader()
-    try {
-      val scriptCL = ClassLoaderHelper.createDynamicScriptClassLoader( menuAction )
-      Thread.currentThread().setContextClassLoader( scriptCL )
+    val message = menuAction.prettyPrint( "" )
 
-      val c = scriptCL.loadClass( menuAction.className.jname )
-      if ( c == null ) {
-        val error = "${message}: class '${menuAction.className.jname}' not found in project '${menuAction.projectName.jname}'"
+    ClassLoaderHelper.createDynamicScriptClassLoader( menuAction ) match {
+      case Failure( ex ) =>
+        val error = "${message}: project not found '${menuAction.projectName.jname}'"
         log.error( error )
         guiLog.showError( error )
         return
-      }
 
-      val m = c.getMethod( menuAction.methodName.sname, classOf[DiagramPresentationElement] )
-      if ( m == null ) {
-        val error = "${message}: method '${menuAction.methodName.sname}(DiagramPresentationElement)' not found in project/class '${menuAction.projectName.jname}/${action.className.jname}'"
-        log.error( error )
-        guiLog.showError( error )
-        return
-      }
+      case Success( scriptCL ) => {
+        val localClassLoader = Thread.currentThread().getContextClassLoader()
+        try {
 
-      val r = m.invoke( null, diagram )
+          Thread.currentThread().setContextClassLoader( scriptCL )
 
-      val currentTime = System.currentTimeMillis()
-      log.info( s"${message} took ${currentTime - previousTime} ms" )
+          val c = scriptCL.loadClass( menuAction.className.jname )
+          if ( c == null ) {
+            val error = "${message}: class '${menuAction.className.jname}' not found in project '${menuAction.projectName.jname}'"
+            log.error( error )
+            guiLog.showError( error )
+            return
+          }
 
-      r match {
-			  case Failure(ex) => 
-			    val ex_message = message + s"\n${ex.getMessage()}"
-    			  log.error(ex_message, ex)
-			    guiLog.showError(ex_message, ex)
-
-			  case Success(None) => 
-			    ()
-			    
-        case Success(Some(MagicDrawValidationDataResults(title, runData, results))) => 
-          Utilities.invokeAndWaitOnDispatcher(new Runnable() {
-            override def run(): Unit = {
-              ValidationResultsWindowManager.updateValidationResultsWindow(currentTime.toString(), title, runData, results)
-            }
-          })
+          val m = ClassLoaderHelper.lookupMethod( c, menuAction, classOf[DiagramContextMenuAction], classOf[DiagramPresentationElement] ) match {
+            case Failure( t ) =>
+              val error = message + ClassLoaderHelper.makeErrorMessageFor_lookupMethod_Failure( menuAction, t )
+              log.error( error, t )
+              guiLog.showError( error, t )
+              return
+            case Success( m ) => m
+          }
           
-        case _ => 
-          ()
-      }
+          val r = m.invoke( null, menuAction, diagram )
 
-    }
-    catch {
-      case ex: InvocationTargetException =>
-        val t = ex.getTargetException() match { case null => ex; case t => t }
-        log.error( message, t )
-        guiLog.showError( message, t )
-      case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
-        log.error( message, ex )
-        guiLog.showError( message, ex )
-    }
-    finally {
-      Thread.currentThread().setContextClassLoader( localClassLoader )
+          val currentTime = System.currentTimeMillis()
+          log.info( s"${message} took ${currentTime - previousTime} ms" )
+
+          r match {
+            case Failure( ex ) =>
+              val ex_message = message + s"\n${ex.getMessage()}"
+              log.error( ex_message, ex )
+              guiLog.showError( ex_message, ex )
+
+            case Success( None ) =>
+              ()
+
+            case Success( Some( MagicDrawValidationDataResults( title, runData, results ) ) ) =>
+              Utilities.invokeAndWaitOnDispatcher( new Runnable() {
+                override def run(): Unit = {
+                  ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString(), title, runData, results )
+                }
+              } )
+
+            case _ =>
+              ()
+          }
+
+        }
+        catch {
+          case ex: InvocationTargetException =>
+            val t = ex.getTargetException() match { case null => ex; case t => t }
+            log.error( message, t )
+            guiLog.showError( message, t )
+          case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
+            log.error( message, ex )
+            guiLog.showError( message, ex )
+        }
+        finally {
+          Thread.currentThread().setContextClassLoader( localClassLoader )
+        }
+      }
     }
   }
-
 }

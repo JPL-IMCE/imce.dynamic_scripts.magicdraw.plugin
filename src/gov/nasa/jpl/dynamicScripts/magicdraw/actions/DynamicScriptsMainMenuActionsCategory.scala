@@ -105,7 +105,10 @@ case class DynamicScriptsMainMenuActionsCategory() extends ActionsCategory(
     }
 
     val reg: DynamicScriptsRegistry = DynamicScriptsPlugin.getInstance().getDynamicScriptsRegistry()
-    reg.toolbarMenuPathActions.values.flatten map addMainToolbarMenuActions
+    reg.toolbarMenuPathActions foreach { 
+      case ((_:String, menus: scala.collection.immutable.SortedSet[DynamicScriptsForMainToolbarMenus])) => 
+        menus foreach (addMainToolbarMenuActions( _ ))
+    }
 
     log.info(s"*** DynamicScriptsMainMenuActionsCategory.doRefresh() - done")
   }
@@ -122,18 +125,21 @@ case class DynamicScriptsMainMenuActionsCategory() extends ActionsCategory(
     r
   }
     
-  def getOrCreateSubMenuForPathSegment( category: ActionsCategory, segment: HName ): ActionsCategory = 
-    category.getAction(segment.hname) match {
-      case subCategory: ActionsCategory => subCategory
+  def getOrCreateSubMenuForPathSegment( category: ActionsCategory, segment: HName ): ActionsCategory = {
+    val segmentID = s"${category.getID()}_|_${segment.hname}"
+    category.getAction( segmentID ) match {
       case null => {
-        val subCategory = new MDActionsCategory( s"${category.getID()}_|_${segment.hname}", segment.hname )
+        val subCategory = new MDActionsCategory( segmentID, segment.hname )
         subCategory.setNested(true)
         category.addAction(subCategory)
         subCategory
       }
-      case _ => throw new IllegalArgumentException(s"DynamicScriptsMainMenuActionsCategory.getOrCreateSubMenuForPathSegment - category: ${category.getID()} / ${category.getName()}; segment=${segment}")
+      case subCategory: ActionsCategory => 
+        subCategory
+      case _ => 
+        throw new IllegalArgumentException(s"DynamicScriptsMainMenuActionsCategory.getOrCreateSubMenuForPathSegment - category: ${category.getID()} / ${category.getName()}; segment=${segment}")
     }
-    
+  }
 }
 
 object DynamicScriptsMainMenuActionsCategory {

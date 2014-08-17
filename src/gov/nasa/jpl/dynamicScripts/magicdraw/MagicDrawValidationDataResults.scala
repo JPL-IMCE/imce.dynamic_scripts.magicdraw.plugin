@@ -41,14 +41,23 @@ package gov.nasa.jpl.dynamicScripts.magicdraw
 
 import com.nomagic.magicdraw.validation.ValidationRunData
 import com.nomagic.magicdraw.validation.RuleViolationResult
+import com.nomagic.magicdraw.core.Project
+import com.nomagic.magicdraw.validation.ValidationSuiteHelper
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Constraint
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
+
+import scala.language.implicitConversions._
+import scala.collection.JavaConversions._
+import scala.language.implicitConversions
+import scala.language.postfixOps
 
 /**
  * The MD Open API for creating validation annotations & actions requires references to
  * <<UML Standard Profile::Validation Profile::validationRule>>-stereotyped constraints defined in an
  * <<UML Standard Profile::Validation Profile::validationSuite>>-stereotyped package.
- * 
- * Constructing a ValidationRunData object requires a reference to validation suite package;
- * for example, given a set of MD Annotations: Set<Annotation> annotations,
+ *
+ * Constructing a ValidationRunData object requires a reference to validation suite package.
+ * For example, given a set of MD Annotations: Set<Annotation> annotations,
  *
  * Application application = Application.getInstance();
  * Project project = application.getProject();
@@ -56,12 +65,12 @@ import com.nomagic.magicdraw.validation.RuleViolationResult
  * String suiteQName = "...";
  * Package validationSuite = null;
  * 	for (Package suite : vsh.getValidationSuites()) {
- *			if (suiteQName.equals(suite.getQualifiedName())) {
- *				validationSuite = suite;
- *				break;
- *			}
- *		}
- *		if (null != validationSuite) {
+ * 			if (suiteQName.equals(suite.getQualifiedName())) {
+ * 				validationSuite = suite;
+ * 				break;
+ * 			}
+ * 		}
+ * 		if (null != validationSuite) {
  *    Collection<Constraint> validationConstraints = vsh.getValidationRules(validationSuite);
  *    ...
  *    EnumerationLiteral lowestLevel = ...;
@@ -70,11 +79,11 @@ import com.nomagic.magicdraw.validation.RuleViolationResult
  *    ValidationRunData runData = new ValidationRunData(validationSuite, false, elements, lowestLevel);
  *    ...
  *  }
- *  
+ *
  * Constructing a RuleViolationResult object requires a reference to a validation constraint;
- * for example, in the context of the above: 
- * 
- *		if (null != validationSuite) {
+ * for example, in the context of the above:
+ *
+ * 		if (null != validationSuite) {
  *    Collection<Constraint> validationConstraints = vsh.getValidationRules(validationSuite);
  *    EnumerationLiteral lowestLevel = null;
  *    Set<Element> elements = new HashSet<Element>();
@@ -90,11 +99,27 @@ import com.nomagic.magicdraw.validation.RuleViolationResult
  *    ValidationRunData runData = new ValidationRunData(validationSuite, false, elements, lowestLevel);
  *    return new MagicDrawValidationDataResults("<title>", runData, results);
  *  }
- *  
+ *
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  * @see Validation chapter in MD Open API User Manual
  */
 case class MagicDrawValidationDataResults(
-    title: String, 
-    runData: ValidationRunData, 
-    results: Seq[RuleViolationResult]) 
+  title: String,
+  runData: ValidationRunData,
+  results: java.util.Collection[RuleViolationResult] )
+
+object MagicDrawValidationDataResults {
+
+  case class ValidationSuiteInfo( vsh: ValidationSuiteHelper, suite: Package ) {}
+  
+  def lookupValidationSuite( p: Project, suiteQualifiedName: String ): Option[ValidationSuiteInfo] = {
+    val vsh = ValidationSuiteHelper.getInstance( p )
+    vsh.getValidationSuites().find { s => s.getQualifiedName() == suiteQualifiedName } match {
+      case None                   => None
+      case Some( suite: Package ) => Some( ValidationSuiteInfo( vsh, suite ) )
+    }
+  }
+
+  def lookupValidationConstraint( vSuiteInfo: ValidationSuiteInfo, constraintQualifiedName: String ): Option[Constraint] =
+    vSuiteInfo.vsh.getValidationRules(vSuiteInfo.suite) find { c => c.getQualifiedName() == constraintQualifiedName }
+}
