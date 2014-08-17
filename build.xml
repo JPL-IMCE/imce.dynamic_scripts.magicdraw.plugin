@@ -15,11 +15,8 @@
 	<property name="plugin.jar"			value="lib/JPLDynamicScriptsMagicDrawPlugin.jar"/>
 
 	<property name="md.build.tools.dir"	location="${md.install.dir}/data/eclipse/resource/SMDP-PackageB" />
-	<!--
-	<import file="${md.build.tools.dir}/build.md.plugin.xml"/>
-	-->
-	<import file="build.md.imce.scala.plugin.xml"/>
-	
+	<import file="${md.build.tools.dir}/build.md.scala.plugin.xml"/>
+
 	<target name="all" depends="all.error,all.ok"/>
 	
 	<target name="all.error" unless="all.precondition.scala">
@@ -49,7 +46,14 @@
 	</fileset>
 	
 	<target name="zip">
-		<md.plugin.zip
+		<md.plugin.clean.root
+			plugin.dir="${plugin.dir}" 
+			plugin.name="${plugin.name}"
+			plugin.resource="${plugin.resource}"
+			plugin.archive="${plugin.archive}"
+			plugin.version="${THIS_JOB.version.human}"/>
+		
+		<md.plugin.copyTo.root
 			plugin.dir="${plugin.dir}" 
 			plugin.name="${plugin.name}"
 			plugin.resource="${plugin.resource}"
@@ -59,11 +63,18 @@
 				<exclude name="build*.xml"/>
 			</excludes>
 			<binary-includes/>
-		</md.plugin.zip>
+		</md.plugin.copyTo.root>
+		
+		<md.plugin.zip.root
+			plugin.dir="${plugin.dir}" 
+			plugin.name="${plugin.name}"
+			plugin.resource="${plugin.resource}"
+			plugin.archive="${plugin.archive}"
+			plugin.version="${THIS_JOB.version.human}"/>
 	</target>
 
 	<target name="install">
-		<md.install.zip
+		<md.plugin.install.zip
 			plugin.dir="${plugin.dir}" 
 			plugin.archive="${plugin.archive}"
 			plugin.version="${THIS_JOB.version.human}"
