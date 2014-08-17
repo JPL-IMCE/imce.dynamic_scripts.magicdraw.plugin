@@ -39,9 +39,7 @@
  */
 package gov.nasa.jpl.dynamicScripts.magicdraw.options
 
-import com.nomagic.magicdraw.properties.PropertyVisitor
 import com.nomagic.magicdraw.properties.StringProperty
-import com.nomagic.magicdraw.utils.MDLog
 
 import gov.nasa.jpl.dynamicScripts.magicdraw.options.resources.DynamicScriptsResources
 
@@ -51,12 +49,6 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.options.resources.DynamicScriptsRes
 class DynamicScriptsConfigurationProperty(id: String, value: Object, multiline: Boolean) extends StringProperty(id, value, multiline) {
 
   override def getValueStringRepresentation(): String = getString()
-
-  override def accept( visitor: PropertyVisitor ): Unit = {
-    val log = MDLog.getPluginsLog()
-    log.info( s"${this.getClass().getName()}: ID=${getID()}, visotor=${visitor.getClass().getName()}" )
-    visitor.visit( this )
-  }
 
   def getDynamicScriptConfigurationFiles(): List[String] =
     getString() match {
@@ -76,7 +68,7 @@ class DynamicScriptsConfigurationProperty(id: String, value: Object, multiline: 
     
   override def getDescription(): String =
     DynamicScriptsResources.getString(DynamicScriptsOptions.DYNAMIC_SCRIPT_CONFIGURATION_FILES_DESC)
-    
+
 }
 
 /**

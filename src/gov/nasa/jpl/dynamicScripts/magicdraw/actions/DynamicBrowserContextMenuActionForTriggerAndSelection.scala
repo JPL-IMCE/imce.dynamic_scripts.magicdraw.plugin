@@ -120,12 +120,13 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
             return
           }
 
-          val m = c.getMethod( menuAction.methodName.sname, classOf[Tree], classOf[Node], classOf[Element], classOf[java.util.Collection[Element]] )
-          if ( m == null ) {
-            val error = "${message}: method '${menuAction.methodName.sname}(Tree, Node, Element, Collection<Element>)' not found in project/class '${menuAction.projectName.jname}/${action.className.jname}'"
-            log.error( error )
-            guiLog.showError( error )
-            return
+          val m = ClassLoaderHelper.lookupMethod( c, menuAction, classOf[Tree], classOf[Node], classOf[Element], classOf[java.util.Collection[Element]] ) match {
+            case Failure( t ) =>
+              val error = message + ClassLoaderHelper.makeErrorMessageFor_lookupMethod_Failure( menuAction, t )
+              log.error( error, t )
+              guiLog.showError( error, t )
+              return
+            case Success( m ) => m
           }
 
           val r = m.invoke( null, tree, triggerNode, triggerElement, selected )
@@ -135,7 +136,7 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
 
           r match {
             case Failure( ex ) => {
-              val ex_message = message + s"\n${ex.getMessage()}"
+              val ex_message = message + s"\nExecution error: ${ex.getClass().getName()}\nMessage: ${ex.getMessage()}\n(do not submit!)"
               log.error( ex_message, ex )
               guiLog.showError( ex_message, ex )
             }
@@ -158,11 +159,13 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
         catch {
           case ex: InvocationTargetException =>
             val t = ex.getTargetException() match { case null => ex; case t => t }
-            log.error( message, t )
-            guiLog.showError( message, t )
+            val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
+            log.error( ex_message, t )
+            guiLog.showError( ex_message, t )
           case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
-            log.error( message, ex )
-            guiLog.showError( message, ex )
+            val ex_message = message + s"\nError: ${ex.getClass().getName()}\nMessage: ${ex.getMessage()}\n(do not submit!)"
+            log.error( ex_message, ex )
+            guiLog.showError( ex_message, ex )
         }
         finally {
           Thread.currentThread().setContextClassLoader( localClassLoader )

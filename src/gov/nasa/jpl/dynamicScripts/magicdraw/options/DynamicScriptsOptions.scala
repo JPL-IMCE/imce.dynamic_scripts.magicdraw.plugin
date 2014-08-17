@@ -41,15 +41,17 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.options
 
 import scala.language.implicitConversions
 import scala.language.postfixOps
+
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup
+import com.nomagic.magicdraw.properties.NumberProperty
 import com.nomagic.magicdraw.properties.Property
 import com.nomagic.magicdraw.properties.PropertyResourceProvider
 import com.nomagic.magicdraw.properties.StringProperty
 import com.nomagic.ui.SwingImageIcon
+
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.options.resources.DynamicScriptsResources
-import com.nomagic.magicdraw.properties.NumberProperty
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -62,8 +64,8 @@ class DynamicScriptsOptions extends AbstractPropertyOptionsGroup( DynamicScripts
     val p = new DynamicScriptsConfigurationProperty( DynamicScriptsOptions.DYNAMIC_SCRIPT_CONFIGURATION_FILES_ID, null, true )
     p.setResourceProvider( DynamicScriptsOptions.PROPERTY_RESOURCE_PROVIDER )
     addProperty( p )
-    
-    val r = new NumberProperty(DynamicScriptsOptions.DYNAMIC_SCRIPT_REFRESH_RATE_ID, 0.2d, 0.1d, 10000d)
+
+    val r = new NumberProperty( DynamicScriptsOptions.DYNAMIC_SCRIPT_REFRESH_RATE_ID, 0.2d, 0.1d, 10000d )
     r.setResourceProvider( DynamicScriptsOptions.PROPERTY_RESOURCE_PROVIDER )
     r.setGroup( DynamicScriptsOptions.DYNAMIC_SCRIPT_CONFIGURATION_FILES_GROUP )
     r.setDescriptionID( DynamicScriptsOptions.DYNAMIC_SCRIPT_REFRESH_RATE_DESC )
@@ -77,12 +79,12 @@ class DynamicScriptsOptions extends AbstractPropertyOptionsGroup( DynamicScripts
       case _                 => List()
     }
 
-  def getDynamicScriptsRefreshRate(): Double = 
+  def getDynamicScriptsRefreshRate(): Double =
     getProperty( DynamicScriptsOptions.DYNAMIC_SCRIPT_REFRESH_RATE_ID ) match {
-    case r: NumberProperty => r.getDouble()
-    case _ => throw new IllegalArgumentException( DynamicScriptsOptions.DYNAMIC_SCRIPT_REFRESH_RATE_ID )
-  }
-    
+      case r: NumberProperty => r.getDouble()
+      case _                 => throw new IllegalArgumentException( DynamicScriptsOptions.DYNAMIC_SCRIPT_REFRESH_RATE_ID )
+    }
+
   override def getIcon(): SwingImageIcon = super.getIcon()
 
 }
@@ -111,7 +113,7 @@ object DynamicScriptsOptions {
   }
 
   val PROPERTY_RESOURCE_PROVIDER = new PropertyResourceProvider() {
-    
+
     override def getString( key: String, property: Property ): String = DynamicScriptsResources.getString( key )
 
   }

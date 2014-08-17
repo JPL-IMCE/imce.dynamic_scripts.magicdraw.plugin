@@ -43,7 +43,6 @@ import java.io.File
 import java.io.FilenameFilter
 import java.net.URL
 import java.net.URLClassLoader
-
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.TraversableOnce.OnceCanBuildFrom
 import scala.language.implicitConversions
@@ -51,21 +50,51 @@ import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
 import com.nomagic.magicdraw.automaton.AutomatonPlugin
 import com.nomagic.magicdraw.core.ApplicationEnvironment
 import com.nomagic.magicdraw.plugins.PluginUtils
 import com.nomagic.magicdraw.utils.MDLog
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.JName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.PluginContext
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ProjectContext
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicScriptInfo
+import java.lang.reflect.Method
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
 object ClassLoaderHelper {
+
+  def makeErrorMessageFor_createDynamicScriptClassLoader_Failure( action: DynamicScriptInfo, t: Throwable ): String =
+     s"\nScript Context: '${action.context}'\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
+     
+  def makeErrorMessageFor_loadClass_null( action: DynamicScriptInfo ): String =
+    s"\nScript class: '${action.className.jname}' not found\n(do not submit!)"
+  
+  def makeErrorMessageFor_lookupMethod_Failure( action: DynamicScriptInfo, t: Throwable ): String =
+    s"\nScript class: '${action.className.jname}' not found\n(do not submit!)"
+  
+  def makeErrorMessageFor_invoke_Failure( t: Throwable ): String =
+    s"\nScript execution failed: ${t.getClass().getName()}\nMessage: ${t.getMessage()}"
+   
+  def makeErrorMessageFor_InvocationTargetException( t: Throwable ): String =
+    s"\nScript execution failed: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
+  
+  def makeErrorMessageFor_invoke_Exception( t: Throwable ): String =
+    s"\nScript execution failed: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
+  
+
+  def lookupMethod( clazz: java.lang.Class[_], action: DynamicActionScript, arguments: java.lang.Class[_]* ): Try[Method] =
+    try {
+      clazz.getMethod( action.methodName.sname, arguments: _*) match {
+        case m: Method => Success( m )
+        case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
+      }
+    }
+    catch {
+      case ex: NoSuchMethodException => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
+    }
 
   sealed abstract class ClassLoaderError( error: String ) extends RuntimeException( error ) {}
 
@@ -182,6 +211,9 @@ object ClassLoaderHelper {
     val last: Try[List[URL]] = ( init /: ( projectContext.project +: projectContext.dependencies ) ) {
       ( urls: Try[List[URL]], project: JName ) => resolveProjectPaths( urls, project )
     }
+    
+    val init2last: Try[List[URL]] = ( init /: ( projectContext.project +: projectContext.dependencies ) ) ( resolveProjectPaths ( _, _ ) )
+    
     last match {
       case Failure( t )   => Failure( t )
       case Success( Nil ) => Failure( DynamicScriptsProjectIncomplete( projectContext.prettyPrint( " " ) ) )
