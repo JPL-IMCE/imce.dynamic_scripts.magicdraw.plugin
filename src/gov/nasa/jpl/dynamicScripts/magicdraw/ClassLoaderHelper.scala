@@ -41,8 +41,10 @@ package gov.nasa.jpl.dynamicScripts.magicdraw
 
 import java.io.File
 import java.io.FilenameFilter
+import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
+
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.TraversableOnce.OnceCanBuildFrom
 import scala.language.implicitConversions
@@ -50,16 +52,18 @@ import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-import com.nomagic.magicdraw.automaton.AutomatonPlugin
+
 import com.nomagic.magicdraw.core.ApplicationEnvironment
+import com.nomagic.magicdraw.plugins.Plugin
 import com.nomagic.magicdraw.plugins.PluginUtils
 import com.nomagic.magicdraw.utils.MDLog
+
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicScriptInfo
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.HName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.JName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.PluginContext
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ProjectContext
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicScriptInfo
-import java.lang.reflect.Method
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -67,27 +71,26 @@ import java.lang.reflect.Method
 object ClassLoaderHelper {
 
   def makeErrorMessageFor_createDynamicScriptClassLoader_Failure( action: DynamicScriptInfo, t: Throwable ): String =
-     s"\nScript Context: '${action.context}'\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
-     
+    s"\nCannot load script: ${t.getClass().getName()}\n${t.getMessage()}\n(do not submit!)"
+
   def makeErrorMessageFor_loadClass_null( action: DynamicScriptInfo ): String =
     s"\nScript class: '${action.className.jname}' not found\n(do not submit!)"
-  
+
   def makeErrorMessageFor_lookupMethod_Failure( action: DynamicScriptInfo, t: Throwable ): String =
-    s"\nScript class: '${action.className.jname}' not found\n(do not submit!)"
-  
+    s"\nScript method: '${action.methodName.sname}' not found\n(do not submit!)"
+
   def makeErrorMessageFor_invoke_Failure( t: Throwable ): String =
     s"\nScript execution failed: ${t.getClass().getName()}\nMessage: ${t.getMessage()}"
-   
+
   def makeErrorMessageFor_InvocationTargetException( t: Throwable ): String =
     s"\nScript execution failed: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
-  
+
   def makeErrorMessageFor_invoke_Exception( t: Throwable ): String =
     s"\nScript execution failed: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
-  
 
   def lookupMethod( clazz: java.lang.Class[_], action: DynamicActionScript, arguments: java.lang.Class[_]* ): Try[Method] =
     try {
-      clazz.getMethod( action.methodName.sname, arguments: _*) match {
+      clazz.getMethod( action.methodName.sname, arguments: _* ) match {
         case m: Method => Success( m )
         case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
       }
@@ -143,15 +146,27 @@ object ClassLoaderHelper {
     case c: PluginContext  => isDynamicActionScriptAvailable( das, c )
   }
 
-  def isDynamicActionScriptAvailable( das: DynamicActionScript, c: PluginContext ): Boolean =
-    PluginUtils.getPlugins().toList find { p => p.getDescriptor().getID() == c.pluginID.hname } match {
-      case None      => false
-      case Some( p ) => p.getDescriptor().isEnabled() && p.getDescriptor().isLoaded()
+  def getPluginIfLoadedAndEnabled( pluginID: String ): Option[Plugin] =
+    PluginUtils.getPlugins().toList find { p => p.getDescriptor().getID() == pluginID } match {
+      case None => None
+      case Some( p ) =>
+        if ( p.getDescriptor().isEnabled() && p.getDescriptor().isLoaded() ) Some( p )
+        else None
     }
+
+  def isDynamicActionScriptAvailable( das: DynamicActionScript, c: PluginContext ): Boolean =
+    getPluginIfLoadedAndEnabled( c.pluginID.hname ).isDefined
 
   def isDynamicActionScriptAvailable( das: DynamicActionScript, c: ProjectContext ): Boolean = {
     val scriptProjectPath = getDynamicScriptsRootPath() + File.separator + c.project.jname + File.separator
     val scriptProjectDir = new File( scriptProjectPath )
+
+    c.requiresPlugin match {
+      case None => ()
+      case Some( rp: HName ) =>
+        if ( getPluginIfLoadedAndEnabled( rp.hname ).isEmpty )
+          return false
+    }
 
     if ( !isFolderAvailable( scriptProjectDir ) )
       return false
@@ -194,7 +209,7 @@ object ClassLoaderHelper {
     }
 
   def createDynamicScriptClassLoader( s: DynamicActionScript, pluginContext: PluginContext ): Try[URLClassLoader] =
-    PluginUtils.getPlugins().toList find { p => p.getDescriptor().getID() == pluginContext.pluginID.hname } match {
+    getPluginIfLoadedAndEnabled( pluginContext.pluginID.hname ) match {
       case None => Failure( DynamicScriptsPluginNotFound( pluginContext.pluginID.hname ) )
       case Some( p ) =>
         p.getDescriptor() match {
@@ -208,18 +223,22 @@ object ClassLoaderHelper {
   def createDynamicScriptClassLoader( s: DynamicActionScript, projectContext: ProjectContext ): Try[URLClassLoader] = {
     val log = MDLog.getPluginsLog()
     val init: Try[List[URL]] = Success( Nil )
-    val last: Try[List[URL]] = ( init /: ( projectContext.project +: projectContext.dependencies ) ) {
-      ( urls: Try[List[URL]], project: JName ) => resolveProjectPaths( urls, project )
+    val last: Try[List[URL]] = ( init /: ( projectContext.project +: projectContext.dependencies ) )( resolveProjectPaths( _, _ ) )
+
+    val parentClassLoader = projectContext.requiresPlugin match {
+      case None => classOf[DynamicScriptsPlugin].getClassLoader()
+      case Some( rp ) => getPluginIfLoadedAndEnabled( rp.hname ) match {
+        case None              => return Failure( DynamicScriptsPluginNotFound( rp.hname ) )
+        case Some( p: Plugin ) => p.getClass().getClassLoader()
+      }
     }
-    
-    val init2last: Try[List[URL]] = ( init /: ( projectContext.project +: projectContext.dependencies ) ) ( resolveProjectPaths ( _, _ ) )
-    
+
     last match {
       case Failure( t )   => Failure( t )
       case Success( Nil ) => Failure( DynamicScriptsProjectIncomplete( projectContext.prettyPrint( " " ) ) )
       case Success( urls ) =>
         log.info( s"gov.nasa.jpl.dynamicScripts.magicdraw - ${urls.size} URLs for ClassLoader for: ${s}${urls.mkString( "\n => ", "\n => ", "" )}" )
-        Success( new URLClassLoader( urls.toArray, classOf[AutomatonPlugin].getClassLoader() ) )
+        Success( new URLClassLoader( urls.toArray, parentClassLoader ) )
     }
   }
 
