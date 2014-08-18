@@ -41,22 +41,29 @@ package gov.nasa.jpl.dynamicScripts.magicdraw
 
 import java.io.File
 import java.io.FilenameFilter
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
 
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.TraversableOnce.OnceCanBuildFrom
+import scala.language.existentials
 import scala.language.implicitConversions
 import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
+import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.ApplicationEnvironment
+import com.nomagic.magicdraw.core.Project
+import com.nomagic.magicdraw.openapi.uml.SessionManager
 import com.nomagic.magicdraw.plugins.Plugin
 import com.nomagic.magicdraw.plugins.PluginUtils
 import com.nomagic.magicdraw.utils.MDLog
+import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
+import com.nomagic.utils.Utilities
 
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicScriptInfo
@@ -70,14 +77,34 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ProjectContext
  */
 object ClassLoaderHelper {
 
+  def reportError( s: DynamicScriptInfo, message: String, t: Throwable ): Unit = {
+    val log = MDLog.getPluginsLog()
+    val guiLog = Application.getInstance().getGUILog()
+
+    log.error( message + t.getMessage(), t )
+    guiLog.showError( message + t.getMessage(), t )
+  }
+
   def makeErrorMessageFor_createDynamicScriptClassLoader_Failure( action: DynamicScriptInfo, t: Throwable ): String =
     s"\nCannot load script: ${t.getClass().getName()}\n${t.getMessage()}\n(do not submit!)"
+
+  def makeErrorMessageFor_loadClass_error( action: DynamicScriptInfo, t: Throwable ): String =
+    s"\nLookup for script class: '${action.className.jname}' failed\nException: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
 
   def makeErrorMessageFor_loadClass_null( action: DynamicScriptInfo ): String =
     s"\nScript class: '${action.className.jname}' not found\n(do not submit!)"
 
-  def makeErrorMessageFor_lookupMethod_Failure( action: DynamicScriptInfo, t: Throwable ): String =
-    s"\nScript method: '${action.methodName.sname}' not found\n(do not submit!)"
+  def makeErrorMessageFor_lookupMethod_null( clazz: java.lang.Class[_], action: DynamicActionScript, argumentTypes: java.lang.Class[_]* ): String =
+    s"""|Script method: '${action.methodName.sname}' not found
+        |argument types:${( argumentTypes map { t => t.getClass().getName() } ) mkString ( "\n  ", "\n  ", "" )} 
+        |(do not submit!)""".stripMargin
+
+  def makeErrorMessageFor_lookupMethod_error( t: Throwable, clazz: java.lang.Class[_], action: DynamicActionScript, argumentTypes: java.lang.Class[_]* ): String =
+    s"""|Script method: '${action.methodName.sname}' failed
+        |Argument types:${( argumentTypes map { t => t.getClass().getName() } ) mkString ( "\n  ", "\n  ", "" )}
+        |Exception: ${t.getClass().getName()}
+        |Exception message: ${t.getMessage()}
+        |(do not submit!)""".stripMargin
 
   def makeErrorMessageFor_invoke_Failure( t: Throwable ): String =
     s"\nScript execution failed: ${t.getClass().getName()}\nMessage: ${t.getMessage()}"
@@ -88,16 +115,7 @@ object ClassLoaderHelper {
   def makeErrorMessageFor_invoke_Exception( t: Throwable ): String =
     s"\nScript execution failed: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
 
-  def lookupMethod( clazz: java.lang.Class[_], action: DynamicActionScript, arguments: java.lang.Class[_]* ): Try[Method] =
-    try {
-      clazz.getMethod( action.methodName.sname, arguments: _* ) match {
-        case m: Method => Success( m )
-        case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
-      }
-    }
-    catch {
-      case ex: NoSuchMethodException => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
-    }
+  case class ResolvedClassAndMethod( s: DynamicActionScript, c: Class[_], m: Method ) {}
 
   sealed abstract class ClassLoaderError( error: String ) extends RuntimeException( error ) {}
 
@@ -117,6 +135,113 @@ object ClassLoaderHelper {
 
   case class DynamicScriptsPluginNotLoaded( pluginName: String )
     extends ClassLoaderError( s"DynamicScripts plugin '${pluginName}' not loaded" ) {}
+
+  case class DynamicScriptsClassNotFound( message: String )
+    extends ClassLoaderError( message ) {}
+
+  case class DynamicScriptsMethodNotFound( message: String )
+    extends ClassLoaderError( message ) {}
+
+  case class DynamicScriptsClassLookupError( s: DynamicActionScript, t: Throwable )
+    extends ClassLoaderException( makeErrorMessageFor_loadClass_error( s, t ), t ) {}
+
+  def lookupMethod( clazz: java.lang.Class[_], action: DynamicActionScript, argumentTypes: java.lang.Class[_]* ): Try[Method] =
+    try {
+      clazz.getMethod( action.methodName.sname, argumentTypes: _* ) match {
+        case m: Method => Success( m )
+        case null      => Failure( DynamicScriptsMethodNotFound( makeErrorMessageFor_lookupMethod_null( clazz, action, argumentTypes: _* ) ) )
+      }
+    }
+    catch {
+      case ex: NoSuchMethodException => Failure( DynamicScriptsMethodNotFound( makeErrorMessageFor_lookupMethod_error( ex, clazz, action, argumentTypes: _* ) ) )
+    }
+
+  def lookupClassAndMethod( scriptCL: URLClassLoader, s: DynamicActionScript, argumentTypes: java.lang.Class[_]* ): Try[ResolvedClassAndMethod] = {
+    val c: Class[_] = try {
+      scriptCL.loadClass( s.className.jname ) match {
+        case null        => return Failure( DynamicScriptsClassNotFound( makeErrorMessageFor_loadClass_null( s ) ) )
+        case c: Class[_] => c
+      }
+    }
+    catch {
+      case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalAccessException ) =>
+        return Failure( DynamicScriptsClassLookupError( s, ex ) )
+    }
+
+    val m: Method = lookupMethod( c, s, argumentTypes: _* ) match {
+      case Failure( t ) => return Failure( t )
+      case Success( m ) => m
+    }
+
+    Success( ResolvedClassAndMethod( s, c, m ) )
+  }
+
+  def invoke( previousTime: Long, p: Project, cm: ResolvedClassAndMethod, argumentValues: Object* ): Try[Unit] = {
+    val log = MDLog.getPluginsLog()
+    val message = cm.s.prettyPrint( "" ) + "\n"
+    val sm = SessionManager.getInstance()
+    if (p != null)
+      sm.createSession( p, message )
+    try {
+      val actionAndArgumentValues: Seq[Object] = cm.s +: argumentValues
+      val r = cm.m.invoke( null, actionAndArgumentValues: _* )
+
+      val currentTime = System.currentTimeMillis()
+      log.info( s"${message} took ${currentTime - previousTime} ms" )
+
+      r match {
+        case Failure( t ) =>
+          if ( p != null && sm.isSessionCreated( p ) ) {
+            sm.cancelSession( p )
+          }
+          ClassLoaderHelper.reportError( cm.s, message, t )
+
+        case Success( None ) =>
+          if ( p != null && sm.isSessionCreated( p ) ) {
+            sm.closeSession( p )
+          }
+
+        case Success( Some( MagicDrawValidationDataResults( title, runData, results ) ) ) =>
+          Utilities.invokeAndWaitOnDispatcher( new Runnable() {
+            override def run(): Unit = {
+              ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString(), title, runData, results )
+            }
+          } )
+
+          if ( p != null && sm.isSessionCreated( p ) ) {
+            sm.closeSession( p )
+          }
+
+        case _ =>
+          if ( p != null && sm.isSessionCreated( p ) ) {
+            sm.closeSession( p )
+          }
+      }
+
+    }
+    catch {
+      case ex: InvocationTargetException =>
+        if ( p != null && sm.isSessionCreated( p ) ) {
+          sm.cancelSession( p )
+        }
+        val t = ex.getTargetException() match { case null => ex; case t => t }
+        val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
+        ClassLoaderHelper.reportError( cm.s, ex_message, t )
+      case t @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException ) =>
+        if ( p != null && sm.isSessionCreated( p ) ) {
+          sm.cancelSession( p )
+        }
+        val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
+        ClassLoaderHelper.reportError( cm.s, ex_message, t )
+    }
+    finally {
+      if ( p != null && sm.isSessionCreated( p ) ) {
+        sm.cancelSession( p )
+      }
+    }
+
+    Success( Unit )
+  }
 
   private var dynamicScriptsRootPath: String = null
 
