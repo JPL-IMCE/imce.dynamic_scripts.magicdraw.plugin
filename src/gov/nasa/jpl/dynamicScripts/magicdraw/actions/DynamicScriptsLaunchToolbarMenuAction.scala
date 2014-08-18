@@ -40,12 +40,10 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.actions
 
 import java.awt.event.ActionEvent
-import java.lang.reflect.InvocationTargetException
-import java.net.MalformedURLException
+import java.net.URLClassLoader
 
 import javax.swing.KeyStroke
 
-import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.implicitConversions
 import scala.language.postfixOps
 import scala.util.Failure
@@ -53,13 +51,10 @@ import scala.util.Success
 
 import com.nomagic.actions.NMAction
 import com.nomagic.magicdraw.core.Application
-import com.nomagic.magicdraw.utils.MDLog
-import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
-import com.nomagic.utils.Utilities
 
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.MainToolbarMenuAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
-import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
+import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper.ResolvedClassAndMethod
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -68,81 +63,27 @@ case class DynamicScriptsLaunchToolbarMenuAction( action: MainToolbarMenuAction,
   extends NMAction( id, action.name.hname, null.asInstanceOf[KeyStroke] ) {
 
   override def actionPerformed( ev: ActionEvent ): Unit = {
-    val log = MDLog.getPluginsLog()
-
     val previousTime = System.currentTimeMillis()
-
     val message = action.prettyPrint( "" ) + "\n"
-    val guiLog = Application.getInstance().getGUILog()
 
     ClassLoaderHelper.createDynamicScriptClassLoader( action ) match {
-      case Failure( ex ) =>
-        val error = message + ClassLoaderHelper.makeErrorMessageFor_createDynamicScriptClassLoader_Failure( action, ex )
-        log.error( error, ex )
-        guiLog.showError( error, ex )
+      case Failure( t ) =>
+        ClassLoaderHelper.reportError( action, message, t )
         return
 
-      case Success( scriptCL ) => {
+      case Success( scriptCL: URLClassLoader ) => {
         val localClassLoader = Thread.currentThread().getContextClassLoader()
+        Thread.currentThread().setContextClassLoader( scriptCL )
+
         try {
-
-          Thread.currentThread().setContextClassLoader( scriptCL )
-
-          val c = scriptCL.loadClass( action.className.jname )
-          if ( c == null ) {
-            val error = message + ClassLoaderHelper.makeErrorMessageFor_loadClass_null( action )
-            log.error( error )
-            guiLog.showError( error )
-            return
-          }
-
-          val m = ClassLoaderHelper.lookupMethod( c, action, classOf[MainToolbarMenuAction], classOf[ActionEvent] ) match {
+          ClassLoaderHelper.lookupClassAndMethod( scriptCL, action, classOf[MainToolbarMenuAction], classOf[ActionEvent] ) match {
             case Failure( t ) =>
-              val error = message + ClassLoaderHelper.makeErrorMessageFor_lookupMethod_Failure( action, t )
-              log.error( error, t )
-              guiLog.showError( error, t )
+              ClassLoaderHelper.reportError( action, message, t )
               return
-            case Success( m ) => m
+
+            case Success( cm: ResolvedClassAndMethod ) =>
+              ClassLoaderHelper.invoke( previousTime, Application.getInstance().getProject(), cm, ev )
           }
-
-          val r = m.invoke( null, action, ev )
-
-          val currentTime = System.currentTimeMillis()
-          log.info( s"${message} took ${currentTime - previousTime} ms" )
-
-          r match {
-            case Failure( ex ) =>
-              val ex_message = message + ClassLoaderHelper.makeErrorMessageFor_invoke_Failure( ex )
-              log.error( ex_message, ex )
-              guiLog.showError( ex_message, ex )
-
-            case Success( None ) =>
-              ()
-
-            case Success( Some( MagicDrawValidationDataResults( title, runData, results ) ) ) =>
-              Utilities.invokeAndWaitOnDispatcher( new Runnable() {
-                override def run(): Unit = {
-                  ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString(), title, runData, results )
-                }
-              } )
-
-            case _ =>
-              ()
-          }
-
-        }
-        catch {
-          case ex: InvocationTargetException =>
-            val t = ex.getTargetException() match { case null => ex; case t => t }
-            val ex_message = message + ClassLoaderHelper.makeErrorMessageFor_InvocationTargetException( t )
-            log.error( ex_message, t )
-            guiLog.showError( ex_message, t )
-            return
-          case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
-            val ex_message = message + ClassLoaderHelper.makeErrorMessageFor_invoke_Exception( ex )
-            log.error( ex_message, ex )
-            guiLog.showError( ex_message, ex )
-            return
         }
         finally {
           Thread.currentThread().setContextClassLoader( localClassLoader )
@@ -150,5 +91,4 @@ case class DynamicScriptsLaunchToolbarMenuAction( action: MainToolbarMenuAction,
       }
     }
   }
-
 }
