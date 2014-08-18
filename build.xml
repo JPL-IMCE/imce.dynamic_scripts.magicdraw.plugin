@@ -48,17 +48,11 @@
 	<target name="zip">
 		<md.plugin.clean.root
 			plugin.dir="${plugin.dir}" 
-			plugin.name="${plugin.name}"
-			plugin.resource="${plugin.resource}"
-			plugin.archive="${plugin.archive}"
-			plugin.version="${THIS_JOB.version.human}"/>
+			plugin.name="${plugin.name}"/>
 		
 		<md.plugin.copyTo.root
 			plugin.dir="${plugin.dir}" 
-			plugin.name="${plugin.name}"
-			plugin.resource="${plugin.resource}"
-			plugin.archive="${plugin.archive}"
-			plugin.version="${THIS_JOB.version.human}">
+			plugin.name="${plugin.name}">
 			<excludes>
 				<exclude name="build*.xml"/>
 			</excludes>
@@ -67,8 +61,6 @@
 		
 		<md.plugin.zip.root
 			plugin.dir="${plugin.dir}" 
-			plugin.name="${plugin.name}"
-			plugin.resource="${plugin.resource}"
 			plugin.archive="${plugin.archive}"
 			plugin.version="${THIS_JOB.version.human}"/>
 	</target>
