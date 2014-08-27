@@ -54,7 +54,7 @@ import com.nomagic.magicdraw.ui.actions.DefaultDiagramAction
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicContextDiagramActionScript
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper.ResolvedClassAndMethod
 
@@ -62,8 +62,8 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper.ResolvedClassAndM
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
 case class DynamicDiagramContextMenuActionForTriggerAndSelection(
-  project: Project, trigger: PresentationElement, element: Element, selected: List[PresentationElement],
-  menuAction: DynamicContextDiagramActionScript,
+  project: Project, trigger: PresentationElement, element: Element, selected: java.util.Collection[PresentationElement],
+  menuAction: DiagramContextMenuAction,
   key: KeyStroke,
   group: String ) extends DefaultDiagramAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
 
@@ -84,13 +84,25 @@ case class DynamicDiagramContextMenuActionForTriggerAndSelection(
         Thread.currentThread().setContextClassLoader( scriptCL )
 
         try {
-          ClassLoaderHelper.lookupClassAndMethod( scriptCL, menuAction, classOf[DynamicContextDiagramActionScript], classOf[PresentationElement], classOf[Element], classOf[java.util.Collection[PresentationElement]] ) match {
-            case Failure( t ) =>
-              ClassLoaderHelper.reportError( menuAction, message, t )
-              return
-
-            case Success( cm: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invoke( previousTime, project, cm, trigger, element, selected )
+          ClassLoaderHelper.lookupClassAndMethod( 
+              scriptCL, menuAction, 
+              classOf[Project], classOf[DiagramContextMenuAction], 
+              classOf[PresentationElement], classOf[Element], 
+              classOf[java.util.Collection[PresentationElement]] ) match {
+            case Failure( t1 ) =>
+              ClassLoaderHelper.lookupClassAndMethod( 
+                scriptCL, menuAction, 
+                classOf[Project], classOf[DiagramContextMenuAction], 
+                trigger.getClassType(), element.getClassType(), 
+                classOf[java.util.Collection[PresentationElement]] ) match {
+                case Failure( t2 ) =>
+                  ClassLoaderHelper.reportError( menuAction, message, t1 )
+                  return
+                case Success( cm2: ResolvedClassAndMethod ) =>
+                 ClassLoaderHelper.invoke( previousTime, project, cm2, trigger, element, selected )
+              }
+            case Success( cm1: ResolvedClassAndMethod ) =>
+              ClassLoaderHelper.invoke( previousTime, project, cm1, trigger, element, selected )
           }
         }
         finally {

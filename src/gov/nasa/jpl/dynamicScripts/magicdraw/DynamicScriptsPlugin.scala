@@ -112,8 +112,8 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
       }
     }
 
-  def updateRegistryForConfigurationFiles( files: List[String] ): Option[String] =
-    DynamicScriptsRegistry.mergeDynamicScripts( registry, files ) match {
+  def updateRegistryForConfigurationFiles( files: List[String] ): Option[String] = 
+    DynamicScriptsRegistry.mergeDynamicScripts( DynamicScriptsRegistry.init(), files ) match {
       case ( r: DynamicScriptsRegistry, errors: List[String] ) =>
         registry = r
         val log = MDLog.getPluginsLog()

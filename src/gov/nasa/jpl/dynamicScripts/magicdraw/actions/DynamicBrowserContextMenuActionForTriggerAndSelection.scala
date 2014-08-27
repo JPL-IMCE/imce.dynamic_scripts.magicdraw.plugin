@@ -96,13 +96,31 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
         Thread.currentThread().setContextClassLoader( scriptCL )
 
         try {
-          ClassLoaderHelper.lookupClassAndMethod( scriptCL, menuAction, classOf[BrowserContextMenuAction], classOf[Tree], classOf[Node], classOf[Element], classOf[java.util.Collection[Element]] ) match {
-            case Failure( t ) =>
-              ClassLoaderHelper.reportError( menuAction, message, t )
-              return
+          ClassLoaderHelper.lookupClassAndMethod( 
+              scriptCL, menuAction, 
+              classOf[Project],
+              classOf[BrowserContextMenuAction], 
+              classOf[Tree], classOf[Node], 
+              classOf[Element], 
+              classOf[java.util.Collection[Element]] ) match {
+            case Failure( t1 ) =>
+              ClassLoaderHelper.lookupClassAndMethod( 
+                  scriptCL, menuAction, 
+                  classOf[Project],
+                  classOf[BrowserContextMenuAction], 
+                  classOf[Tree], classOf[Node], 
+                  triggerElement.getClassType(), 
+                  classOf[java.util.Collection[Element]] ) match {
+                case Failure( t2 ) =>
+                  ClassLoaderHelper.reportError( menuAction, message, t1 )
+                  return
 
-            case Success( cm: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invoke( previousTime, project, cm, tree, triggerNode, triggerElement, selected )
+                case Success( cm2: ResolvedClassAndMethod ) =>
+                  ClassLoaderHelper.invoke( previousTime, project, cm2, tree, triggerNode, triggerElement, selected )
+              }
+
+            case Success( cm1: ResolvedClassAndMethod ) =>
+              ClassLoaderHelper.invoke( previousTime, project, cm1, tree, triggerNode, triggerElement, selected )
           }
         }
         finally {

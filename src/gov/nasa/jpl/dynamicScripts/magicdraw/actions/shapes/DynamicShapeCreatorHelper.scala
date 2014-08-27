@@ -78,7 +78,7 @@ case class DynamicShapeCreatorForMetaclassDesignation( project: Project, d: Meta
   
   def lookupMethod(clazz: java.lang.Class[_], action: DynamicActionScript): Try[Method] = 
     try {
-			clazz.getMethod(action.methodName.sname, classOf[DynamicActionScript], classOf[MagicDrawMetaclassDesignation], classOf[PresentationElement], classOf[Element]) match {
+			clazz.getMethod(action.methodName.sname, classOf[DynamicActionScript], classOf[Project], classOf[MagicDrawMetaclassDesignation], classOf[PresentationElement], classOf[Element]) match {
 			  case m: Method => Success(m)
 			  case null => Failure(new IllegalArgumentException(s"method '${action.methodName.sname}()' not found in ${action.className.jname}"))
 			}
@@ -88,7 +88,7 @@ case class DynamicShapeCreatorForMetaclassDesignation( project: Project, d: Meta
     
   def invokeMethod(method: Method, das: DynamicActionScript, pe: PresentationElement, e: Element): Object = md match {
     case u:UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
-    case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, r, pe, e)
+    case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, Project.getProject(e), r, pe, e)
   }
 }
 
@@ -105,7 +105,7 @@ case class DynamicShapeCreatorForStereotypedMetaclassDesignation( project: Proje
   
   def lookupMethod(clazz: java.lang.Class[_], action: DynamicActionScript): Try[Method] = 
         try {
-			clazz.getMethod(action.methodName.sname, classOf[DynamicActionScript], classOf[ResolvedMagicDrawStereotypeDesignation], classOf[PresentationElement], classOf[Element]) match {
+			clazz.getMethod(action.methodName.sname, classOf[DynamicActionScript], classOf[Project], classOf[ResolvedMagicDrawStereotypeDesignation], classOf[PresentationElement], classOf[Element]) match {
 			  case m: Method => Success(m)
 			  case null => Failure(new IllegalArgumentException(s"method '${action.methodName.sname}()' not found in ${action.className.jname}"))
 			}
@@ -115,7 +115,7 @@ case class DynamicShapeCreatorForStereotypedMetaclassDesignation( project: Proje
     
   def invokeMethod(method: Method, das: DynamicActionScript, pe: PresentationElement, e: Element): Object = md match {
     case u:UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
-    case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, r, pe, e)
+    case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, Project.getProject(e), r, pe, e)
   }
 }
 
@@ -131,7 +131,7 @@ case class DynamicShapeCreatorForClassifiedInstanceDesignation( project: Project
   }
   def lookupMethod(clazz: java.lang.Class[_], action: DynamicActionScript): Try[Method] = 
         try {
-			clazz.getMethod(action.methodName.sname, classOf[DynamicActionScript], classOf[ResolvedMagicDrawClassifiedInstanceDesignation], classOf[PresentationElement], classOf[Element]) match {
+			clazz.getMethod(action.methodName.sname, classOf[DynamicActionScript], classOf[Project], classOf[ResolvedMagicDrawClassifiedInstanceDesignation], classOf[PresentationElement], classOf[Element]) match {
 			  case m: Method => Success(m)
 			  case null => Failure(new IllegalArgumentException(s"method '${action.methodName.sname}()' not found in ${action.className.jname}"))
 			}
@@ -141,7 +141,7 @@ case class DynamicShapeCreatorForClassifiedInstanceDesignation( project: Project
     
   def invokeMethod(method: Method, das: DynamicActionScript, pe: PresentationElement, e: Element): Object = md match {
     case u:UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
-    case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, r, pe, e)
+    case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, Project.getProject(e), r, pe, e)
   }
 }
 
@@ -158,7 +158,7 @@ case class DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation( proje
 
   def lookupMethod(clazz: java.lang.Class[_], action: DynamicActionScript): Try[Method] = 
         try {
-			clazz.getMethod(action.methodName.sname, classOf[DynamicActionScript], classOf[ResolvedMagicDrawStereotypedClassifiedInstanceDesignation], classOf[PresentationElement], classOf[Element]) match {
+			clazz.getMethod(action.methodName.sname, classOf[DynamicActionScript], classOf[Project], classOf[ResolvedMagicDrawStereotypedClassifiedInstanceDesignation], classOf[PresentationElement], classOf[Element]) match {
 			  case m: Method => Success(m)
 			  case null => Failure(new IllegalArgumentException(s"method '${action.methodName.sname}()' not found in ${action.className.jname}"))
 			}
@@ -168,6 +168,6 @@ case class DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation( proje
     
   def invokeMethod(method: Method, das: DynamicActionScript, pe: PresentationElement, e: Element): Object = md match {
     case u:UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
-    case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, r, pe, e)
+    case r:ResolvedMagicDrawMetaclassDesignation => method.invoke(null, das, Project.getProject(e), r, pe, e)
   }
 }

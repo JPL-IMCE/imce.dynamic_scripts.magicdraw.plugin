@@ -100,7 +100,7 @@ case class DynamicPathCreatorForClassifiedInstanceDesignation( d: ClassifiedInst
   def createPathElement( e: Element ): PathElement = ???
   def lookupMethod(clazz: java.lang.Class[_], action: DynamicActionScript): Try[Method] = 
         try {
-      clazz.getMethod( action.methodName.sname, classOf[LinkView], classOf[InstanceSpecification], classOf[Association], classOf[InstanceSpecification], classOf[InstanceSpecification] ) match {
+      clazz.getMethod( action.methodName.sname, classOf[DynamicActionScript], classOf[Project], classOf[LinkView], classOf[InstanceSpecification], classOf[Association], classOf[InstanceSpecification], classOf[InstanceSpecification] ) match {
         case m: Method => Success( m )
         case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}(LinkView, InstanceSpecification, Association, InstanceSpecification, InstanceSpecification)' not found in ${action.className.jname}" ) )
       }
@@ -120,7 +120,7 @@ case class DynamicPathCreatorForClassifiedInstanceDesignation( d: ClassifiedInst
           case i: InstanceSpecification => i
           case _                        => Failure(new IllegalArgumentException( s"Cannot find supplier InstanceSpecification" ))
         }
-        method.invoke( null, linkView, link, null, iSource, iTarget )
+        method.invoke( null, Project.getProject(e), linkView, link, null, iSource, iTarget )
       case ( _, _ ) =>
         Failure(new IllegalArgumentException( s"Cannot find created LinkView for InstanceSpecification" ))
     }
