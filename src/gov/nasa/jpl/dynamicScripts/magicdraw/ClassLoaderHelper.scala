@@ -96,12 +96,12 @@ object ClassLoaderHelper {
 
   def makeErrorMessageFor_lookupMethod_null( clazz: java.lang.Class[_], action: DynamicActionScript, argumentTypes: java.lang.Class[_]* ): String =
     s"""|Script method: '${action.methodName.sname}' not found
-        |argument types:${( argumentTypes map { t => t.getClass().getName() } ) mkString ( "\n  ", "\n  ", "" )} 
+        |argument types:${( argumentTypes map { t => t.getName() } ) mkString ( "\n  ", "\n  ", "" )} 
         |(do not submit!)""".stripMargin
 
   def makeErrorMessageFor_lookupMethod_error( t: Throwable, clazz: java.lang.Class[_], action: DynamicActionScript, argumentTypes: java.lang.Class[_]* ): String =
     s"""|Script method: '${action.methodName.sname}' failed
-        |Argument types:${( argumentTypes map { t => t.getClass().getName() } ) mkString ( "\n  ", "\n  ", "" )}
+        |Argument types:${( argumentTypes map { t => t.getName() } ) mkString ( "\n  ", "\n  ", "" )}
         |Exception: ${t.getClass().getName()}
         |Exception message: ${t.getMessage()}
         |(do not submit!)""".stripMargin
@@ -182,9 +182,11 @@ object ClassLoaderHelper {
     val sm = SessionManager.getInstance()
     if (p != null)
       sm.createSession( p, message )
+    val actionAndArgumentValues0: Seq[Object] = argumentValues
+    val actionAndArgumentValues1: Seq[Object] = cm.s +: actionAndArgumentValues0
+    val actionAndArgumentValues2: Seq[Object] = p +: actionAndArgumentValues1
     try {
-      val actionAndArgumentValues: Seq[Object] = cm.s +: argumentValues
-      val r = cm.m.invoke( null, actionAndArgumentValues: _* )
+      val r = cm.m.invoke( null, actionAndArgumentValues2: _* )
 
       val currentTime = System.currentTimeMillis()
       log.info( s"${message} took ${currentTime - previousTime} ms" )
@@ -227,7 +229,15 @@ object ClassLoaderHelper {
         val t = ex.getTargetException() match { case null => ex; case t => t }
         val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
         ClassLoaderHelper.reportError( cm.s, ex_message, t )
-      case t @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException ) =>
+      case t: IllegalArgumentException =>        
+        if ( p != null && sm.isSessionCreated( p ) ) {
+          sm.cancelSession( p )
+        }
+        val parameterTypes = (cm.m.getParameterTypes() map (_.getName())) mkString("\n parameter type: ", "\n parameter type: ", "")
+        val parameterValues = (actionAndArgumentValues2 map (_.getClass().getName())) mkString("\n argument type: ", "\n argument type: ", "")
+        val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n${parameterTypes}\n${parameterValues}(do not submit!)"
+        ClassLoaderHelper.reportError( cm.s, ex_message, t )
+      case t @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalAccessException ) =>
         if ( p != null && sm.isSessionCreated( p ) ) {
           sm.cancelSession( p )
         }

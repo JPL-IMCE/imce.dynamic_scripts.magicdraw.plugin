@@ -61,7 +61,7 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper.ResolvedClassAndM
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
 case class DynamicDiagramContextMenuActionForMultipleSelection(
-  project: Project, selected: List[PresentationElement],
+  project: Project, selected: java.util.Collection[PresentationElement],
   menuAction: DiagramContextMenuAction,
   key: KeyStroke,
   group: String ) extends DefaultDiagramAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
@@ -83,7 +83,8 @@ case class DynamicDiagramContextMenuActionForMultipleSelection(
         Thread.currentThread().setContextClassLoader( scriptCL )
 
         try {
-          ClassLoaderHelper.lookupClassAndMethod( scriptCL, menuAction, classOf[DiagramContextMenuAction], classOf[java.util.Collection[PresentationElement]] ) match {
+          ClassLoaderHelper.lookupClassAndMethod( scriptCL, menuAction, 
+              classOf[Project], classOf[DiagramContextMenuAction], classOf[java.util.Collection[PresentationElement]] ) match {
             case Failure( t ) =>
               ClassLoaderHelper.reportError( menuAction, message, t )
               return

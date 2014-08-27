@@ -358,7 +358,7 @@ object DynamicScriptsDiagramConfigurator {
 
   def createContextMenuActionForTriggerAndSelection( project: Project, trigger: PresentationElement, element: Element, selected: List[PresentationElement] )( dynamicActionScript: DynamicActionScript ): Option[DynamicDiagramContextMenuActionForTriggerAndSelection] =
     dynamicActionScript match {
-      case s: DynamicContextDiagramActionScript =>
+      case s: DiagramContextMenuAction =>
         Some( DynamicDiagramContextMenuActionForTriggerAndSelection( project, trigger, element, selected, s, null, null ) )
       case _ =>
         None

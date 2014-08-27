@@ -83,7 +83,8 @@ case class DynamicDiagramContextMenuActionForDiagram(
         Thread.currentThread().setContextClassLoader( scriptCL )
 
         try {
-          ClassLoaderHelper.lookupClassAndMethod( scriptCL, menuAction, classOf[DiagramContextMenuAction], classOf[DiagramPresentationElement] ) match {
+          ClassLoaderHelper.lookupClassAndMethod( scriptCL, menuAction, 
+              classOf[Project], classOf[DiagramContextMenuAction], classOf[DiagramPresentationElement] ) match {
             case Failure( t ) =>
               ClassLoaderHelper.reportError( menuAction, message, t )
               return
