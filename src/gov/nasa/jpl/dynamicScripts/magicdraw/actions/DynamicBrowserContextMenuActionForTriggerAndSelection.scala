@@ -68,10 +68,6 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
   key: KeyStroke,
   group: String ) extends DefaultBrowserAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
 
-  menuAction.access match {
-    case ScopeAccess.READ_ONLY => ()
-  }
-  
   override def getTree(): Tree = tree
   override def getFirstElement(): BaseElement = triggerElement
   override def getSelectedObject(): Object = triggerElement
