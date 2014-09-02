@@ -103,28 +103,30 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
   override def getPriority(): Int = ConfiguratorWithPriority.HIGH_PRIORITY
   override def configure( manager: ActionsManager ): Unit = {}
 
-  override def configure( manager: ActionsManager, pElement: PresentationElement ): Unit = pElement match {
-    case null => ()
-    case pe => ( pe.getDiagramPresentationElement(), pe.getElement() ) match {
-      case ( null, _ ) => ()
-      case ( _, null ) => ()
-      case ( d, e )    => configureContextToolbar( manager, d, pe, e )
+  override def configure( manager: ActionsManager, pElement: PresentationElement ): Unit = {
+    val log = MDLog.getPluginsLog()
+    val previousTime = System.currentTimeMillis()
+    pElement match {
+      case null => ()
+      case pe => ( pe.getDiagramPresentationElement(), pe.getElement() ) match {
+        case ( null, _ ) => ()
+        case ( _, null ) => ()
+        case ( d, e )    => configureContextToolbar( manager, d, pe, e )
+      }
     }
+    val currentTime = System.currentTimeMillis()
+    log.info( s"DynamicScriptsDiagramConfigurator.configure(manager, pElement) took ${currentTime - previousTime} ms" )
   }
 
-  def configureContextToolbar( manager: ActionsManager, diagram: DiagramPresentationElement, pElement: PresentationElement, element: Element ): Unit = {
-    val log = MDLog.getPluginsLog()
+  protected def configureContextToolbar( manager: ActionsManager, diagram: DiagramPresentationElement, pElement: PresentationElement, element: Element ): Unit = {
     val d = diagram.getDiagram()
     val ds = StereotypesHelper.getStereotypes( d ).toList
-    log.info(
-      s"""|${this.getClass().getName()}.configureContextToolbar(diagram=${diagram.getDiagram().getQualifiedName()}
-            |Element=${pElement.getClassType().getName()}
-            |element=${ClassTypes.getShortName( element.getClassType() )}: ${element.getHumanName()}""".stripMargin )
-
-    def dynamicScriptToolbarFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicPathToolbarScriptActionAvailable( d, diagram.getDiagramType().getType(), ds )( das )
 
     val p = DynamicScriptsPlugin.getInstance()
     val mName = ClassTypes.getShortName( element.getClassType() )
+
+    def dynamicScriptToolbarFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicPathToolbarScriptActionAvailable( d, diagram.getDiagramType().getType(), ds )( das )
+
     val mActions = p.getRelevantMetaclassActions( mName, dynamicScriptToolbarFilter )
     val sActions = StereotypesHelper.getStereotypesHierarchy( element ) flatMap ( s => p.getRelevantStereotypeActions( mName, s.getProfile().getQualifiedName(), s.getQualifiedName(), dynamicScriptToolbarFilter ) )
     val cActions = p.getRelevantClassifierActions( element, dynamicScriptToolbarFilter )
@@ -140,7 +142,6 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
       val category = new MDActionsCategory( key, key )
       category.setDisplayHeader( true )
       category.setNested( false )
-      log.info( s"${this.getClass().getName()}.configureContextToolbar ${toolbarActions.size} actions ${( toolbarActions map { a => a.finalizationAction.action.name.hname } ).mkString( "\n => ", "\n => ", "\n" )}" )
       category.setActions( toolbarActions )
       manager.addCategory( 0, category )
     }
@@ -162,6 +163,9 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
    */
   override def configure( manager: ActionsManager, diagram: DiagramPresentationElement, selected: Array[PresentationElement], requestor: PresentationElement ): Unit = {
 
+    val log = MDLog.getPluginsLog()
+    val previousTime = System.currentTimeMillis()
+    
     val trigger: PresentationElement = diagram.getDiagramSurface() match {
       case dc: DiagramCanvas => dc.getLastPopupTriggerPoint() match {
         case point: Point => diagram.getPresentationElementAt( point )
@@ -187,26 +191,24 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
         // no trigger & no selection
         configureDiagramContextMenuToolbarForNoTriggerAndNoSelection( category, diagram )
     }
+    
+    val currentTime = System.currentTimeMillis()
+    log.info( s"DynamicScriptsDiagramConfigurator.configure(manager, diagram, selected, requestor) took ${currentTime - previousTime} ms" )
   }
 
-  def configureDiagramContextMenuToolbarForTriggerAndSelection( category: MDActionsCategory, diagram: DiagramPresentationElement, trigger: PresentationElement, selected: List[PresentationElement] ): Unit = {
+  protected def configureDiagramContextMenuToolbarForTriggerAndSelection( category: MDActionsCategory, diagram: DiagramPresentationElement, trigger: PresentationElement, selected: List[PresentationElement] ): Unit = {
     trigger.getElement() match {
       case null => ()
       case element: Element =>
 
-        val log = MDLog.getPluginsLog()
         val d = diagram.getDiagram()
         val ds = StereotypesHelper.getStereotypes( d ).toList
 
-        log.info(
-          s"""|${this.getClass().getName()}.configureDiagramContextMenuToolbarForTriggerAndSelection(category=${category.getName()},
-          |trigger=${trigger.getClassType().getName()} : ${element.getHumanName}${( selected map { _.getElement().getHumanName() } ).mkString( "\nselected:\n =>", "\n => ", "\n" )}
-          |diagram=${diagram.getDiagramType().getType()} : '${d.getQualifiedName()}' ${( ds map ( _.getQualifiedName() ) ) mkString ( "<<", ", ", ">>" )}""".stripMargin )
+        val p = DynamicScriptsPlugin.getInstance()
+        val mName = ClassTypes.getShortName( element.getClassType() )
 
         def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( d, diagram.getDiagramType().getType(), ds )( das )
 
-        val p = DynamicScriptsPlugin.getInstance()
-        val mName = ClassTypes.getShortName( element.getClassType() )
         val mActions = p.getRelevantMetaclassActions( mName, dynamicScriptMenuFilter )
         val sActions = StereotypesHelper.getStereotypesHierarchy( element ) flatMap ( s => p.getRelevantStereotypeActions( mName, s.getProfile().getQualifiedName(), s.getQualifiedName(), dynamicScriptMenuFilter ) )
         val cActions = p.getRelevantClassifierActions( element, dynamicScriptMenuFilter )
@@ -227,16 +229,9 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
     }
   }
 
-  def configureDiagramContextMenuToolbarForMultipleSelection( category: MDActionsCategory, diagram: DiagramPresentationElement, selected: List[PresentationElement] ): Unit = {
-    val log = MDLog.getPluginsLog()
+  protected def configureDiagramContextMenuToolbarForMultipleSelection( category: MDActionsCategory, diagram: DiagramPresentationElement, selected: List[PresentationElement] ): Unit = {
     val d = diagram.getDiagram()
     val ds = StereotypesHelper.getStereotypes( d ).toList
-    log.info(
-      s"""|${this.getClass().getName()}.configureDiagramContextMenuToolbarForMultipleSelection(category=${category.getName()},
-          |${( selected map { _.getElement().getHumanName() } ).mkString( "\nselected:\n =>", "\n => ", "\n" )},
-          |diagram=${diagram.getDiagramType().getType()} : '${d.getQualifiedName()}' ${( ds map ( _.getQualifiedName() ) ) mkString ( "<<", ", ", ">>" )}""".stripMargin )
-
-    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( d, diagram.getDiagramType().getType(), ds )( das )
 
     val p = DynamicScriptsPlugin.getInstance()
     val elements = selected map { pe => pe.getElement() }
@@ -244,6 +239,8 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
     if ( projects.size != 1 )
       return
     val project = projects.head
+
+    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( d, diagram.getDiagramType().getType(), ds )( das )
 
     val mActions = elements map ( e => ClassTypes.getShortName( e.getClassType() ) ) flatMap ( mName => p.getRelevantMetaclassActions( mName, dynamicScriptMenuFilter ) )
     val sActions = elements flatMap { e =>
@@ -266,13 +263,9 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
     }
   }
 
-  def configureDiagramContextMenuToolbarForNoTriggerAndNoSelection( category: MDActionsCategory, diagram: DiagramPresentationElement ): Unit = {
-    val log = MDLog.getPluginsLog()
+  protected def configureDiagramContextMenuToolbarForNoTriggerAndNoSelection( category: MDActionsCategory, diagram: DiagramPresentationElement ): Unit = {
     val d = diagram.getDiagram()
     val ds = StereotypesHelper.getStereotypes( d ).toList
-    log.info(
-      s"""|${this.getClass().getName()}.configureDiagramContextMenuToolbarForNoTriggerAndNoSelection(category=${category.getName()},
-          |diagram=${diagram.getDiagramType().getType()} : '${d.getQualifiedName()}' ${( ds map ( _.getQualifiedName() ) ) mkString ( "<<", ", ", ">>" )}""".stripMargin )
 
     val p = DynamicScriptsPlugin.getInstance()
     val mName = ClassTypes.getShortName( d.getClassType() )

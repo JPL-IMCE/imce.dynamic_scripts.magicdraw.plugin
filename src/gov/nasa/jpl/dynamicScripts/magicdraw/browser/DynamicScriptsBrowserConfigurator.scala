@@ -40,25 +40,30 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.browser
 
 import java.awt.event.MouseEvent
-import scala.collection.JavaConversions._
+
+import scala.collection.JavaConversions.collectionAsScalaIterable
+import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.implicitConversions
 import scala.language.postfixOps
+
 import com.nomagic.actions.AMConfigurator
 import com.nomagic.actions.ActionsManager
 import com.nomagic.magicdraw.actions.ConfiguratorWithPriority
 import com.nomagic.magicdraw.actions.MDActionsCategory
+import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.ui.browser.Node
 import com.nomagic.magicdraw.ui.browser.Tree
-import com.nomagic.magicdraw.utils.MDLog
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
-import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
-import gov.nasa.jpl.magicdraw.enhanced.ui.browser.EnhancedBrowserContextAMConfigurator
-import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import com.nomagic.magicdraw.uml.ClassTypes
+import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper
-import com.nomagic.magicdraw.core.Project
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
+
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.BrowserContextMenuAction
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
+import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
+import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicBrowserContextMenuActionForTriggerAndSelection
+import gov.nasa.jpl.magicdraw.enhanced.ui.browser.EnhancedBrowserContextAMConfigurator
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -74,6 +79,9 @@ class DynamicScriptsBrowserConfigurator extends EnhancedBrowserContextAMConfigur
    */
   override def configure( manager: ActionsManager, tree: Tree, mouseEvent: MouseEvent, trigger: Node, selection: java.util.Collection[Node] ): Unit = {
 
+    val log = MDLog.getPluginsLog()
+    val previousTime = System.currentTimeMillis()
+      
     def getSelectedElement( node: Node ): Option[Element] = node.getUserObject() match {
       case e: Element => Some( e )
       case _          => None
@@ -93,14 +101,17 @@ class DynamicScriptsBrowserConfigurator extends EnhancedBrowserContextAMConfigur
         }
     }
 
+    val currentTime = System.currentTimeMillis()
+    log.info( s"DynamicScriptsBrowserConfigurator.configure took ${currentTime - previousTime} ms" )
   }
 
   def configure( category: MDActionsCategory, tree: Tree, mouseEvent: MouseEvent, triggerNode: Node, triggerElement: Element, selected: List[Element] ): Unit = {
 
-    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsBrowserConfigurator.isDynamicContextMenuScriptActionAvailable( das )
-
     val p = DynamicScriptsPlugin.getInstance()
     val mName = ClassTypes.getShortName( triggerElement.getClassType() )
+    
+    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsBrowserConfigurator.isDynamicContextMenuScriptActionAvailable( das )
+
     val mActions = p.getRelevantMetaclassActions( mName, dynamicScriptMenuFilter )
     val sActions = StereotypesHelper.getStereotypesHierarchy( triggerElement ) flatMap ( s => p.getRelevantStereotypeActions( mName, s.getProfile().getQualifiedName(), s.getQualifiedName(), dynamicScriptMenuFilter ) )
     val cActions = p.getRelevantClassifierActions( triggerElement, dynamicScriptMenuFilter )
