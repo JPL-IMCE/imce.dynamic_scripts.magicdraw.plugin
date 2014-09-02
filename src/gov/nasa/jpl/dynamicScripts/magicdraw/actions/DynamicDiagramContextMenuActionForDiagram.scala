@@ -84,13 +84,13 @@ case class DynamicDiagramContextMenuActionForDiagram(
 
         try {
           ClassLoaderHelper.lookupClassAndMethod( scriptCL, menuAction, 
-              classOf[Project], classOf[DiagramContextMenuAction], classOf[DiagramPresentationElement] ) match {
+              classOf[Project], classOf[ActionEvent], classOf[DiagramContextMenuAction], classOf[DiagramPresentationElement] ) match {
             case Failure( t ) =>
               ClassLoaderHelper.reportError( menuAction, message, t )
               return
 
             case Success( cm: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invoke( previousTime, project, cm, diagram )
+              ClassLoaderHelper.invoke( previousTime, project, ev, cm, diagram )
           }
         }
         finally {

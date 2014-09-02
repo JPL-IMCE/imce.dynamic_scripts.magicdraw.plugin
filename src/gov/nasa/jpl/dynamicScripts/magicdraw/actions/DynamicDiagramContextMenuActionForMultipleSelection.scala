@@ -84,13 +84,13 @@ case class DynamicDiagramContextMenuActionForMultipleSelection(
 
         try {
           ClassLoaderHelper.lookupClassAndMethod( scriptCL, menuAction, 
-              classOf[Project], classOf[DiagramContextMenuAction], classOf[java.util.Collection[PresentationElement]] ) match {
+              classOf[Project], classOf[ActionEvent], classOf[DiagramContextMenuAction], classOf[java.util.Collection[PresentationElement]] ) match {
             case Failure( t ) =>
               ClassLoaderHelper.reportError( menuAction, message, t )
               return
 
             case Success( cm: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invoke( previousTime, project, cm, selected )
+              ClassLoaderHelper.invoke( previousTime, project, ev, cm, selected )
           }
         }
         finally {

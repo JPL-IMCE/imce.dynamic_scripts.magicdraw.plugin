@@ -45,7 +45,6 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
-
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.TraversableOnce.OnceCanBuildFrom
 import scala.language.existentials
@@ -54,7 +53,6 @@ import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.ApplicationEnvironment
 import com.nomagic.magicdraw.core.Project
@@ -64,13 +62,13 @@ import com.nomagic.magicdraw.plugins.PluginUtils
 import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
 import com.nomagic.utils.Utilities
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicScriptInfo
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.HName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.JName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.PluginContext
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ProjectContext
+import java.awt.event.ActionEvent
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -176,7 +174,7 @@ object ClassLoaderHelper {
     Success( ResolvedClassAndMethod( s, c, m ) )
   }
 
-  def invoke( previousTime: Long, p: Project, cm: ResolvedClassAndMethod, argumentValues: Object* ): Try[Unit] = {
+  def invoke( previousTime: Long, p: Project, ev: ActionEvent, cm: ResolvedClassAndMethod, argumentValues: Object* ): Try[Unit] = {
     val log = MDLog.getPluginsLog()
     val message = cm.s.prettyPrint( "" ) + "\n"
     val sm = SessionManager.getInstance()
@@ -184,9 +182,10 @@ object ClassLoaderHelper {
       sm.createSession( p, message )
     val actionAndArgumentValues0: Seq[Object] = argumentValues
     val actionAndArgumentValues1: Seq[Object] = cm.s +: actionAndArgumentValues0
-    val actionAndArgumentValues2: Seq[Object] = p +: actionAndArgumentValues1
+    val actionAndArgumentValues2: Seq[Object] = ev +: actionAndArgumentValues1
+    val actionAndArgumentValues: Seq[Object] = p +: actionAndArgumentValues2
     try {
-      val r = cm.m.invoke( null, actionAndArgumentValues2: _* )
+      val r = cm.m.invoke( null, actionAndArgumentValues: _* )
 
       val currentTime = System.currentTimeMillis()
       log.info( s"${message} took ${currentTime - previousTime} ms" )
@@ -234,7 +233,7 @@ object ClassLoaderHelper {
           sm.cancelSession( p )
         }
         val parameterTypes = (cm.m.getParameterTypes() map (_.getName())) mkString("\n parameter type: ", "\n parameter type: ", "")
-        val parameterValues = (actionAndArgumentValues2 map (_.getClass().getName())) mkString("\n argument type: ", "\n argument type: ", "")
+        val parameterValues = (actionAndArgumentValues map (_.getClass().getName())) mkString("\n argument type: ", "\n argument type: ", "")
         val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n${parameterTypes}\n${parameterValues}(do not submit!)"
         ClassLoaderHelper.reportError( cm.s, ex_message, t )
       case t @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalAccessException ) =>

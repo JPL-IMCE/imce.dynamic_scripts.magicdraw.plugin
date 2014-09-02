@@ -40,9 +40,13 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.diagram
 
 import java.awt.Point
-import scala.collection.JavaConversions._
+
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.collectionAsScalaIterable
+import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.implicitConversions
 import scala.language.postfixOps
+
 import com.nomagic.actions.AMConfigurator
 import com.nomagic.actions.ActionsManager
 import com.nomagic.magicdraw.actions.ConfiguratorWithPriority
@@ -54,20 +58,42 @@ import com.nomagic.magicdraw.ui.DiagramCanvas
 import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
-import com.nomagic.magicdraw.uml.symbols.paths._
-import com.nomagic.magicdraw.uml.symbols.shapes._
 import com.nomagic.magicdraw.utils.MDLog
-import com.nomagic.uml2.ext.jmi.helpers.ModelHelper
 import com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Diagram
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
+import com.nomagic.uml2.ext.magicdraw.mdprofiles.Stereotype
+
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ClassifiedInstanceDesignation
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicContextMenuActionScript
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicContextPathCreationActionScript
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicContextShapeCreationActionScript
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.MetaclassDesignation
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedClassifiedInstanceDesignation
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedMetaclassDesignation
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ToplevelPathInstanceCreator
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ToplevelShapeInstanceCreator
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions._
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths._
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes._
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Diagram
-import com.nomagic.uml2.ext.magicdraw.mdprofiles.Stereotype
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForDiagram
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForTriggerAndSelection
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawElementKindDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForClassifiedInstanceDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForMetaclassDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForStereotypedMetaclassDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorHelper
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathDiagramContextToolbarAction
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathFinalizationAction
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForClassifiedInstanceDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForMetaclassDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForStereotypedMetaclassDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorHelper
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeDiagramContextToolbarAction
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeFinalizationAction
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -153,23 +179,26 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
 
       if ( trigger != null )
         // trigger & selection
-        configureDiagramContextMenuToolbarForTriggerAndSelection( category, trigger, selected.toList )
+        configureDiagramContextMenuToolbarForTriggerAndSelection( category, diagram, trigger, selected.toList )
       else if ( selected.nonEmpty )
         // no trigger & some selection
-        configureDiagramContextMenuToolbarForMultipleSelection( category, selected.toList )
+        configureDiagramContextMenuToolbarForMultipleSelection( category, diagram, selected.toList )
       else
         // no trigger & no selection
         configureDiagramContextMenuToolbarForNoTriggerAndNoSelection( category, diagram )
     }
   }
 
-  def configureDiagramContextMenuToolbarForTriggerAndSelection( category: MDActionsCategory, trigger: PresentationElement, selected: List[PresentationElement] ): Unit = {
+  def configureDiagramContextMenuToolbarForTriggerAndSelection( category: MDActionsCategory, diagram: DiagramPresentationElement, trigger: PresentationElement, selected: List[PresentationElement] ): Unit = {
     val log = MDLog.getPluginsLog()
+    val d = diagram.getDiagram()
+    val ds = StereotypesHelper.getStereotypes( d ).toList
     log.info(
       s"""|${this.getClass().getName()}.configureDiagramContextMenuToolbarForTriggerAndSelection(category=${category.getName()},
-            |trigger=${trigger.getClassType().getName()} : ${trigger.getElement().getHumanName}${( selected map { _.getElement().getHumanName() } ).mkString( "\nselected:\n =>", "\n => ", "\n" )}""".stripMargin )
+          |trigger=${trigger.getClassType().getName()} : ${trigger.getElement().getHumanName}${( selected map { _.getElement().getHumanName() } ).mkString( "\nselected:\n =>", "\n => ", "\n" )}
+          |diagram=${diagram.getDiagramType().getType()} : '${d.getQualifiedName()}' ${( ds map ( _.getQualifiedName() ) ) mkString ( "<<", ", ", ">>" )}""".stripMargin )
 
-    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( das )
+    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( d, diagram.getDiagramType().getType(), ds )( das )
 
     val p = DynamicScriptsPlugin.getInstance()
     val element = trigger.getElement()
@@ -193,13 +222,16 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
     }
   }
 
-  def configureDiagramContextMenuToolbarForMultipleSelection( category: MDActionsCategory, selected: List[PresentationElement] ): Unit = {
+  def configureDiagramContextMenuToolbarForMultipleSelection( category: MDActionsCategory, diagram: DiagramPresentationElement, selected: List[PresentationElement] ): Unit = {
     val log = MDLog.getPluginsLog()
+    val d = diagram.getDiagram()
+    val ds = StereotypesHelper.getStereotypes( d ).toList
     log.info(
       s"""|${this.getClass().getName()}.configureDiagramContextMenuToolbarForMultipleSelection(category=${category.getName()},
-            |${( selected map { _.getElement().getHumanName() } ).mkString( "\nselected:\n =>", "\n => ", "\n" )}""".stripMargin )
+          |${( selected map { _.getElement().getHumanName() } ).mkString( "\nselected:\n =>", "\n => ", "\n" )},
+          |diagram=${diagram.getDiagramType().getType()} : '${d.getQualifiedName()}' ${( ds map ( _.getQualifiedName() ) ) mkString ( "<<", ", ", ">>" )}""".stripMargin )
 
-    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( das )
+    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( d, diagram.getDiagramType().getType(), ds )( das )
 
     val p = DynamicScriptsPlugin.getInstance()
     val elements = selected map { pe => pe.getElement() }
@@ -235,7 +267,7 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
     val ds = StereotypesHelper.getStereotypes( d ).toList
     log.info(
       s"""|${this.getClass().getName()}.configureDiagramContextMenuToolbarForNoTriggerAndNoSelection(category=${category.getName()},
-            |diagram=${diagram.getDiagramType().getType()} : '${d.getQualifiedName()}' ${( ds map ( _.getQualifiedName() ) ) mkString ( "<<", ", ", ">>" )}""".stripMargin )
+          |diagram=${diagram.getDiagramType().getType()} : '${d.getQualifiedName()}' ${( ds map ( _.getQualifiedName() ) ) mkString ( "<<", ", ", ">>" )}""".stripMargin )
 
     val p = DynamicScriptsPlugin.getInstance()
     val mName = ClassTypes.getShortName( d.getClassType() )
@@ -247,7 +279,7 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
     val cShapes = p.getRelevantDiagramClassifierActions( d, dynamicShapeMenuFilter )
     val allDynamicShapeActions: Map[String, Seq[DynamicActionScript]] = mShapes ++ sShapes ++ cShapes
 
-    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( das )
+    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( d, diagram.getDiagramType().getType(), ds )( das )
 
     val mActions = p.getRelevantMetaclassActions( mName, dynamicScriptMenuFilter )
     val sActions = StereotypesHelper.getStereotypesHierarchy( d ) flatMap ( s => p.getRelevantStereotypeActions( mName, s.getProfile().getQualifiedName(), s.getQualifiedName(), dynamicScriptMenuFilter ) )
@@ -343,15 +375,15 @@ object DynamicScriptsDiagramConfigurator {
   }
 
   def isDynamicToolbarScriptActionAvailable( das: DynamicActionScript, d: Diagram, dType: String, ds: List[Stereotype] ): Boolean = das match {
-    case c: DynamicMenuActionScript =>
-      ClassLoaderHelper.isDynamicActionScriptAvailable( c )
+    case c: DynamicContextMenuActionScript =>
+      ClassLoaderHelper.isDynamicActionScriptAvailable( c ) && MagicDrawElementKindDesignation.isDynamicContextDiagramActionScriptAvailable( c, d, dType, ds )
     case _ =>
       false
   }
 
-  def isDynamicContextMenuScriptActionAvailable( das: DynamicActionScript ): Boolean = das match {
+  def isDynamicContextMenuScriptActionAvailable( d: Diagram, dType: String, ds: List[Stereotype] )( das: DynamicActionScript ): Boolean = das match {
     case c: DiagramContextMenuAction =>
-      ClassLoaderHelper.isDynamicActionScriptAvailable( c )
+      ClassLoaderHelper.isDynamicActionScriptAvailable( c ) && MagicDrawElementKindDesignation.isDynamicContextDiagramActionScriptAvailable( c, d, dType, ds )
     case _ =>
       false
   }
