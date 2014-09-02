@@ -56,20 +56,28 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.InstanceSpecification
 import com.nomagic.uml2.impl.ElementsFactory
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions._
 import com.nomagic.magicdraw.core.Project
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawElementKindDesignation
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
 trait DynamicPathCreatorHelper {
+  def isResolved: Boolean
   def createElement( project: Project ): Try[Element]
   def createPathElement( e: Element ): PathElement
   def lookupMethod( clazz: java.lang.Class[_], action: DynamicActionScript ): Try[Method]
   def invokeMethod( method: Method, pe: PresentationElement, e: Element ): Object
 }
 
-case class DynamicPathCreatorForMetaclassDesignation( d: MetaclassDesignation ) extends DynamicPathCreatorHelper {
+case class DynamicPathCreatorForMetaclassDesignation( project: Project, d: MetaclassDesignation ) extends DynamicPathCreatorHelper {
+  val md: MagicDrawMetaclassDesignation = MagicDrawElementKindDesignation.resolveMagicDrawMetaclassDesignation( project, d )
+  
+  override def isResolved: Boolean = md match {
+    case _:UnresolvedMagicDrawMetaclassDesignation => false
+    case _:ResolvedMagicDrawMetaclassDesignation => true
+  }
+  
   def createElement(project: Project): Try[Element] = ???
 //  MagicDrawElementKindDesignation.createElement(project, d) match {
 //    case Success(e) => e
@@ -80,7 +88,12 @@ case class DynamicPathCreatorForMetaclassDesignation( d: MetaclassDesignation ) 
   def invokeMethod(method: Method, pe: PresentationElement, e: Element): Object = ???
 }
 
-case class DynamicPathCreatorForStereotypedMetaclassDesignation( d: StereotypedMetaclassDesignation ) extends DynamicPathCreatorHelper {
+case class DynamicPathCreatorForStereotypedMetaclassDesignation( project: Project, d: StereotypedMetaclassDesignation ) extends DynamicPathCreatorHelper {
+  val md: MagicDrawStereotypeDesignation = MagicDrawElementKindDesignation.resolveMagicDrawStereotypeDesignation( project, d ) 
+  override def isResolved: Boolean = md match {
+    case _:UnresolvedMagicDrawStereotypeDesignation => false
+    case _:ResolvedMagicDrawStereotypeDesignation => true
+  }
   def createElement(project: Project): Try[Element] = ???
 //  MagicDrawElementKindDesignation.createElement(project, d) match {
 //    case Success(e) => e
@@ -91,7 +104,52 @@ case class DynamicPathCreatorForStereotypedMetaclassDesignation( d: StereotypedM
   def invokeMethod(method: Method, pe: PresentationElement, e: Element): Object = ???  
 }
 
-case class DynamicPathCreatorForClassifiedInstanceDesignation( d: ClassifiedInstanceDesignation ) extends DynamicPathCreatorHelper {
+case class DynamicPathCreatorForClassifiedInstanceDesignation( project: Project, d: ClassifiedInstanceDesignation ) extends DynamicPathCreatorHelper {
+  val md: MagicDrawClassifiedInstanceDesignation = MagicDrawElementKindDesignation.resolveMagicDrawClassifierDesignation( project, d ) 
+  override def isResolved: Boolean = md match {
+    case _:UnresolvedMagicDrawClassifiedInstanceDesignation => false
+    case _:ResolvedMagicDrawClassifiedInstanceDesignation => true
+  }
+  def createElement(project: Project): Try[Element] = ???
+//  MagicDrawElementKindDesignation.createElement(project, d) match {
+//    case Success(e) => e
+//    case Failure(e) => throw e
+//  }
+  def createPathElement( e: Element ): PathElement = ???
+  def lookupMethod(clazz: java.lang.Class[_], action: DynamicActionScript): Try[Method] = 
+        try {
+      clazz.getMethod( action.methodName.sname, classOf[DynamicActionScript], classOf[Project], classOf[LinkView], classOf[InstanceSpecification], classOf[Association], classOf[InstanceSpecification], classOf[InstanceSpecification] ) match {
+        case m: Method => Success( m )
+        case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}(LinkView, InstanceSpecification, Association, InstanceSpecification, InstanceSpecification)' not found in ${action.className.jname}" ) )
+      }
+    }
+    catch {
+      case ex: NoSuchMethodException => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}(LinkView, InstanceSpecification, Association, InstanceSpecification, InstanceSpecification)' not found in ${action.className.jname}" ) )
+    }
+    
+  def invokeMethod(method: Method, pe: PresentationElement, e: Element): Object =
+    ( pe, e ) match {
+      case ( linkView: LinkView, link: InstanceSpecification ) =>
+        val iSource = linkView.getClient().getElement() match {
+          case i: InstanceSpecification => i
+          case _                        => Failure(new IllegalArgumentException( s"Cannot find client InstanceSpecification" ))
+        }
+        val iTarget = linkView.getSupplier().getElement() match {
+          case i: InstanceSpecification => i
+          case _                        => Failure(new IllegalArgumentException( s"Cannot find supplier InstanceSpecification" ))
+        }
+        method.invoke( null, Project.getProject(e), linkView, link, null, iSource, iTarget )
+      case ( _, _ ) =>
+        Failure(new IllegalArgumentException( s"Cannot find created LinkView for InstanceSpecification" ))
+    }
+}
+
+case class DynamicPathCreatorForStereotypedClassifiedInstanceDesignation( project: Project, d: StereotypedClassifiedInstanceDesignation ) extends DynamicPathCreatorHelper {
+  val md: MagicDrawStereotypedClassifiedInstanceDesignation = MagicDrawElementKindDesignation.resolveMagicDrawStereotypedClassifier( project, d ) 
+  override def isResolved: Boolean = md match {
+    case _:UnresolvedMagicDrawStereotypedClassifiedInstanceDesignation => false
+    case _:ResolvedMagicDrawStereotypedClassifiedInstanceDesignation => true
+  }
   def createElement(project: Project): Try[Element] = ???
 //  MagicDrawElementKindDesignation.createElement(project, d) match {
 //    case Success(e) => e

@@ -41,27 +41,28 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.actions
 
 import java.awt.event.ActionEvent
 import java.net.URLClassLoader
-
 import javax.swing.KeyStroke
-
+import scala.collection.JavaConversions._
 import scala.language.implicitConversions
 import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
-
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.ui.actions.DefaultDiagramAction
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper.ResolvedClassAndMethod
+import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
 case class DynamicDiagramContextMenuActionForMultipleSelection(
-  project: Project, selected: java.util.Collection[PresentationElement],
+  project: Project, 
+  diagram: DiagramPresentationElement,
+  selected: java.util.Collection[PresentationElement],
   menuAction: DiagramContextMenuAction,
   key: KeyStroke,
   group: String ) extends DefaultDiagramAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
@@ -69,6 +70,11 @@ case class DynamicDiagramContextMenuActionForMultipleSelection(
   override def toString(): String =
     s"${menuAction.name.hname}"
 
+  override def updateState(): Unit = {
+    super.updateState()
+    setEnabled( ClassLoaderHelper.isDynamicActionScriptAvailable( menuAction ) && MDUML.isAccessCompatibleWithElements( menuAction.access, ( diagram :: selected.toList) : _*))
+  }
+  
   override def actionPerformed( ev: ActionEvent ): Unit = {
     val previousTime = System.currentTimeMillis()
     val message = menuAction.prettyPrint( "" ) + "\n"
