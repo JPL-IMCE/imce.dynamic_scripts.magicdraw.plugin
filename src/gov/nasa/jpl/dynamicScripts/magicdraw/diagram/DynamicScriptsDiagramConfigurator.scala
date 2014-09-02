@@ -190,35 +190,40 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
   }
 
   def configureDiagramContextMenuToolbarForTriggerAndSelection( category: MDActionsCategory, diagram: DiagramPresentationElement, trigger: PresentationElement, selected: List[PresentationElement] ): Unit = {
-    val log = MDLog.getPluginsLog()
-    val d = diagram.getDiagram()
-    val ds = StereotypesHelper.getStereotypes( d ).toList
-    log.info(
-      s"""|${this.getClass().getName()}.configureDiagramContextMenuToolbarForTriggerAndSelection(category=${category.getName()},
-          |trigger=${trigger.getClassType().getName()} : ${trigger.getElement().getHumanName}${( selected map { _.getElement().getHumanName() } ).mkString( "\nselected:\n =>", "\n => ", "\n" )}
+    trigger.getElement() match {
+      case null => ()
+      case element: Element =>
+
+        val log = MDLog.getPluginsLog()
+        val d = diagram.getDiagram()
+        val ds = StereotypesHelper.getStereotypes( d ).toList
+
+        log.info(
+          s"""|${this.getClass().getName()}.configureDiagramContextMenuToolbarForTriggerAndSelection(category=${category.getName()},
+          |trigger=${trigger.getClassType().getName()} : ${element.getHumanName}${( selected map { _.getElement().getHumanName() } ).mkString( "\nselected:\n =>", "\n => ", "\n" )}
           |diagram=${diagram.getDiagramType().getType()} : '${d.getQualifiedName()}' ${( ds map ( _.getQualifiedName() ) ) mkString ( "<<", ", ", ">>" )}""".stripMargin )
 
-    def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( d, diagram.getDiagramType().getType(), ds )( das )
+        def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsDiagramConfigurator.isDynamicContextMenuScriptActionAvailable( d, diagram.getDiagramType().getType(), ds )( das )
 
-    val p = DynamicScriptsPlugin.getInstance()
-    val element = trigger.getElement()
-    val mName = ClassTypes.getShortName( element.getClassType() )
-    val mActions = p.getRelevantMetaclassActions( mName, dynamicScriptMenuFilter )
-    val sActions = StereotypesHelper.getStereotypesHierarchy( element ) flatMap ( s => p.getRelevantStereotypeActions( mName, s.getProfile().getQualifiedName(), s.getQualifiedName(), dynamicScriptMenuFilter ) )
-    val cActions = p.getRelevantClassifierActions( element, dynamicScriptMenuFilter )
+        val p = DynamicScriptsPlugin.getInstance()
+        val mName = ClassTypes.getShortName( element.getClassType() )
+        val mActions = p.getRelevantMetaclassActions( mName, dynamicScriptMenuFilter )
+        val sActions = StereotypesHelper.getStereotypesHierarchy( element ) flatMap ( s => p.getRelevantStereotypeActions( mName, s.getProfile().getQualifiedName(), s.getQualifiedName(), dynamicScriptMenuFilter ) )
+        val cActions = p.getRelevantClassifierActions( element, dynamicScriptMenuFilter )
 
-    val allDynamicScriptActions: Map[String, Seq[DynamicActionScript]] = mActions ++ sActions ++ cActions
-    val project = Project.getProject( element )
-    for {
-      ( key, dynamicScriptActions ) <- allDynamicScriptActions
-      menuActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createContextMenuActionForTriggerAndSelection( project, trigger, element, selected )
-      if ( menuActions.nonEmpty )
-    } {
-      val subCategory = new MDActionsCategory( key, key )
-      subCategory.setEnabled( true )
-      subCategory.setNested( true )
-      subCategory.setActions( menuActions )
-      category.addAction( subCategory )
+        val allDynamicScriptActions: Map[String, Seq[DynamicActionScript]] = mActions ++ sActions ++ cActions
+        val project = Project.getProject( element )
+        for {
+          ( key, dynamicScriptActions ) <- allDynamicScriptActions
+          menuActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createContextMenuActionForTriggerAndSelection( project, trigger, element, selected )
+          if ( menuActions.nonEmpty )
+        } {
+          val subCategory = new MDActionsCategory( key, key )
+          subCategory.setEnabled( true )
+          subCategory.setNested( true )
+          subCategory.setActions( menuActions )
+          category.addAction( subCategory )
+        }
     }
   }
 
