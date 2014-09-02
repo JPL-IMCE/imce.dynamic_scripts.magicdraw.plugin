@@ -217,10 +217,25 @@ object MagicDrawElementKindDesignation {
       case Success( ( c, m, cls, p, s ) ) => ResolvedMagicDrawStereotypedClassifiedInstanceDesignation( project, d, c, m, cls, p, s )
     }
 
-  def isDynamicContextDiagramActionScriptAvailable( das: DynamicContextDiagramActionScript, d: Diagram, dType: String, ds: List[Stereotype] ): Boolean =
-    ( das.diagramTypes.isEmpty || ( das.diagramTypes exists ( sn => sn.sname == dType ) ) ) &&
-      ( das.diagramStereotypes.isEmpty || ( ds forall { s => val sQName = s.getQualifiedName(); das.diagramStereotypes exists ( sq => sq.qname == sQName ) } ) )
-
+  /**
+   * availability depends on 2 criteria:
+   * - diagram type availability
+   * - diagram stereotype availability
+   * 
+   * Diagram type availability is either:
+   * - the script specifies no diagram types
+   * - at least one of the script's diagram types matches the type of the current diagram
+   * 
+   * Diagram stereotype availability is either:
+   * - the script specifies no diagram types
+	 * - at least one of the script's diagram stereotypes matches a stereotype applied to the current diagram
+   */
+  def isDynamicContextDiagramActionScriptAvailable( das: DynamicContextDiagramActionScript, d: Diagram, dType: String, ds: List[Stereotype] ): Boolean = {
+    val isAvailableByType = das.diagramTypes.isEmpty || ( das.diagramTypes exists ( sn => sn.sname == dType ) )
+    val isAvailableByStereotype = das.diagramStereotypes.isEmpty || ( das.diagramStereotypes exists ( dsn => ds exists { s => dsn.qname == s.getQualifiedName() } ) )
+    isAvailableByType && isAvailableByStereotype
+  }
+  
   def createClassifiedInstanceElement( project: Project, d: ElementKindDesignation, metaclassName: String, creator: ElementsFactory => Element, cls: Classifier ): Try[Element] =
     cls match {
       case a: Association =>

@@ -86,23 +86,25 @@ case class DynamicDiagramContextMenuActionForTriggerAndSelection(
         try {
           ClassLoaderHelper.lookupClassAndMethod( 
               scriptCL, menuAction, 
-              classOf[Project], classOf[DiagramContextMenuAction], 
+              classOf[Project], classOf[ActionEvent], 
+              classOf[DiagramContextMenuAction], 
               classOf[PresentationElement], classOf[Element], 
               classOf[java.util.Collection[PresentationElement]] ) match {
             case Failure( t1 ) =>
               ClassLoaderHelper.lookupClassAndMethod( 
                 scriptCL, menuAction, 
-                classOf[Project], classOf[DiagramContextMenuAction], 
+                classOf[Project], classOf[ActionEvent], 
+                classOf[DiagramContextMenuAction], 
                 trigger.getClassType(), element.getClassType(), 
                 classOf[java.util.Collection[PresentationElement]] ) match {
                 case Failure( t2 ) =>
                   ClassLoaderHelper.reportError( menuAction, message, t1 )
                   return
                 case Success( cm2: ResolvedClassAndMethod ) =>
-                 ClassLoaderHelper.invoke( previousTime, project, cm2, trigger, element, selected )
+                 ClassLoaderHelper.invoke( previousTime, project, ev, cm2, trigger, element, selected )
               }
             case Success( cm1: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invoke( previousTime, project, cm1, trigger, element, selected )
+              ClassLoaderHelper.invoke( previousTime, project, ev, cm1, trigger, element, selected )
           }
         }
         finally {

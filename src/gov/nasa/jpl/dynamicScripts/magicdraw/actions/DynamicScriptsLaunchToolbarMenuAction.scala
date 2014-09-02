@@ -41,17 +41,21 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.actions
 
 import java.awt.event.ActionEvent
 import java.net.URLClassLoader
+
 import javax.swing.KeyStroke
+
 import scala.language.implicitConversions
 import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
+
 import com.nomagic.actions.NMAction
 import com.nomagic.magicdraw.core.Application
+import com.nomagic.magicdraw.core.Project
+
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.MainToolbarMenuAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper.ResolvedClassAndMethod
-import com.nomagic.magicdraw.core.Project
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -73,14 +77,15 @@ case class DynamicScriptsLaunchToolbarMenuAction( action: MainToolbarMenuAction,
         Thread.currentThread().setContextClassLoader( scriptCL )
 
         try {
-          ClassLoaderHelper.lookupClassAndMethod( scriptCL, action, classOf[Project], classOf[MainToolbarMenuAction], classOf[ActionEvent] ) match {
-            case Failure( t ) =>
-              ClassLoaderHelper.reportError( action, message, t )
-              return
+          ClassLoaderHelper.lookupClassAndMethod( scriptCL, action,
+            classOf[Project], classOf[ActionEvent], classOf[MainToolbarMenuAction] ) match {
+              case Failure( t ) =>
+                ClassLoaderHelper.reportError( action, message, t )
+                return
 
-            case Success( cm: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invoke( previousTime, Application.getInstance().getProject(), cm, ev )
-          }
+              case Success( cm: ResolvedClassAndMethod ) =>
+                ClassLoaderHelper.invoke( previousTime, Application.getInstance().getProject(), ev, cm )
+            }
         }
         finally {
           Thread.currentThread().setContextClassLoader( localClassLoader )
