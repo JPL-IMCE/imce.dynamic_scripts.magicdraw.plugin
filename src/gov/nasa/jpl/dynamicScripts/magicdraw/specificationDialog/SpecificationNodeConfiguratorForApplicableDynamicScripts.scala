@@ -56,7 +56,12 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
    */
   override def configure(node: IConfigurableNode, element: Element): Unit = {
     val log = MDLog.getPluginsLog()
+    val previousTime = System.currentTimeMillis()
+    
     val characterizationContext: DynamicScriptsProjectListener = DynamicScriptsPlugin.getInstance().getCharacterizationContext()
     log.info(s"${this.getClass().getName()}: configure specification dialog for ${element.getHumanType()}}")
+    
+    val currentTime = System.currentTimeMillis()
+    log.info( s"SpecificationNodeConfiguratorForApplicableDynamicScripts.configure took ${currentTime - previousTime} ms" )
   }
 }
