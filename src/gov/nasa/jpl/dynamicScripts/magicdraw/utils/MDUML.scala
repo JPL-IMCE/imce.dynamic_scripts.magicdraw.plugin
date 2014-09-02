@@ -43,7 +43,6 @@ import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.language.implicitConversions
 import scala.language.postfixOps
-
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.ui.browser.Browser
@@ -56,6 +55,8 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Classifier
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.PackageImport
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ScopeAccess
+import com.nomagic.magicdraw.uml.BaseElement
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -146,4 +147,12 @@ object MDUML {
     List( cls ) ++ getAllGeneralClassifiers( cls )
   }
 
+  def isAccessCompatibleWithElements(access: ScopeAccess.Value, elements: BaseElement*): Boolean = {
+    val mustBeEditable = access match {
+      case ScopeAccess.READ_ONLY => false
+      case ScopeAccess.READ_WRITE => true
+    }
+    val compatibleAccess = elements.forall { e => ! mustBeEditable || e.isEditable() }
+    compatibleAccess
+  } 
 }

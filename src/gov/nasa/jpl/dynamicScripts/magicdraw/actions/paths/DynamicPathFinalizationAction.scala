@@ -69,6 +69,9 @@ case class DynamicPathFinalizationAction(
 
   def getSortKey(): String = action.sortKey()
 
+  def isEnabled(): Boolean =
+    ClassLoaderHelper.isDynamicActionScriptAvailable( action ) && creatorHelper.isResolved
+
   override def execute( pe: PresentationElement, point: Point ): Boolean = {
     val log = MDLog.getPluginsLog()
     val e = pe.getElement()

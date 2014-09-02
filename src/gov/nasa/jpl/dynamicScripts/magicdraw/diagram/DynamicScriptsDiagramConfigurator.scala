@@ -83,6 +83,7 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuAc
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawElementKindDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForMetaclassDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForStereotypedClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForStereotypedMetaclassDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathDiagramContextToolbarAction
@@ -94,7 +95,6 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorF
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeDiagramContextToolbarAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeFinalizationAction
-
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
@@ -134,7 +134,7 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
     val project = Project.getProject( element )
     for {
       ( key, dynamicScriptActions ) <- allDynamicScriptActions
-      toolbarActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createDrawPathContextToolbarAction( project, pElement, element )
+      toolbarActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createDrawPathContextToolbarAction( project, diagram, pElement, element )
       if ( toolbarActions.nonEmpty )
     } {
       val category = new MDActionsCategory( key, key )
@@ -215,7 +215,7 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
         val project = Project.getProject( element )
         for {
           ( key, dynamicScriptActions ) <- allDynamicScriptActions
-          menuActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createContextMenuActionForTriggerAndSelection( project, trigger, element, selected )
+          menuActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createContextMenuActionForTriggerAndSelection( project, diagram, trigger, element, selected )
           if ( menuActions.nonEmpty )
         } {
           val subCategory = new MDActionsCategory( key, key )
@@ -255,7 +255,7 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
     val allDynamicScriptActions: Map[String, Seq[DynamicActionScript]] = ( mActions ++ sActions ++ cActions ) toMap;
     for {
       ( key, dynamicScriptActions ) <- allDynamicScriptActions
-      menuActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createContextMenuActionForMultipleSelection( project, selected )
+      menuActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createContextMenuActionForMultipleSelection( project, diagram, selected )
       if ( menuActions.nonEmpty )
     } {
       val subCategory = new MDActionsCategory( key, key )
@@ -346,14 +346,15 @@ object DynamicScriptsDiagramConfigurator {
     }
   }
 
-  def createDrawPathContextToolbarAction( project: Project, pElement: PresentationElement, element: Element )( dynamicActionScript: DynamicActionScript ): Option[DynamicPathDiagramContextToolbarAction] = {
+  def createDrawPathContextToolbarAction( project: Project, diagram: DiagramPresentationElement, pElement: PresentationElement, element: Element )( dynamicActionScript: DynamicActionScript ): Option[DynamicPathDiagramContextToolbarAction] = {
     val creator: Option[DynamicPathCreatorHelper] = dynamicActionScript match {
       case p: ToplevelPathInstanceCreator =>
         p.elementPath match {
-          case d: MetaclassDesignation            => Some( DynamicPathCreatorForMetaclassDesignation( d ) )
-          case d: StereotypedMetaclassDesignation => Some( DynamicPathCreatorForStereotypedMetaclassDesignation( d ) )
-          case d: ClassifiedInstanceDesignation   => Some( DynamicPathCreatorForClassifiedInstanceDesignation( d ) )
-          case _                                  => None
+          case d: MetaclassDesignation => Some( DynamicPathCreatorForMetaclassDesignation( project, d ) )
+          case d: StereotypedMetaclassDesignation => Some( DynamicPathCreatorForStereotypedMetaclassDesignation( project, d ) )
+          case d: ClassifiedInstanceDesignation => Some( DynamicPathCreatorForClassifiedInstanceDesignation( project, d ) )
+          case d: StereotypedClassifiedInstanceDesignation => Some( DynamicPathCreatorForStereotypedClassifiedInstanceDesignation( project, d ) )
+          case _ => None
         }
       case _ => None
     }
@@ -361,7 +362,7 @@ object DynamicScriptsDiagramConfigurator {
       case None =>
         None
       case Some( c ) =>
-        Some( DynamicPathDiagramContextToolbarAction( pElement, DynamicPathFinalizationAction( dynamicActionScript, c ) ) )
+        Some( DynamicPathDiagramContextToolbarAction( diagram, pElement, DynamicPathFinalizationAction( dynamicActionScript, c ) ) )
     }
   }
 
@@ -393,18 +394,18 @@ object DynamicScriptsDiagramConfigurator {
       false
   }
 
-  def createContextMenuActionForTriggerAndSelection( project: Project, trigger: PresentationElement, element: Element, selected: List[PresentationElement] )( dynamicActionScript: DynamicActionScript ): Option[DynamicDiagramContextMenuActionForTriggerAndSelection] =
+  def createContextMenuActionForTriggerAndSelection( project: Project, diagram: DiagramPresentationElement, trigger: PresentationElement, element: Element, selected: List[PresentationElement] )( dynamicActionScript: DynamicActionScript ): Option[DynamicDiagramContextMenuActionForTriggerAndSelection] =
     dynamicActionScript match {
       case s: DiagramContextMenuAction =>
-        Some( DynamicDiagramContextMenuActionForTriggerAndSelection( project, trigger, element, selected, s, null, null ) )
+        Some( DynamicDiagramContextMenuActionForTriggerAndSelection( project, diagram, trigger, element, selected, s, null, null ) )
       case _ =>
         None
     }
 
-  def createContextMenuActionForMultipleSelection( project: Project, selected: List[PresentationElement] )( dynamicActionScript: DynamicActionScript ): Option[DynamicDiagramContextMenuActionForMultipleSelection] =
+  def createContextMenuActionForMultipleSelection( project: Project, diagram: DiagramPresentationElement, selected: List[PresentationElement] )( dynamicActionScript: DynamicActionScript ): Option[DynamicDiagramContextMenuActionForMultipleSelection] =
     dynamicActionScript match {
       case s: DiagramContextMenuAction =>
-        Some( DynamicDiagramContextMenuActionForMultipleSelection( project, selected, s, null, null ) )
+        Some( DynamicDiagramContextMenuActionForMultipleSelection( project, diagram, selected, s, null, null ) )
       case _ =>
         None
     }

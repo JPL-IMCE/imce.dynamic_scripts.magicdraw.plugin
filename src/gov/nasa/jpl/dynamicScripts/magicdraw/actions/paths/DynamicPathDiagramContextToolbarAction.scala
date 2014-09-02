@@ -44,15 +44,17 @@ import java.awt.event.ActionEvent
 import javax.swing.Icon
 
 import com.nomagic.magicdraw.ui.actions.DiagramContextToolbarAction
+import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
 
-import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
 case class DynamicPathDiagramContextToolbarAction(
+    diagram: DiagramPresentationElement,
     firstSelected: PresentationElement,
     finalizationAction: DynamicPathFinalizationAction) 
     extends DiagramContextToolbarAction(
@@ -64,7 +66,7 @@ case class DynamicPathDiagramContextToolbarAction(
   
   override def updateState(): Unit = {
     super.updateState()
-    setEnabled(ClassLoaderHelper.isDynamicActionScriptAvailable(finalizationAction.action))
+    setEnabled(finalizationAction.isEnabled() && MDUML.isAccessCompatibleWithElements( finalizationAction.action.access, diagram, firstSelected ))
   }
   
   override def actionPerformed(ev: ActionEvent): Unit = {
