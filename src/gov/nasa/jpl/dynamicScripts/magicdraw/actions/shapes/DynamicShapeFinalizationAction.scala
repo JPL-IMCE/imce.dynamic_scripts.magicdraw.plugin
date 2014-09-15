@@ -125,12 +125,15 @@ case class DynamicShapeFinalizationAction(
             case Success( None ) =>
               true
 
-            case Success( Some( MagicDrawValidationDataResults( title, runData, results ) ) ) =>
-              Utilities.invokeAndWaitOnDispatcher( new Runnable() {
-                override def run(): Unit = {
-                  ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString(), title, runData, results )
-                }
-              } )
+            case Success( Some( MagicDrawValidationDataResults( title, runData, results, postSessionActions ) ) ) =>
+              if ( !results.isEmpty() )
+                Utilities.invokeAndWaitOnDispatcher( new Runnable() {
+                  override def run(): Unit = {
+                    ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString(), title, runData, results )
+                  }
+                } )
+              if ( !postSessionActions.isEmpty() )
+                guiLog.showError( s"There are ${postSessionActions.size()} post-session actions that will not be executed because session management is not accessible for MD shape finalization actions")
               false
 
             case b: java.lang.Boolean => b.booleanValue()

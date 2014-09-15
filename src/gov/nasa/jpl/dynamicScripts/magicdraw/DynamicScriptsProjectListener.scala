@@ -80,9 +80,7 @@ class DynamicScriptsProjectListener extends ProjectEventListenerAdapter {
   }
 
   protected def projectOpenedOrActivated( p: Project ): Unit = {
-    val p = DynamicScriptsPlugin.getInstance()
-    val files = p.getDynamicScriptsOptions().getDynamicScriptConfigurationFiles()
-    p.updateRegistryForConfigurationFiles( files )
+    DynamicScriptsPlugin.getInstance().loadDynamicScriptsFiles()
   }
 
   protected def projectClosedOrDeactivated( p: Project ): Unit = {

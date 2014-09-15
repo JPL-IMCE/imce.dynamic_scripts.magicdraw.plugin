@@ -40,10 +40,12 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes
 
 import java.awt.event.ActionEvent
+
 import javax.swing.Icon
+
 import com.nomagic.magicdraw.ui.actions.DiagramContextToolbarAction
 import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
-import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
+
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 
@@ -63,6 +65,9 @@ case class DynamicShapeDiagramContextToolbarAction(
     setEnabled(finalizationAction.isEnabled() && MDUML.isAccessCompatibleWithElements( finalizationAction.action.access, diagram ))
   }
   
+  override def getDescription(): String =
+    finalizationAction.action.prettyPrint("  ")
+    
   override def actionPerformed(ev: ActionEvent): Unit = {
     val drawRelatinshipPathAction = DrawDynamicShapeAction(finalizationAction, getDiagram(), getID() + ".DrawShapeAction", getName(), null, getLargeIcon())
     drawRelatinshipPathAction.actionPerformed(ev)

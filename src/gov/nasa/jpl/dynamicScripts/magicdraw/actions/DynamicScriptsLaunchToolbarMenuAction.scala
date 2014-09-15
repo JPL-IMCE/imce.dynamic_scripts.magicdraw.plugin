@@ -63,6 +63,9 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper.ResolvedClassAndM
 case class DynamicScriptsLaunchToolbarMenuAction( action: MainToolbarMenuAction, id: String )
   extends NMAction( id, action.name.hname, null.asInstanceOf[KeyStroke] ) {
 
+  override def getDescription(): String =
+    action.prettyPrint("  ")
+    
   override def actionPerformed( ev: ActionEvent ): Unit = {
     val previousTime = System.currentTimeMillis()
     val message = action.prettyPrint( "" ) + "\n"
