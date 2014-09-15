@@ -39,12 +39,14 @@
  */
 package gov.nasa.jpl.dynamicScripts.magicdraw
 
+import java.awt.event.ActionEvent
 import java.io.File
 import java.io.FilenameFilter
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
+
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.TraversableOnce.OnceCanBuildFrom
 import scala.language.existentials
@@ -53,6 +55,7 @@ import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
+
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.ApplicationEnvironment
 import com.nomagic.magicdraw.core.Project
@@ -61,14 +64,17 @@ import com.nomagic.magicdraw.plugins.Plugin
 import com.nomagic.magicdraw.plugins.PluginUtils
 import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
+import com.nomagic.task.ProgressStatus
+import com.nomagic.task.RunnableWithProgress
+import com.nomagic.ui.ProgressStatusRunner
 import com.nomagic.utils.Utilities
+
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicScriptInfo
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.HName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.JName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.PluginContext
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ProjectContext
-import java.awt.event.ActionEvent
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -178,7 +184,7 @@ object ClassLoaderHelper {
     val log = MDLog.getPluginsLog()
     val message = cm.s.prettyPrint( "" ) + "\n"
     val sm = SessionManager.getInstance()
-    if (p != null)
+    if ( p != null )
       sm.createSession( p, message )
     val actionAndArgumentValues0: Seq[Object] = argumentValues
     val actionAndArgumentValues1: Seq[Object] = cm.s +: actionAndArgumentValues0
@@ -196,23 +202,33 @@ object ClassLoaderHelper {
             sm.cancelSession( p )
           }
           ClassLoaderHelper.reportError( cm.s, message, t )
+          return Failure( t )
 
         case Success( None ) =>
           if ( p != null && sm.isSessionCreated( p ) ) {
             sm.closeSession( p )
           }
 
-        case Success( Some( MagicDrawValidationDataResults( title, runData, results ) ) ) =>
-          Utilities.invokeAndWaitOnDispatcher( new Runnable() {
-            override def run(): Unit = {
-              ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString(), title, runData, results )
-            }
-          } )
+        case Success( Some( MagicDrawValidationDataResults( title, runData, results, postSessionActions ) ) ) =>
+          if ( !results.isEmpty() )
+            Utilities.invokeAndWaitOnDispatcher( new Runnable() {
+              override def run(): Unit = {
+                ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString(), title, runData, results )
+              }
+            } )
 
           if ( p != null && sm.isSessionCreated( p ) ) {
             sm.closeSession( p )
           }
 
+          doPostSessionActions( p, message, postSessionActions ) match {
+            case Success(_) => 
+              ()
+            case Failure( t ) => 
+              ClassLoaderHelper.reportError( cm.s, message, t )
+              return Failure( t )
+          }
+          
         case _ =>
           if ( p != null && sm.isSessionCreated( p ) ) {
             sm.closeSession( p )
@@ -228,20 +244,26 @@ object ClassLoaderHelper {
         val t = ex.getTargetException() match { case null => ex; case t => t }
         val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
         ClassLoaderHelper.reportError( cm.s, ex_message, t )
-      case t: IllegalArgumentException =>        
+        return Failure( t )
+        
+      case t: IllegalArgumentException =>
         if ( p != null && sm.isSessionCreated( p ) ) {
           sm.cancelSession( p )
         }
-        val parameterTypes = (cm.m.getParameterTypes() map (_.getName())) mkString("\n parameter type: ", "\n parameter type: ", "")
-        val parameterValues = (actionAndArgumentValues map (_.getClass().getName())) mkString("\n argument type: ", "\n argument type: ", "")
+        val parameterTypes = ( cm.m.getParameterTypes() map ( _.getName() ) ) mkString ( "\n parameter type: ", "\n parameter type: ", "" )
+        val parameterValues = ( actionAndArgumentValues map ( _.getClass().getName() ) ) mkString ( "\n argument type: ", "\n argument type: ", "" )
         val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n${parameterTypes}\n${parameterValues}(do not submit!)"
         ClassLoaderHelper.reportError( cm.s, ex_message, t )
+        return Failure( t )
+        
       case t @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalAccessException ) =>
         if ( p != null && sm.isSessionCreated( p ) ) {
           sm.cancelSession( p )
         }
         val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
         ClassLoaderHelper.reportError( cm.s, ex_message, t )
+        return Failure( t )
+        
     }
     finally {
       if ( p != null && sm.isSessionCreated( p ) ) {
@@ -250,6 +272,55 @@ object ClassLoaderHelper {
     }
 
     Success( Unit )
+  }
+
+  def doPostSessionActions( project: Project, message: String, requests: java.util.Collection[RunnableWithProgress] ): Try[Unit] = {
+    if ( requests.isEmpty() )
+      return Success( None )
+
+    var result: Try[Unit] = Success( None )
+
+    ProgressStatusRunner.runWithProgressStatus( new RunnableWithProgress() {
+      override def run( progressStatus: ProgressStatus ): Unit = {
+        val sm: SessionManager = SessionManager.getInstance()
+        try {
+          progressStatus.setIndeterminate( true )
+          for ( request <- requests ) {
+            if ( progressStatus.isCancel() ) {
+              if ( sm.isSessionCreated() )
+                sm.cancelSession()
+              return
+            }
+
+            // With direct invocation, i.e.:
+            //
+            //   request.doAction(progressStatus);
+            //
+            // we would need an UncaughtExceptionHandler to detect any problem that may have occured.
+
+            // With reflective invocation, we will get an InvocationTargetException instead.
+            val doActionMethod: Method = request.getClass().getMethod( "doAction", classOf[ProgressStatus] )
+            doActionMethod.invoke( request, progressStatus )
+          }
+        }
+        catch {
+          case ex: InvocationTargetException =>
+            if ( project != null && sm.isSessionCreated( project ) )
+                sm.cancelSession( project )
+            ex.getTargetException() match {
+              case t: Throwable => result = Failure( t )
+              case null => result = Failure( ex )
+            }
+
+          case e @ ( _: InvocationTargetException | _: SecurityException | _: IllegalArgumentException | _: IllegalAccessException | _: NoSuchMethodException ) =>
+            if ( project != null && sm.isSessionCreated( project ) )
+                sm.cancelSession( project )            
+            result = Failure( e )
+        }
+      }
+    }, message, true, 0 )
+
+    result
   }
 
   private var dynamicScriptsRootPath: String = null

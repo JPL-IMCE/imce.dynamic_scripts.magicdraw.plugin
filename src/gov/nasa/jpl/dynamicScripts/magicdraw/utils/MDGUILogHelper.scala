@@ -57,7 +57,7 @@ object MDGUILogHelper {
    * each Java format specifier with the corresponding String component of each tuple in the sequence of links.
    */
   def addGUILogHyperlink( guiLog: GUILog, format: String, links: (String, Element)*): Unit = {
-    val linkedFormat = String.format(format, links map { case ( (label:String, element: Element) ) => label })  
+    val linkedFormat = String.format(format, (links map { case ( (label:String, element: Element) ) => label }) : _*)  
     val linkMap = (links map { case ( (label:String, element: Element) ) => ( label -> new SelectInContainmentTreeRunnable( element ) ) }).toMap
     guiLog.addHyperlinkedText( linkedFormat, linkMap )
   }

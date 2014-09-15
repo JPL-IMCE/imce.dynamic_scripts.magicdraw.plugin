@@ -42,8 +42,10 @@ package gov.nasa.jpl.dynamicScripts.magicdraw
 import java.io.File
 import java.net.MalformedURLException
 import java.net.URL
+
 import javax.swing.Icon
 import javax.swing.ImageIcon
+
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.TraversableOnce.MonadOps
@@ -51,7 +53,9 @@ import scala.collection.TraversableOnce.OnceCanBuildFrom
 import scala.collection.TraversableOnce.flattenTraversableOnce
 import scala.language.implicitConversions
 import scala.language.postfixOps
+
 import com.nomagic.actions.AMConfigurator
+import com.nomagic.actions.ActionsCategory
 import com.nomagic.actions.ActionsManager
 import com.nomagic.magicdraw.actions.ActionsConfiguratorsManager
 import com.nomagic.magicdraw.actions.ConfiguratorWithPriority
@@ -65,6 +69,7 @@ import com.nomagic.magicdraw.plugins.ResourceDependentPlugin
 import com.nomagic.magicdraw.properties.Property
 import com.nomagic.magicdraw.properties.StringProperty
 import com.nomagic.magicdraw.ui.ImageMap16
+import com.nomagic.magicdraw.ui.MagicDrawProgressStatusRunner
 import com.nomagic.magicdraw.ui.dialogs.specifications.SpecificationDialogManager
 import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.magicdraw.uml.DiagramType
@@ -76,6 +81,7 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.InstanceSpecification
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.uml2.ext.magicdraw.compositestructures.mdinternalstructures.Connector
+
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsRegistry
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
@@ -85,16 +91,18 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.MetaclassDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.QName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.SName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedMetaclassDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicScriptsMainMenuActionsCategory
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawElementKindDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.RefreshableActionsCategory
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.ResolvedMagicDrawDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.UnresolvedMagicDrawDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.browser.DynamicScriptsBrowserConfigurator
+import gov.nasa.jpl.dynamicScripts.magicdraw.commands.LoadDynamicScriptFilesCommand
 import gov.nasa.jpl.dynamicScripts.magicdraw.diagram.DynamicScriptsDiagramConfigurator
 import gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsConfigurationProperty
 import gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions
 import gov.nasa.jpl.dynamicScripts.magicdraw.specificationDialog.SpecificationNodeConfiguratorForApplicableDynamicScripts
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicScriptsMainMenuActionsCategory
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -260,6 +268,22 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
   override def getPluginVersion(): String = getDescriptor().getVersion()
   override def isPluginRequired( p: Project ): Boolean = false
 
+  val refreshableActionsCategories: Map[String, ActionsCategory with RefreshableActionsCategory] = 
+    Map( DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_ID -> DynamicScriptsMainMenuActionsCategory() )
+    
+  def getRefreshableActionsCategory(id: String): ActionsCategory with RefreshableActionsCategory = {
+    require(refreshableActionsCategories.contains(id))
+    refreshableActionsCategories.get(id).get
+  }
+  
+  def doRefreshActionsCategories(): Unit = 
+    refreshableActionsCategories.values foreach (_.doRefresh())
+  
+  protected val loadDynamicScriptsRefreshCommand = new LoadDynamicScriptFilesCommand( () => { this.doRefreshActionsCategories()} )
+
+  def loadDynamicScriptsFiles(): Unit =
+    MagicDrawProgressStatusRunner.runWithProgressStatus( loadDynamicScriptsRefreshCommand, "Reload DynamicScripts", true, 0 )
+
   override def init(): Unit = {
     DynamicScriptsPlugin.instance = this
 
@@ -312,7 +336,7 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
         override def getPriority(): Int = ConfiguratorWithPriority.MEDIUM_PRIORITY
         override def configure( manager: ActionsManager ): Unit = {
           if ( null == manager.getActionFor( DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_ID ) )
-            manager.addCategory( dynamicScriptsMainMenuActionsCategory )
+            manager.addCategory( getRefreshableActionsCategory( DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_ID ))
         }
       } )
 

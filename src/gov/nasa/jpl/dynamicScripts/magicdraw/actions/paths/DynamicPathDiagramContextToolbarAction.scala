@@ -69,6 +69,9 @@ case class DynamicPathDiagramContextToolbarAction(
     setEnabled(finalizationAction.isEnabled() && MDUML.isAccessCompatibleWithElements( finalizationAction.action.access, diagram, firstSelected ))
   }
   
+  override def getDescription(): String =
+    finalizationAction.action.prettyPrint("  ")
+    
   override def actionPerformed(ev: ActionEvent): Unit = {
     val drawRelatinshipPathAction = DrawDynamicPathAction(finalizationAction, getDiagram(), getID() + ".DrawPathAction", getName(), null, getLargeIcon())
     drawRelatinshipPathAction.actionPerformed(ev)

@@ -42,21 +42,23 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.actions
 import java.awt.event.ActionEvent
 import java.net.URLClassLoader
 import javax.swing.KeyStroke
-import scala.collection.JavaConversions._
+
+import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.language.implicitConversions
 import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
+
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.ui.browser.Node
 import com.nomagic.magicdraw.ui.browser.Tree
 import com.nomagic.magicdraw.ui.browser.actions.DefaultBrowserAction
 import com.nomagic.magicdraw.uml.BaseElement
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
+
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.BrowserContextMenuAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper.ResolvedClassAndMethod
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ScopeAccess
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 
 /**
@@ -76,6 +78,9 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
   override def toString(): String =
     s"${menuAction.name.hname}"
 
+  override def getDescription(): String =
+    menuAction.prettyPrint("  ")
+    
   override def updateState(): Unit = {
     super.updateState()
     setEnabled( ClassLoaderHelper.isDynamicActionScriptAvailable( menuAction ) && MDUML.isAccessCompatibleWithElements( menuAction.access, ( triggerElement :: selected.toList) : _*))

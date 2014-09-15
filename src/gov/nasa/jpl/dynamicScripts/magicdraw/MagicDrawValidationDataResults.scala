@@ -39,17 +39,17 @@
  */
 package gov.nasa.jpl.dynamicScripts.magicdraw
 
-import com.nomagic.magicdraw.validation.ValidationRunData
-import com.nomagic.magicdraw.validation.RuleViolationResult
-import com.nomagic.magicdraw.core.Project
-import com.nomagic.magicdraw.validation.ValidationSuiteHelper
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Constraint
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
-
-import scala.language.implicitConversions._
-import scala.collection.JavaConversions._
+import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.language.implicitConversions
 import scala.language.postfixOps
+
+import com.nomagic.magicdraw.core.Project
+import com.nomagic.magicdraw.validation.RuleViolationResult
+import com.nomagic.magicdraw.validation.ValidationRunData
+import com.nomagic.magicdraw.validation.ValidationSuiteHelper
+import com.nomagic.task.RunnableWithProgress
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Constraint
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 
 /**
  * The MD Open API for creating validation annotations & actions requires references to
@@ -97,7 +97,8 @@ import scala.language.postfixOps
  *      results.add(new RuleViolationResult(annotation, annotation.getConstraint()));
  *    }
  *    ValidationRunData runData = new ValidationRunData(validationSuite, false, elements, lowestLevel);
- *    return new MagicDrawValidationDataResults("<title>", runData, results);
+ *    List<RunnableWithProgress> postSessionActions = new ArrayList<RunnableWithProgress>();
+ *    return new MagicDrawValidationDataResults("<title>", runData, results, postSessionActions);
  *  }
  *
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -106,7 +107,8 @@ import scala.language.postfixOps
 case class MagicDrawValidationDataResults(
   title: String,
   runData: ValidationRunData,
-  results: java.util.Collection[RuleViolationResult] )
+  results: java.util.Collection[RuleViolationResult],
+  postSessionActions: java.util.Collection[RunnableWithProgress])
 
 object MagicDrawValidationDataResults {
 
