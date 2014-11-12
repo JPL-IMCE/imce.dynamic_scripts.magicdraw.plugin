@@ -48,6 +48,7 @@ import scala.language.implicitConversions
 import scala.language.postfixOps
 
 import com.nomagic.actions.AMConfigurator
+import com.nomagic.actions.ActionsCategory
 import com.nomagic.actions.ActionsManager
 import com.nomagic.magicdraw.actions.ConfiguratorWithPriority
 import com.nomagic.magicdraw.actions.DiagramContextAMConfigurator
@@ -85,16 +86,15 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorFor
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForMetaclassDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForStereotypedClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForStereotypedMetaclassDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathDiagramContextToolbarAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathFinalizationAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForMetaclassDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForStereotypedMetaclassDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeDiagramContextToolbarAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeFinalizationAction
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
@@ -104,7 +104,7 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
   override def configure( manager: ActionsManager ): Unit = {}
 
   override def configure( manager: ActionsManager, pElement: PresentationElement ): Unit = {
-    val log = MDLog.getPluginsLog()
+    val log = MDGUILogHelper.getMDPluginsLog
     val previousTime = System.currentTimeMillis()
     pElement match {
       case null => ()
@@ -117,6 +117,17 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
     val currentTime = System.currentTimeMillis()
     log.info( s"DynamicScriptsDiagramConfigurator.configure(manager, pElement) took ${currentTime - previousTime} ms" )
   }
+
+  def getOrCreateActionsManagerCategory( manager: ActionsManager, categoryName: String ): ActionsCategory =
+    manager.getCategories() find { ac => ac.getName == categoryName } match {
+      case Some( ac ) => ac
+      case None =>
+        val category = new MDActionsCategory( categoryName, categoryName )
+        category.setDisplayHeader( true )
+        category.setNested( false )
+        manager.addCategory( 0, category )
+        category
+    }
 
   protected def configureContextToolbar( manager: ActionsManager, diagram: DiagramPresentationElement, pElement: PresentationElement, element: Element ): Unit = {
     val d = diagram.getDiagram()
@@ -139,11 +150,8 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
       toolbarActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createDrawPathContextToolbarAction( project, diagram, pElement, element )
       if ( toolbarActions.nonEmpty )
     } {
-      val category = new MDActionsCategory( key, key )
-      category.setDisplayHeader( true )
-      category.setNested( false )
-      category.setActions( toolbarActions )
-      manager.addCategory( 0, category )
+      val category = getOrCreateActionsManagerCategory( manager, key )
+      category.addActions( toolbarActions )
     }
   }
 
@@ -163,9 +171,9 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
    */
   override def configure( manager: ActionsManager, diagram: DiagramPresentationElement, selected: Array[PresentationElement], requestor: PresentationElement ): Unit = {
 
-    val log = MDLog.getPluginsLog()
+    val log = MDGUILogHelper.getMDPluginsLog
     val previousTime = System.currentTimeMillis()
-    
+
     val trigger: PresentationElement = diagram.getDiagramSurface() match {
       case dc: DiagramCanvas => dc.getLastPopupTriggerPoint() match {
         case point: Point => diagram.getPresentationElementAt( point )
@@ -191,10 +199,21 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
         // no trigger & no selection
         configureDiagramContextMenuToolbarForNoTriggerAndNoSelection( category, diagram )
     }
-    
+
     val currentTime = System.currentTimeMillis()
     log.info( s"DynamicScriptsDiagramConfigurator.configure(manager, diagram, selected, requestor) took ${currentTime - previousTime} ms" )
   }
+
+  def getOrCreateActionsSubCategory( category: ActionsCategory, categoryName: String ): ActionsCategory =
+    category.getCategories() find { ac => ac.getName == categoryName } match {
+      case Some( ac ) => ac
+      case None =>
+        val subCategory = new MDActionsCategory( categoryName, categoryName )
+        subCategory.setEnabled( true )
+        subCategory.setNested( true )
+        category.addAction( subCategory )
+        subCategory
+    }
 
   protected def configureDiagramContextMenuToolbarForTriggerAndSelection( category: MDActionsCategory, diagram: DiagramPresentationElement, trigger: PresentationElement, selected: List[PresentationElement] ): Unit = {
     trigger.getElement() match {
@@ -220,11 +239,8 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
           menuActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createContextMenuActionForTriggerAndSelection( project, diagram, trigger, element, selected )
           if ( menuActions.nonEmpty )
         } {
-          val subCategory = new MDActionsCategory( key, key )
-          subCategory.setEnabled( true )
-          subCategory.setNested( true )
-          subCategory.setActions( menuActions )
-          category.addAction( subCategory )
+          val subCategory = getOrCreateActionsSubCategory( category, key )
+          subCategory.addActions( menuActions )
         }
     }
   }
@@ -255,11 +271,8 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
       menuActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createContextMenuActionForMultipleSelection( project, diagram, selected )
       if ( menuActions.nonEmpty )
     } {
-      val subCategory = new MDActionsCategory( key, key )
-      subCategory.setEnabled( true )
-      subCategory.setNested( true )
-      subCategory.setActions( menuActions )
-      category.addAction( subCategory )
+      val subCategory = getOrCreateActionsSubCategory( category, key )
+      subCategory.addActions( menuActions )
     }
   }
 
@@ -302,11 +315,8 @@ class DynamicScriptsDiagramConfigurator extends AMConfigurator with DiagramConte
       menuActions = dynamicScriptActions flatMap DynamicScriptsDiagramConfigurator.createContextMenuActionForNoTriggerAndNoSelection( project, diagram )
       if ( menuActions.nonEmpty )
     } {
-      val subCategory = new MDActionsCategory( key, key )
-      subCategory.setEnabled( true )
-      subCategory.setNested( true )
-      subCategory.setActions( menuActions )
-      category.addAction( subCategory )
+      val subCategory = getOrCreateActionsSubCategory( category, key )
+      subCategory.addActions( menuActions )
     }
   }
 }
@@ -322,42 +332,31 @@ object DynamicScriptsDiagramConfigurator {
   val DYNAMIC_SCRIPTS_DIAGRAM_CONTEXT_MENU_CATEGORY_ID: String = "DYNAMIC_SCRIPTS_DIAGRAM_CONTEXT_MENU_CATEGORY_ID"
   val DYNAMIC_SCRIPTS_DIAGRAM_CONTEXT_MENU_CATEGORY_NAME: String = "DynamicScriptsContextMenu"
 
-  def createDrawShapeContextToolbarAction( project: Project, diagram: DiagramPresentationElement )( dynamicActionScript: DynamicActionScript ): Option[DynamicShapeDiagramContextToolbarAction] = {
-    val creator: Option[DynamicShapeCreatorHelper] = dynamicActionScript match {
+  def createDrawShapeContextToolbarAction( project: Project, diagram: DiagramPresentationElement )( dynamicActionScript: DynamicActionScript ): Option[DynamicShapeDiagramContextToolbarAction] =
+    dynamicActionScript match {
       case s: ToplevelShapeInstanceCreator =>
-        s.elementShape match {
-          case d: MetaclassDesignation                     => Some( DynamicShapeCreatorForMetaclassDesignation( project, d ) )
-          case d: StereotypedMetaclassDesignation          => Some( DynamicShapeCreatorForStereotypedMetaclassDesignation( project, d ) )
-          case d: ClassifiedInstanceDesignation            => Some( DynamicShapeCreatorForClassifiedInstanceDesignation( project, d ) )
-          case d: StereotypedClassifiedInstanceDesignation => Some( DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation( project, d ) )
+        val shapeCreator = s.elementShape match {
+          case d: MetaclassDesignation                     => DynamicShapeCreatorForMetaclassDesignation( project, d )
+          case d: StereotypedMetaclassDesignation          => DynamicShapeCreatorForStereotypedMetaclassDesignation( project, d )
+          case d: ClassifiedInstanceDesignation            => DynamicShapeCreatorForClassifiedInstanceDesignation( project, d )
+          case d: StereotypedClassifiedInstanceDesignation => DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation( project, d )
         }
+        Some( DynamicShapeDiagramContextToolbarAction( diagram, DynamicShapeFinalizationAction( s, shapeCreator ) ) )
       case _ => None
     }
-    creator match {
-      case None      => None
-      case Some( c ) => Some( DynamicShapeDiagramContextToolbarAction( diagram, DynamicShapeFinalizationAction( dynamicActionScript, c ) ) )
-    }
-  }
 
-  def createDrawPathContextToolbarAction( project: Project, diagram: DiagramPresentationElement, pElement: PresentationElement, element: Element )( dynamicActionScript: DynamicActionScript ): Option[DynamicPathDiagramContextToolbarAction] = {
-    val creator: Option[DynamicPathCreatorHelper] = dynamicActionScript match {
+  def createDrawPathContextToolbarAction( project: Project, diagram: DiagramPresentationElement, pElement: PresentationElement, element: Element )( dynamicActionScript: DynamicActionScript ): Option[DynamicPathDiagramContextToolbarAction] =
+    dynamicActionScript match {
       case p: ToplevelPathInstanceCreator =>
-        p.elementPath match {
-          case d: MetaclassDesignation => Some( DynamicPathCreatorForMetaclassDesignation( project, d ) )
-          case d: StereotypedMetaclassDesignation => Some( DynamicPathCreatorForStereotypedMetaclassDesignation( project, d ) )
-          case d: ClassifiedInstanceDesignation => Some( DynamicPathCreatorForClassifiedInstanceDesignation( project, d ) )
-          case d: StereotypedClassifiedInstanceDesignation => Some( DynamicPathCreatorForStereotypedClassifiedInstanceDesignation( project, d ) )
-          case _ => None
+        val pathCreator = p.elementPath match {
+          case d: MetaclassDesignation                     => DynamicPathCreatorForMetaclassDesignation( project, d )
+          case d: StereotypedMetaclassDesignation          => DynamicPathCreatorForStereotypedMetaclassDesignation( project, d )
+          case d: ClassifiedInstanceDesignation            => DynamicPathCreatorForClassifiedInstanceDesignation( project, d )
+          case d: StereotypedClassifiedInstanceDesignation => DynamicPathCreatorForStereotypedClassifiedInstanceDesignation( project, d )
         }
+        Some( DynamicPathDiagramContextToolbarAction( diagram, pElement, DynamicPathFinalizationAction( p, pathCreator ) ) )
       case _ => None
     }
-    creator match {
-      case None =>
-        None
-      case Some( c ) =>
-        Some( DynamicPathDiagramContextToolbarAction( diagram, pElement, DynamicPathFinalizationAction( dynamicActionScript, c ) ) )
-    }
-  }
 
   def isDynamicPathToolbarScriptActionAvailable( d: Diagram, dType: String, ds: List[Stereotype] )( das: DynamicActionScript ): Boolean = das match {
     case c: DynamicContextPathCreationActionScript =>

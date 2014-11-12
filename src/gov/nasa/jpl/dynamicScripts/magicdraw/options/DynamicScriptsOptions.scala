@@ -41,7 +41,6 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.options
 
 import scala.language.implicitConversions
 import scala.language.postfixOps
-
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup
 import com.nomagic.magicdraw.properties.NumberProperty
@@ -49,9 +48,9 @@ import com.nomagic.magicdraw.properties.Property
 import com.nomagic.magicdraw.properties.PropertyResourceProvider
 import com.nomagic.magicdraw.properties.StringProperty
 import com.nomagic.ui.SwingImageIcon
-
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.options.resources.DynamicScriptsResources
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -67,7 +66,7 @@ class DynamicScriptsOptions extends AbstractPropertyOptionsGroup( DynamicScripts
   }
 
   def getDynamicScriptConfigurationFiles(): List[String] =
-    getProperty( DynamicScriptsOptions.DYNAMIC_SCRIPT_CONFIGURATION_FILES_ID ) match {
+    MDUML.getPropertyOfOptionsGroup( this, DynamicScriptsOptions.DYNAMIC_SCRIPT_CONFIGURATION_FILES_ID ) match {
       case null              => List()
       case p: StringProperty => DynamicScriptsConfigurationProperty.getDynamicScriptConfigurationFiles( p )
       case _                 => List()

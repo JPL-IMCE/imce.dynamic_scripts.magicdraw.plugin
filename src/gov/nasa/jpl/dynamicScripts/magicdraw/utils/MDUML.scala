@@ -43,7 +43,6 @@ import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.language.implicitConversions
 import scala.language.postfixOps
-
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.ui.browser.Browser
@@ -57,14 +56,22 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Classifier
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.PackageImport
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ScopeAccess
+import com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup
+import com.nomagic.magicdraw.core.ApplicationEnvironment
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
 object MDUML {
 
+  def getInstallRoot() = ApplicationEnvironment.getInstallRoot
+  
+  def getProjectLocationURI( p: Project ) = p.getPrimaryProject.getLocationURI
+  
+  def getPropertyOfOptionsGroup( g: AbstractPropertyOptionsGroup, propertyID: String ) =
+    g.getProperty( propertyID )
+    
   case class ActiveDiagramSelectionInfo( p: Project, d: DiagramPresentationElement, selected: java.util.List[PresentationElement] )
 
   /**
@@ -150,7 +157,7 @@ object MDUML {
       generalClassifiers.toList
     }
 
-    if (cls == null ) List()
+    if ( cls == null ) List()
     else List( cls ) ++ getAllGeneralClassifiers( cls )
   }
 

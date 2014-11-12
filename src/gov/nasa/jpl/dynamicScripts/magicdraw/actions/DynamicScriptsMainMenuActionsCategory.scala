@@ -40,21 +40,18 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.actions
 
 import java.awt.event.ActionEvent
-
 import javax.swing.KeyStroke
-
 import scala.language.postfixOps
-
 import com.nomagic.actions.ActionsCategory
 import com.nomagic.actions.NMAction
 import com.nomagic.magicdraw.actions.MDActionsCategory
 import com.nomagic.magicdraw.utils.MDLog
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsRegistry
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicScriptsForMainToolbarMenus
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.HName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.MainToolbarMenuAction
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -79,7 +76,7 @@ case class DynamicScriptsMainMenuActionsCategory() extends ActionsCategory(
   override def updateState(): Unit = {}
 
   override def doRefresh(): Unit = {
-    val log = MDLog.getPluginsLog()
+    val log = MDGUILogHelper.getMDPluginsLog
     log.info( s"*** DynamicScriptsMainMenuActionsCategory.doRefresh()" )
     var it = getActions().iterator()
     while ( it.hasNext() ) {

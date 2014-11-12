@@ -39,11 +39,12 @@
  */
 package gov.nasa.jpl.dynamicScripts.magicdraw.scripts
 
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-import com.nomagic.magicdraw.utils.MDLog
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions._
+
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.ResolvedMagicDrawStereotypeDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -51,7 +52,7 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.actions._
 object DynamicShapeCreatorScriptForStereotypedMetaclassDesignation {
 
   def postCreateCallback(das: DynamicActionScript, r: ResolvedMagicDrawStereotypeDesignation, pe: PresentationElement, e: Element): Boolean = {
-    val log = MDLog.getPluginsLog()
+    val log = MDGUILogHelper.getMDPluginsLog
     log.info(s"""|DynamicShapeCreatorScriptForStereotypedMetaclassDesignation.postCreateCallback
                  |- action : ${das.prettyPrint("  ")}
                  |- element: ${e.getHumanType()}: ${e.getID()}

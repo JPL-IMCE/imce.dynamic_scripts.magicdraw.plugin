@@ -39,17 +39,30 @@
  */
 package gov.nasa.jpl.dynamicScripts.magicdraw
 
-import scala.collection.JavaConversions.collectionAsScalaIterable
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import scala.language.postfixOps
-
+import java.lang.reflect.InvocationTargetException
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 import com.nomagic.magicdraw.core.Project
+import com.nomagic.magicdraw.openapi.uml.SessionManager
 import com.nomagic.magicdraw.validation.RuleViolationResult
 import com.nomagic.magicdraw.validation.ValidationRunData
 import com.nomagic.magicdraw.validation.ValidationSuiteHelper
+import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
+import com.nomagic.task.ProgressStatus
 import com.nomagic.task.RunnableWithProgress
+import com.nomagic.ui.ProgressStatusRunner
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Constraint
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
+import com.nomagic.utils.Utilities
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.EnumerationLiteral
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
+import com.nomagic.actions.NMAction
+import com.nomagic.magicdraw.annotation.Annotation
 
 /**
  * The MD Open API for creating validation annotations & actions requires references to
@@ -105,15 +118,21 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
  * @see Validation chapter in MD Open API User Manual
  */
 case class MagicDrawValidationDataResults(
-  title: String,
-  runData: ValidationRunData,
-  results: java.util.Collection[RuleViolationResult],
-  postSessionActions: java.util.Collection[RunnableWithProgress])
+  val title: String,
+  val runData: ValidationRunData,
+  val results: java.util.Collection[RuleViolationResult],
+  val postSessionActions: java.util.Collection[RunnableWithProgress] )
 
 object MagicDrawValidationDataResults {
 
+  def getValidationSuiteHelper( p: Project ): ValidationSuiteHelper =
+    ValidationSuiteHelper.getInstance( p )
+
+  def getValidationSeverityLevel( p: Project, severityLevel: String ): EnumerationLiteral =
+    getValidationSuiteHelper( p ).getSeverityLevel( severityLevel )
+
   case class ValidationSuiteInfo( vsh: ValidationSuiteHelper, suite: Package ) {}
-  
+
   def lookupValidationSuite( p: Project, suiteQualifiedName: String ): Option[ValidationSuiteInfo] = {
     val vsh = ValidationSuiteHelper.getInstance( p )
     vsh.getValidationSuites().find { s => s.getQualifiedName() == suiteQualifiedName } match {
@@ -123,5 +142,102 @@ object MagicDrawValidationDataResults {
   }
 
   def lookupValidationConstraint( vSuiteInfo: ValidationSuiteInfo, constraintQualifiedName: String ): Option[Constraint] =
-    vSuiteInfo.vsh.getValidationRules(vSuiteInfo.suite) find { c => c.getQualifiedName() == constraintQualifiedName }
+    vSuiteInfo.vsh.getValidationRules( vSuiteInfo.suite ) find { c => c.getQualifiedName() == constraintQualifiedName }
+
+  
+  def getMDValidationProfileAndConstraint( p: Project, validationSuiteQName: String, validationConstraintQName: String ): Option[( ValidationSuiteInfo, Constraint )] =
+    lookupValidationSuite( p, validationSuiteQName ) match {
+      case None => None
+      case Some( vSuite ) =>
+        lookupValidationConstraint( vSuite, validationConstraintQName ) match {
+          case None      => None
+          case Some( c ) => Some( ( vSuite, c ) )
+        }
+    }
+  
+  val mdValidationProfileQName = "UML Standard Profile::Validation Profile::Composition Integrity"
+  val mdValidationConstraintQName = "UML Standard Profile::Validation Profile::Composition Integrity::Illegal Reference"
+  
+  def makeMDIllegalArgumentExceptionValidation( 
+      p: Project, 
+      validationMessage: String,
+      elementMessages: Map[Element, Either[String, (String, List[NMAction])]],
+      validationSuiteQName: String = mdValidationProfileQName,
+      validationConstraintQName: String = mdValidationConstraintQName): MagicDrawValidationDataResults = 
+    getMDValidationProfileAndConstraint( p, validationSuiteQName, validationConstraintQName ) match {
+    case None => 
+      throw new IllegalArgumentException(s"Failed to find MD's Validation Profile '${validationSuiteQName}' & Constraint '${validationConstraintQName}'" )
+    case Some( ( vSuite, c )) =>
+      val runData = new ValidationRunData(vSuite.suite, false, elementMessages.keys, vSuite.vsh.getRuleSeverityLevel( c ) )
+      val results = elementMessages map { 
+        case (element, Left(message)) => 
+          new RuleViolationResult(new Annotation( element, c, message, List[NMAction]() ), c )
+        case (element, Right((message, actions))) => 
+          new RuleViolationResult(new Annotation( element, c, message, actions ), c ) 
+      }
+      MagicDrawValidationDataResults( validationMessage, runData, results, List[RunnableWithProgress]() )
+  }
+  
+  def showMDValidationDataResultsIfAny( data: MagicDrawValidationDataResults ): Unit =
+    if ( data.results.nonEmpty )
+      Utilities.invokeAndWaitOnDispatcher( new Runnable() {
+        override def run: Unit =
+          ValidationResultsWindowManager.updateValidationResultsWindow(
+            data.title + System.currentTimeMillis().toString,
+            data.title,
+            data.runData,
+            data.results )
+      } )
+
+  def doPostSessionActions( project: Project, message: String, data: MagicDrawValidationDataResults ): Try[Unit] = {
+    if ( data.postSessionActions.isEmpty() )
+      return Success( Unit )
+
+    var result: Try[Unit] = Success( Unit )
+
+    ProgressStatusRunner.runWithProgressStatus( new RunnableWithProgress() {
+      override def run( progressStatus: ProgressStatus ): Unit = {
+        val sm = SessionManager.getInstance
+        try {
+          progressStatus.setIndeterminate( true )
+          for ( request <- data.postSessionActions ) {
+            if ( progressStatus.isCancel() ) {
+              if ( sm.isSessionCreated() )
+                sm.cancelSession()
+              return
+            }
+
+            // With direct invocation, i.e.:
+            //
+            //   request.doAction(progressStatus);
+            //
+            // we would need an UncaughtExceptionHandler to detect any problem that may have occured.
+
+            // With reflective invocation, we will get an InvocationTargetException instead.
+            request.getClass().getMethod( "doAction", classOf[ProgressStatus] ) match {
+              case null => ()
+              case m    => m.invoke( request, progressStatus )
+            }
+
+          }
+        }
+        catch {
+          case ex: InvocationTargetException =>
+            if ( project != null && sm.isSessionCreated( project ) )
+              sm.cancelSession( project )
+            ex.getTargetException() match {
+              case t: Throwable => result = Failure( t )
+              case null         => result = Failure( ex )
+            }
+
+          case e @ ( _: InvocationTargetException | _: SecurityException | _: IllegalArgumentException | _: IllegalAccessException | _: NoSuchMethodException ) =>
+            if ( project != null && sm.isSessionCreated( project ) )
+              sm.cancelSession( project )
+            result = Failure( e )
+        }
+      }
+    }, message, true, 0 )
+
+    result
+  }
 }

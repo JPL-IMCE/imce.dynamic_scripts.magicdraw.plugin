@@ -42,10 +42,8 @@ package gov.nasa.jpl.dynamicScripts.magicdraw
 import java.io.File
 import java.net.MalformedURLException
 import java.net.URL
-
 import javax.swing.Icon
 import javax.swing.ImageIcon
-
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.TraversableOnce.MonadOps
@@ -53,7 +51,6 @@ import scala.collection.TraversableOnce.OnceCanBuildFrom
 import scala.collection.TraversableOnce.flattenTraversableOnce
 import scala.language.implicitConversions
 import scala.language.postfixOps
-
 import com.nomagic.actions.AMConfigurator
 import com.nomagic.actions.ActionsCategory
 import com.nomagic.actions.ActionsManager
@@ -81,7 +78,6 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.InstanceSpecification
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.uml2.ext.magicdraw.compositestructures.mdinternalstructures.Connector
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsRegistry
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
@@ -103,6 +99,9 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsConfiguration
 import gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions
 import gov.nasa.jpl.dynamicScripts.magicdraw.specificationDialog.SpecificationNodeConfiguratorForApplicableDynamicScripts
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ComputedCharacterization
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ComputedDerivedFeature
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -124,7 +123,7 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
     DynamicScriptsRegistry.mergeDynamicScripts( DynamicScriptsRegistry.init(), files ) match {
       case ( r: DynamicScriptsRegistry, errors: List[String] ) =>
         registry = r
-        val log = MDLog.getPluginsLog()
+        val log = MDGUILogHelper.getMDPluginsLog
         log.info( s"${this.getPluginName()} -- updateRegistryForConfigurationFiles: current dynamic scripts registry:\n${registry}" )
         if ( errors.isEmpty )
           None
@@ -135,6 +134,96 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
           Some( message )
         }
     }
+
+  def getRelevantMetaclassComputedCharacterizations( metaclassShortName: String, criteria: ComputedDerivedFeature => Boolean ): Map[String, Seq[ComputedDerivedFeature]] = {
+    val scripts = for {
+      ( key, scripts ) <- registry.metaclassCharacterizations
+      sScript <- scripts.filter { cs: ComputedCharacterization =>
+        cs.characterizesInstancesOf match {
+          case MetaclassDesignation( SName( mName ) ) => mName == metaclassShortName
+          case _                                      => false
+        }
+      }
+      availableActions = sScript.computedDerivedFeatures filter ( criteria( _ ) )
+      if ( availableActions.nonEmpty )
+    } yield ( key -> availableActions )
+    scripts.toMap
+  }
+  
+  def getRelevantClassifierComputedCharacterizations( e: Element, criteria: ComputedDerivedFeature => Boolean ): Map[String, Seq[ComputedDerivedFeature]] = {
+    val meta = e.getClassType().asSubclass( classOf[Element] )
+    val metaName = ClassTypes.getShortName( meta )
+    MagicDrawElementKindDesignation.METACLASS_2_CLASSIFIER_QUERY.get( meta ) match {
+      case None => Map()
+      case Some( query ) =>
+        val scripts = for {
+          c <- query( e )
+          cls <- MDUML.getAllGeneralClassifiersIncludingSelf( c )
+          clsQName = cls.getQualifiedName()
+          ( key, scripts ) <- registry.classifierCharacterizations
+          cScript <- scripts.filter { cs: ComputedCharacterization =>
+            cs.characterizesInstancesOf match {
+              case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == metaName && qName == clsQName
+              case _ => false
+            }
+          }
+          availableActions = cScript.computedDerivedFeatures filter ( criteria( _ ) )
+          if ( availableActions.nonEmpty )
+        } yield ( key -> availableActions )
+        scripts.toMap
+    }
+  }
+
+  def getRelevantStereotypeComputedCharacterizations( metaclassName: String, profileQName: String, stereotypeQName: String, criteria: ComputedDerivedFeature => Boolean ): Map[String, Seq[ComputedDerivedFeature]] = {
+    val scripts = for {
+      ( key, scripts ) <- registry.stereotypedMetaclassCharacterizations
+      sScript <- scripts.filter { cs: ComputedCharacterization =>
+        cs.characterizesInstancesOf match {
+          case StereotypedMetaclassDesignation( SName( mName ), QName( pfName ), QName( qName ) ) => mName == metaclassName && pfName == profileQName && qName == stereotypeQName
+          case _ => false
+        }
+      }
+      availableActions = sScript.computedDerivedFeatures filter ( criteria( _ ) )
+      if ( availableActions.nonEmpty )
+    } yield ( key -> availableActions )
+    scripts.toMap
+  }
+  
+  def getRelevantStereotypedClassifierComputedCharacterizations( e: Element, criteria: ComputedDerivedFeature => Boolean ): Map[String, Seq[ComputedDerivedFeature]] = e match {
+    case is: InstanceSpecification =>
+      val scripts = for {
+        c <- is.getClassifier()
+        cls <- MDUML.getAllGeneralClassifiersIncludingSelf( c )
+        clsQName = cls.getQualifiedName()
+        ( key, scripts ) <- registry.stereotypedClassifierCharacterizations
+        cScript <- scripts.filter { cs: ComputedCharacterization =>
+          cs.characterizesInstancesOf match {
+            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == "InstanceSpecification" && qName == clsQName
+            case _ => false
+          }
+        }
+        availableActions = cScript.computedDerivedFeatures filter ( criteria( _ ) )
+        if ( availableActions.nonEmpty )
+      } yield ( key -> availableActions )
+      scripts.toMap
+    case is: Connector =>
+      val scripts = for {
+        cls <- MDUML.getAllGeneralClassifiersIncludingSelf( is.getType() )
+        clsQName = cls.getQualifiedName()
+        ( key, scripts ) <- registry.stereotypedClassifierCharacterizations
+        cScript <- scripts.filter { cs: ComputedCharacterization =>
+          cs.characterizesInstancesOf match {
+            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == "Connector" && qName == clsQName
+            case _ => false
+          }
+        }
+        availableActions = cScript.computedDerivedFeatures filter ( criteria( _ ) )
+        if ( availableActions.nonEmpty )
+      } yield ( key -> availableActions )
+      scripts.toMap
+    case _ =>
+      Map()
+  }
 
   def getRelevantMetaclassActions( metaclassShortName: String, criteria: DynamicActionScript => Boolean ): Map[String, Seq[DynamicActionScript]] = {
     val scripts = for {
@@ -256,7 +345,7 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
       case None => getJPLCustomLinkIcon()
       case Some( iconPath ) =>
         try {
-          val iconURL = new File( ApplicationEnvironment.getInstallRoot() + File.separator + iconPath.path ).toURI().toURL()
+          val iconURL = new File( MDUML.getInstallRoot() + File.separator + iconPath.path ).toURI().toURL()
           new ImageIcon( iconURL )
         }
         catch {
@@ -287,7 +376,7 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
   override def init(): Unit = {
     DynamicScriptsPlugin.instance = this
 
-    val log = MDLog.getPluginsLog()
+    val log = MDGUILogHelper.getMDPluginsLog
     log.info( s"INIT: >> ${this.getClass().getName()}" )
     try {
       projectListener = new DynamicScriptsProjectListener()
@@ -360,7 +449,7 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
   }
 
   override def close(): Boolean = {
-    val log = MDLog.getPluginsLog()
+    val log = MDGUILogHelper.getMDPluginsLog
     log.info( s"CLOSE: >> ${this.getClass().getName()}" )
     try {
       Application.getInstance().removeProjectEventListener( projectListener )
