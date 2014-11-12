@@ -3,11 +3,14 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables
 import java.awt.Component
 import java.awt.Graphics
 import java.awt.Rectangle
+
 import javax.swing.table.DefaultTableModel
+
 import com.jidesoft.grid.CellPainter
 import com.jidesoft.grid.CellStyle
 import com.jidesoft.grid.StyleModel
 import com.jidesoft.swing.OverlayableIconsFactory
+
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AnnotationNodeInfo
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
 
@@ -44,6 +47,7 @@ object AbstractDisposableTableModel {
 
     override def paint( g: Graphics, component: Component, row: Int, column: Int, cellRect: Rectangle, value: Object ): Unit =
       value match {
+      
         case ai: AnnotationNodeInfo =>
           val iconKind = if ( ai.isError ) OverlayableIconsFactory.ERROR
           else if ( ai.isWarning ) OverlayableIconsFactory.ATTENTION
@@ -51,6 +55,9 @@ object AbstractDisposableTableModel {
           else OverlayableIconsFactory.QUESTION
           val icon = OverlayableIconsFactory.getImageIcon( iconKind )
           icon.paintIcon( component, g, cellRect.x + cellRect.width - icon.getIconWidth() - 1, cellRect.y )
+
+        case _ =>
+          ()
       }
   } )
 

@@ -3,12 +3,14 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
+
 import com.nomagic.magicdraw.annotation.Annotation
 import com.nomagic.magicdraw.uml.UUIDRegistry
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Classifier
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.InstanceSpecification
+
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ComputedDerivedFeature
+import gov.nasa.jpl.dynamicScripts.magicdraw.designations.MagicDrawElementKindDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AbstractTreeNodeInfo
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.LabelNodeInfo
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.ReferenceNodeInfo
@@ -16,30 +18,27 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.ReferenceNodeInfo
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-abstract class DerivedPropertyComputedInfo[E <: Element]( metaclass: Class[_],
-                                                          e: E,
-                                                          c: Classifier,
-                                                          computedDerivedFeature: ComputedDerivedFeature )
+abstract class DerivedPropertyComputedInfo( e: Element,
+                                            ek: MagicDrawElementKindDesignation,
+                                            computedDerivedFeature: ComputedDerivedFeature )
   extends AbstractDisposableTableModel(
     table = new java.util.Vector[java.util.Vector[String]](),
     columns = new java.util.Vector[String]() ) {
 
-  override def getLabel: String = s"/${computedDerivedFeature.name}"
-  
-  override def isCellEditable(row: Int, column: Int): Boolean = false
-  
-  protected def getAnnotationSummary(annotations: Set[Annotation]): String = 
-    if (annotations.isEmpty) "no annotations"
+  override def isCellEditable( row: Int, column: Int ): Boolean = false
+
+  protected def getAnnotationSummary( annotations: Set[Annotation] ): String =
+    if ( annotations.isEmpty ) "no annotations"
     else {
-      val counts = annotations.map (_.getSeverity.getName) groupBy (w=>w) mapValues (_.size)
-      val summary = counts.keys.toList.sorted map { w => s"${counts.get(w).get} $w(s)" } mkString ("; ")
+      val counts = annotations.map( _.getSeverity.getName ) groupBy ( w => w ) mapValues ( _.size )
+      val summary = counts.keys.toList.sorted map { w => s"${counts.get( w ).get} $w(s)" } mkString ( "; " )
       summary
     }
 
 }
 
 object DerivedPropertyComputedInfo {
-  
+
   /**
    * @param x One of the following:
    * - `Failure(_)` if there is no recognized mapping for `x`
@@ -81,7 +80,7 @@ object DerivedPropertyComputedInfo {
             case Success( s )  => ( fi, si ++ s )
           }
       }
-      if (fn.nonEmpty) fn.head
+      if ( fn.nonEmpty ) fn.head
       else Success( sn )
     case r =>
       Failure( new IllegalArgumentException( s"Unrecognized result: ${r}" ) )

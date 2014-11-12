@@ -39,14 +39,19 @@
  */
 package gov.nasa.jpl.dynamicScripts.magicdraw
 
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
+import java.lang.reflect.InvocationTargetException
+
+import scala.collection.JavaConversions.asJavaCollection
+import scala.collection.JavaConversions.collectionAsScalaIterable
+import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.implicitConversions
 import scala.language.postfixOps
-import java.lang.reflect.InvocationTargetException
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
+
+import com.nomagic.actions.NMAction
+import com.nomagic.magicdraw.annotation.Annotation
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.openapi.uml.SessionManager
 import com.nomagic.magicdraw.validation.RuleViolationResult
@@ -57,12 +62,10 @@ import com.nomagic.task.ProgressStatus
 import com.nomagic.task.RunnableWithProgress
 import com.nomagic.ui.ProgressStatusRunner
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Constraint
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.EnumerationLiteral
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.utils.Utilities
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.EnumerationLiteral
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-import com.nomagic.actions.NMAction
-import com.nomagic.magicdraw.annotation.Annotation
 
 /**
  * The MD Open API for creating validation annotations & actions requires references to
@@ -144,7 +147,6 @@ object MagicDrawValidationDataResults {
   def lookupValidationConstraint( vSuiteInfo: ValidationSuiteInfo, constraintQualifiedName: String ): Option[Constraint] =
     vSuiteInfo.vsh.getValidationRules( vSuiteInfo.suite ) find { c => c.getQualifiedName() == constraintQualifiedName }
 
-  
   def getMDValidationProfileAndConstraint( p: Project, validationSuiteQName: String, validationConstraintQName: String ): Option[( ValidationSuiteInfo, Constraint )] =
     lookupValidationSuite( p, validationSuiteQName ) match {
       case None => None
@@ -154,40 +156,44 @@ object MagicDrawValidationDataResults {
           case Some( c ) => Some( ( vSuite, c ) )
         }
     }
-  
+
   val mdValidationProfileQName = "UML Standard Profile::Validation Profile::Composition Integrity"
   val mdValidationConstraintQName = "UML Standard Profile::Validation Profile::Composition Integrity::Illegal Reference"
-  
-  def makeMDIllegalArgumentExceptionValidation( 
-      p: Project, 
-      validationMessage: String,
-      elementMessages: Map[Element, Either[String, (String, List[NMAction])]],
-      validationSuiteQName: String = mdValidationProfileQName,
-      validationConstraintQName: String = mdValidationConstraintQName): MagicDrawValidationDataResults = 
+
+  def makeMDIllegalArgumentExceptionValidation(
+    p: Project,
+    validationMessage: String,
+    elementMessages: Map[Element, Either[String, ( String, List[NMAction] )]],
+    validationSuiteQName: String = mdValidationProfileQName,
+    validationConstraintQName: String = mdValidationConstraintQName ): MagicDrawValidationDataResults =
     getMDValidationProfileAndConstraint( p, validationSuiteQName, validationConstraintQName ) match {
-    case None => 
-      throw new IllegalArgumentException(s"Failed to find MD's Validation Profile '${validationSuiteQName}' & Constraint '${validationConstraintQName}'" )
-    case Some( ( vSuite, c )) =>
-      val runData = new ValidationRunData(vSuite.suite, false, elementMessages.keys, vSuite.vsh.getRuleSeverityLevel( c ) )
-      val results = elementMessages map { 
-        case (element, Left(message)) => 
-          new RuleViolationResult(new Annotation( element, c, message, List[NMAction]() ), c )
-        case (element, Right((message, actions))) => 
-          new RuleViolationResult(new Annotation( element, c, message, actions ), c ) 
-      }
-      MagicDrawValidationDataResults( validationMessage, runData, results, List[RunnableWithProgress]() )
-  }
-  
-  def showMDValidationDataResultsIfAny( data: MagicDrawValidationDataResults ): Unit =
-    if ( data.results.nonEmpty )
-      Utilities.invokeAndWaitOnDispatcher( new Runnable() {
-        override def run: Unit =
-          ValidationResultsWindowManager.updateValidationResultsWindow(
-            data.title + System.currentTimeMillis().toString,
-            data.title,
-            data.runData,
-            data.results )
-      } )
+      case None =>
+        throw new IllegalArgumentException( s"Failed to find MD's Validation Profile '${validationSuiteQName}' & Constraint '${validationConstraintQName}'" )
+      case Some( ( vSuite, c ) ) =>
+        val runData = new ValidationRunData( vSuite.suite, false, elementMessages.keys, vSuite.vsh.getRuleSeverityLevel( c ) )
+        val results = elementMessages map {
+          case ( element, Left( message ) ) =>
+            new RuleViolationResult( new Annotation( element, c, message, List[NMAction]() ), c )
+          case ( element, Right( ( message, actions ) ) ) =>
+            new RuleViolationResult( new Annotation( element, c, message, actions ), c )
+        }
+        MagicDrawValidationDataResults( validationMessage, runData, results, List[RunnableWithProgress]() )
+    }
+
+  def showMDValidationDataResultsIfAny( data: Option[MagicDrawValidationDataResults] ): Unit =
+    data match {
+      case None => ()
+      case Some( d ) =>
+        if ( d.results.nonEmpty )
+          Utilities.invokeAndWaitOnDispatcher( new Runnable() {
+            override def run: Unit =
+              ValidationResultsWindowManager.updateValidationResultsWindow(
+                d.title + System.currentTimeMillis().toString,
+                d.title,
+                d.runData,
+                d.results )
+          } )
+    }
 
   def doPostSessionActions( project: Project, message: String, data: MagicDrawValidationDataResults ): Try[Unit] = {
     if ( data.postSessionActions.isEmpty() )

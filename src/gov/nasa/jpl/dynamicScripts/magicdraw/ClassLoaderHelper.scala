@@ -113,7 +113,7 @@ object ClassLoaderHelper {
   def makeErrorMessageFor_invoke_Exception( t: Throwable ): String =
     s"\nScript execution failed: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
 
-  case class ResolvedClassAndMethod( s: DynamicScriptInfo, c: Class[_], m: Method ) {}
+  case class ResolvedClassAndMethod( s: DynamicScriptInfo, c: Class[_ <: Any], m: Method ) {}
 
   sealed abstract class ClassLoaderError( error: String ) extends RuntimeException( error ) {}
 
@@ -162,7 +162,7 @@ object ClassLoaderHelper {
       }
     }
     catch {
-      case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalAccessException ) =>
+      case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalAccessException | _: NoClassDefFoundError ) =>
         return Failure( DynamicScriptsClassLookupError( s, ex ) )
     }
 
@@ -210,37 +210,52 @@ object ClassLoaderHelper {
           if ( p != null && sm.isSessionCreated( p ) ) {
             sm.closeSession( p )
           }
+          return Success( Unit )
 
-        case Success( Some( r: MagicDrawValidationDataResults ) ) =>
-          try {
-            MagicDrawValidationDataResults.showMDValidationDataResultsIfAny( r )
-          }
-          finally {
-            if ( p != null && sm.isSessionCreated( p ) ) {
-              sm.closeSession( p )
-            }
-          }
-          MagicDrawValidationDataResults.doPostSessionActions( p, message, r ) match {
-            case Success( _ ) =>
-              ()
-            case Failure( t ) =>
-              ClassLoaderHelper.reportError( cm.s, message, t )
-              return Failure( t )
-          }
+        case Success( s ) =>
+          s match {
+            case Some( r: MagicDrawValidationDataResults ) =>
+              try {
+                MagicDrawValidationDataResults.showMDValidationDataResultsIfAny( Some( r ) )
+              }
+              finally {
+                if ( p != null && sm.isSessionCreated( p ) ) {
+                  sm.closeSession( p )
+                }
+              }
+              MagicDrawValidationDataResults.doPostSessionActions( p, message, r ) match {
+                case Success( _ ) =>
+                  Success( Unit )
+                case Failure( t ) =>
+                  ClassLoaderHelper.reportError( cm.s, message, t )
+                  Failure( t )
+              }
 
-        case Success( any ) =>
-          if ( p != null && sm.isSessionCreated( p ) ) {
-            sm.closeSession( p )
+            case Some( any ) =>
+              if ( p != null && sm.isSessionCreated( p ) ) {
+                sm.closeSession( p )
+              }
+              Success( any )
+
+            case None =>
+              if ( p != null && sm.isSessionCreated( p ) ) {
+                sm.closeSession( p )
+              }
+              Success( Unit )
+
+            case any =>
+              if ( p != null && sm.isSessionCreated( p ) ) {
+                sm.closeSession( p )
+              }
+              Success( any )
           }
-          return Success( any )
 
         case any =>
           if ( p != null && sm.isSessionCreated( p ) ) {
             sm.closeSession( p )
           }
-          return Success( any )
+          Success( any )
       }
-
     }
     catch {
       case ex: InvocationTargetException =>
@@ -257,7 +272,7 @@ object ClassLoaderHelper {
           sm.cancelSession( p )
         }
         val parameterTypes = ( cm.m.getParameterTypes() map ( _.getName() ) ) mkString ( "\n parameter type: ", "\n parameter type: ", "" )
-        val parameterValues = ( actionAndArgumentValues map ( _.getClass().getName() ) ) mkString ( "\n argument type: ", "\n argument type: ", "" )
+        val parameterValues = ( actionAndArgumentValues map ( getArgumentValueTypeName( _ ) ) ) mkString ( "\n argument type: ", "\n argument type: ", "" )
         val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n${parameterTypes}\n${parameterValues}(do not submit!)"
         ClassLoaderHelper.reportError( cm.s, ex_message, t )
         return Failure( t )
@@ -276,10 +291,12 @@ object ClassLoaderHelper {
         sm.cancelSession( p )
       }
     }
-
-    Success( Unit )
   }
 
+  def getArgumentValueTypeName( value: Any ): String = 
+    if (null == value) "<null>"
+    else value.getClass.getName
+    
   private var dynamicScriptsRootPath: String = null
 
   def getDynamicScriptsRootPath(): String = {
@@ -303,9 +320,9 @@ object ClassLoaderHelper {
     else
       true
 
-  def isDynamicActionScriptAvailable( das: DynamicScriptInfo ): Boolean = das.context match {
-    case c: ProjectContext => isDynamicActionScriptAvailable( das, c )
-    case c: PluginContext  => isDynamicActionScriptAvailable( das, c )
+  def isDynamicActionScriptAvailable( ds: DynamicScriptInfo ): Boolean = ds.context match {
+    case c: ProjectContext => isDynamicActionScriptAvailable( ds, c )
+    case c: PluginContext  => isDynamicActionScriptAvailable( ds, c )
   }
 
   def getPluginIfLoadedAndEnabled( pluginID: String ): Option[Plugin] =
@@ -316,10 +333,10 @@ object ClassLoaderHelper {
         else None
     }
 
-  def isDynamicActionScriptAvailable( das: DynamicScriptInfo, c: PluginContext ): Boolean =
+  def isDynamicActionScriptAvailable( ds: DynamicScriptInfo, c: PluginContext ): Boolean =
     getPluginIfLoadedAndEnabled( c.pluginID.hname ).isDefined
 
-  def isDynamicActionScriptAvailable( das: DynamicScriptInfo, c: ProjectContext ): Boolean = {
+  def isDynamicActionScriptAvailable( ds: DynamicScriptInfo, c: ProjectContext ): Boolean = {
     val scriptProjectPath = getDynamicScriptsRootPath() + File.separator + c.project.jname + File.separator
     val scriptProjectDir = new File( scriptProjectPath )
 

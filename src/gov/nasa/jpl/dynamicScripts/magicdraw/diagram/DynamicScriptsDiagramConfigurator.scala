@@ -81,19 +81,9 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForDiagram
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForTriggerAndSelection
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawElementKindDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForClassifiedInstanceDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForMetaclassDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForStereotypedClassifiedInstanceDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathCreatorForStereotypedMetaclassDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathDiagramContextToolbarAction
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths.DynamicPathFinalizationAction
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForClassifiedInstanceDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForMetaclassDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorForStereotypedMetaclassDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeDiagramContextToolbarAction
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeFinalizationAction
+import gov.nasa.jpl.dynamicScripts.magicdraw.designations._
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths._
+import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes._
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov

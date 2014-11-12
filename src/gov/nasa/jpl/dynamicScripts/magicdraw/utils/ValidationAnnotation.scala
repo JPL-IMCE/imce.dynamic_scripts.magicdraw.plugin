@@ -41,12 +41,14 @@ object ValidationAnnotation {
   def toMagicDrawValidationDataResults(
     title: String,
     validationAnnotations: Seq[ValidationAnnotation],
-    postSessionActions: java.util.Collection[RunnableWithProgress] ): MagicDrawValidationDataResults = {
-    val validationSeverities = validationAnnotations map ( _.annotation.getSeverity ) toSet
-    val lowestValidation = validationSeverities.toList sorted ( SEVERITY_LEVEL_ORDERING ) head
-    val elements = validationAnnotations map ( _.annotation.getTarget )
-    val runData = new ValidationRunData( validationAnnotations.head.validationSuiteInfo.suite, false, elements, lowestValidation )
-    val ruleViolationResults = validationAnnotations map ( _.toRuleViolationResult )
-    MagicDrawValidationDataResults( title, runData, ruleViolationResults, postSessionActions )
-  }
+    postSessionActions: java.util.Collection[RunnableWithProgress] ): Option[MagicDrawValidationDataResults] =
+    if ( validationAnnotations.isEmpty ) None
+    else {
+      val validationSeverities = validationAnnotations map ( _.annotation.getSeverity ) toSet
+      val lowestValidation = validationSeverities.toList sorted ( SEVERITY_LEVEL_ORDERING ) head
+      val elements = validationAnnotations map ( _.annotation.getTarget )
+      val runData = new ValidationRunData( validationAnnotations.head.validationSuiteInfo.suite, false, elements, lowestValidation )
+      val ruleViolationResults = validationAnnotations map ( _.toRuleViolationResult )
+      Some( MagicDrawValidationDataResults( title, runData, ruleViolationResults, postSessionActions ) )
+    }
 }

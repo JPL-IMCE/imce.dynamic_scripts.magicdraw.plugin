@@ -43,7 +43,7 @@ import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.ResolvedMagicDrawClassifiedInstanceDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.designations._
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 
 /**

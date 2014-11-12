@@ -11,8 +11,8 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDispo
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-case class SpecificationComputedNode[T <: AbstractHierarchicalDisposableTableModel, E <: Element](
-  ID: String, label: String, e: E, table: T )
+case class SpecificationComputedNode[T <: AbstractHierarchicalDisposableTableModel](
+  ID: String, label: String, e: Element, table: T )
   extends ISpecificationNode {
 
   override def getID= ID
@@ -24,7 +24,7 @@ case class SpecificationComputedNode[T <: AbstractHierarchicalDisposableTableMod
 
   override def createSpecificationComponent( element: Element ) = {
     require( e == element )
-    SpecificationComputedComponent[T, E]( table, this )
+    SpecificationComputedComponent[T]( table, this )
   }
 
 }

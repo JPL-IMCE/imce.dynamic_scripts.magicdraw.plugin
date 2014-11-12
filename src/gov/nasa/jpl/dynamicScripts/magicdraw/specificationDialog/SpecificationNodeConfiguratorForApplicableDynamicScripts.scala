@@ -41,6 +41,7 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.specificationDialog
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.collectionAsScalaIterable
+import scala.collection.immutable.SortedSet
 import scala.language.implicitConversions
 import scala.language.postfixOps
 
@@ -50,9 +51,7 @@ import com.nomagic.magicdraw.ui.dialogs.specifications.tree.node.ConfigurableNod
 import com.nomagic.magicdraw.ui.dialogs.specifications.tree.node.IConfigurableNode
 import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Classifier
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-import com.nomagic.uml2.ext.magicdraw.mdprofiles.Stereotype
 
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.BinaryDerivationRefresh.DELAYED_COMPUTATION_UNTIL_INVOKED
@@ -60,6 +59,7 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.BinaryDerivationRefresh.E
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ComputedDerivedFeature
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsProjectListener
+import gov.nasa.jpl.dynamicScripts.magicdraw.designations.MagicDrawElementKindDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.DerivedPropertiesHierarchicalTableModel
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.DerivedPropertyComputedInfo
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.DerivedPropertyComputedRowInfo
@@ -84,85 +84,17 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
         return
 
       val p = DynamicScriptsPlugin.getInstance
-      val metaclass = e.getClassType
-      val mName = ClassTypes.getShortName( metaclass )
+      val mName = ClassTypes.getShortName( e.getClassType )
       val es = StereotypesHelper.getStereotypes( e ).toList
 
-      def dynamicScriptToolbarFilter( df: ComputedDerivedFeature ): Boolean = isComputedDerivedFeatureAvailable( e, es )( df )
-      val mDerivedFeatures = p.getRelevantMetaclassComputedCharacterizations( mName, dynamicScriptToolbarFilter )
-      val sDerivedFeatures = StereotypesHelper.getStereotypesHierarchy( e ) flatMap ( s => p.getRelevantStereotypeComputedCharacterizations( mName, s.getProfile().getQualifiedName(), s.getQualifiedName(), dynamicScriptToolbarFilter ) )
-      val cDerivedFeatures = p.getRelevantClassifierComputedCharacterizations( e, dynamicScriptToolbarFilter )
-      val csDerivedFeatures = p.getRelevantStereotypedClassifierComputedCharacterizations( e, dynamicScriptToolbarFilter )
+      val mDerivedFeatures = p.getRelevantMetaclassComputedCharacterizations( mName )
+      val sDerivedFeatures = StereotypesHelper.getStereotypesHierarchy( e ) flatMap ( s => p.getRelevantStereotypeComputedCharacterizations( mName, s.getProfile().getQualifiedName(), s.getQualifiedName() ) )
+      val cDerivedFeatures = p.getRelevantClassifierComputedCharacterizations( e )
+      val csDerivedFeatures = p.getRelevantStereotypedClassifierComputedCharacterizations( e )
 
       val allDerivedFeatures = mDerivedFeatures ++ sDerivedFeatures ++ cDerivedFeatures ++ csDerivedFeatures
-      val earlyDerivedFeatures = allDerivedFeatures flatMap { 
-        case (name, dfs) => 
-        dfs filter (EAGER_COMPUTATION_AS_NEEDED == _.refresh) match {
-          case Seq() => None
-          case s => Some( name -> s )
-        }        
-      }
-      val delayedDerivedFeatures = allDerivedFeatures flatMap { 
-        case (name, dfs) => 
-        dfs filter (DELAYED_COMPUTATION_UNTIL_INVOKED == _.refresh) match {
-          case Seq() => None
-          case s => Some( name -> s )
-        }        
-      }
-      val entries = (earlyDerivedFeatures.keys.toSet ++ delayedDerivedFeatures.keys.toSet).toSeq sorted;
-      
-      type DerivedPropertyInfo = DerivedPropertyComputedInfo[Element]
-      type DerivedHierarchicalTable = DerivedPropertiesHierarchicalTableModel[DerivedPropertyInfo, Element]
-      
-      entries foreach { entry =>
-        val early = earlyDerivedFeatures.get(entry)
-        val delayed = delayedDerivedFeatures.get(entry)
-        (early, delayed) match {
-          case ( Some(efs), Some(dfs) ) =>
-            val eps = efs map { ef => computedFeatureToInfo( metaclass, e, c=null, computedDerivedFeature=ef ) }
-            val dps = dfs map { df => computedFeatureToInfo( metaclass, e, c=null, computedDerivedFeature=df ) }
-            
-            val esNode = ConfigurableNodeFactory.createConfigurableNode( SpecificationComputedNode[DerivedHierarchicalTable, Element](
-               ID=s"${entry} (early derived features)", 
-               label=s"${e.getHumanType}",
-               e,
-               table=new DerivedHierarchicalTable(e, eps) ) )
-            
-            val dsNode = ConfigurableNodeFactory.createConfigurableNode( SpecificationComputedNode[DerivedHierarchicalTable, Element](
-               ID=s"${entry} (late derived features)", 
-               label=s"${e.getHumanType}",
-               e,
-               table=new DerivedHierarchicalTable(e, dps) ) )
-              
-            node.insertNode( IConfigurableNode.DOCUMENTATION_HYPERLINKS, IConfigurableNode.Position.BEFORE, esNode )
-            esNode.addNode( dsNode )
-            
-          case ( Some(efs), None ) =>
-            val eps = efs map { ef => computedFeatureToInfo( metaclass, e, c=null, computedDerivedFeature=ef ) }
-            
-            val esNode = ConfigurableNodeFactory.createConfigurableNode( SpecificationComputedNode[DerivedHierarchicalTable, Element](
-               ID=s"${entry} (early derived features)", 
-               label=s"${e.getHumanType}",
-               e,
-               table=new DerivedHierarchicalTable(e, eps) ) )            
-              
-            node.insertNode( IConfigurableNode.DOCUMENTATION_HYPERLINKS, IConfigurableNode.Position.BEFORE, esNode )
-            
-          case ( None, Some(dfs) ) =>
-            val dps = dfs map { df => computedFeatureToInfo( metaclass, e, c=null, computedDerivedFeature=df ) }
-            
-            val dsNode = ConfigurableNodeFactory.createConfigurableNode( SpecificationComputedNode[DerivedHierarchicalTable, Element](
-               ID=s"${entry} (late derived features)", 
-               label=s"${e.getHumanType}",
-               e,
-               table=new DerivedHierarchicalTable(e, dps) ) )
-              
-            node.insertNode( IConfigurableNode.DOCUMENTATION_HYPERLINKS, IConfigurableNode.Position.BEFORE, dsNode )
-            
-          case ( None, None ) =>
-            ()
-        }
-      }
+      addDerivedFeatures( project, node, allDerivedFeatures, e )
+
     }
     finally {
       val currentTime = System.currentTimeMillis()
@@ -170,17 +102,55 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
     }
   }
 
-  def isComputedDerivedFeatureAvailable( e: Element, es: List[Stereotype] )( df: ComputedDerivedFeature ): Boolean = ???
+  def addDerivedFeatures(
+    project: Project,
+    node: IConfigurableNode,
+    allDerivedFeatures: Map[String, SortedSet[DynamicScriptsTypes.ComputedCharacterization]],
+    e: Element ): Unit = {
 
-  def computedFeatureToInfo[E <: Element]( 
-      metaclass: Class[_],
-      e: E,
-      c: Classifier,
-      computedDerivedFeature: ComputedDerivedFeature ): 
-  DerivedPropertyComputedInfo[E] = computedDerivedFeature match {
+    type DerivedHierarchicalTable = DerivedPropertiesHierarchicalTableModel[DerivedPropertyComputedInfo]
+
+    val entries = allDerivedFeatures.keys.toList sorted;
+    entries foreach { entry =>
+      val characterizations = allDerivedFeatures( entry )
+      characterizations foreach {
+        case cs if ( cs.computedDerivedFeatures nonEmpty ) =>
+
+          val ek = MagicDrawElementKindDesignation.getMagicDrawDesignation( project, cs.characterizesInstancesOf )
+
+          val early = cs.computedDerivedFeatures filter ( EAGER_COMPUTATION_AS_NEEDED == _.refresh ) map ( computedFeatureToInfo( e, ek, _ ) )
+          val delayed = cs.computedDerivedFeatures filter ( DELAYED_COMPUTATION_UNTIL_INVOKED == _.refresh ) map ( computedFeatureToInfo( e, ek, _ ) )
+
+          val earlyNode = ConfigurableNodeFactory.createConfigurableNode( SpecificationComputedNode[DerivedHierarchicalTable](
+            ID = s"${entry} EARLY",
+            label = s"${cs.name.hname} (derivations computed early)",
+            e,
+            table = new DerivedHierarchicalTable( e, early ) ) )
+
+          node.insertNode( IConfigurableNode.DOCUMENTATION_HYPERLINKS, IConfigurableNode.Position.BEFORE, earlyNode )
+
+          if ( delayed nonEmpty ) {
+
+            val delayedNode = ConfigurableNodeFactory.createConfigurableNode( SpecificationComputedNode[DerivedHierarchicalTable](
+              ID = s"${entry} DELAYED",
+              label = s"${cs.name.hname} (derivations computed on-demand)",
+              e,
+              table = new DerivedHierarchicalTable( e, delayed ) ) )
+
+            earlyNode.addNode( delayedNode )
+
+          }
+      }
+    }
+  }
+
+  def computedFeatureToInfo(
+    e: Element,
+    ek: MagicDrawElementKindDesignation,
+    computedDerivedFeature: ComputedDerivedFeature ): DerivedPropertyComputedInfo = computedDerivedFeature match {
     case p: DynamicScriptsTypes.ComputedDerivedProperty =>
-      DerivedPropertyComputedRowInfo[E]( metaclass, e, c, p )
+      DerivedPropertyComputedRowInfo( e, ek, p )
     case t: DynamicScriptsTypes.ComputedDerivedTable =>
-      DerivedPropertyComputedTableInfo[E]( metaclass, e, c, t, columnLabels = Seq() )
+      DerivedPropertyComputedTableInfo( e, ek, t )
   }
 }

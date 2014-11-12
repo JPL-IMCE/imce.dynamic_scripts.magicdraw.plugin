@@ -29,6 +29,7 @@ import scala.Right
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.postfixOps
 
+import com.jidesoft.grid.AutoFilterTableHeader
 import com.jidesoft.grid.HierarchicalTable
 import com.jidesoft.grid.HierarchicalTableComponentFactory
 import com.jidesoft.grid.ListSelectionModelGroup
@@ -46,8 +47,7 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
-import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AnnotationNodeInfo
-import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.ReferenceNodeInfo
+import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes._
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
@@ -55,19 +55,28 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-case class SpecificationComputedComponent[T <: AbstractHierarchicalDisposableTableModel, E <: Element](
-  model: T, node: SpecificationComputedNode[T, E] )
+case class SpecificationComputedComponent[T <: AbstractHierarchicalDisposableTableModel](
+  model: T, node: SpecificationComputedNode[T] )
   extends ISpecificationComponent {
 
   override def propertyChanged( element: Element, event: PropertyChangeEvent ) = ()
   override def updateComponent = ()
   override def dispose = model.dispose
 
+  val _group = new ListSelectionModelGroup()
+  
   override def getComponent: JComponent = {
     val table = new HierarchicalTable( model )
     table.setAutoRefreshOnRowUpdate( true )
     table.setSelectionMode( ListSelectionModel.SINGLE_SELECTION )
-
+    table.setComponentFactory( HierarchicaltableComputedComponentFactory() )
+    _group.add( table.getSelectionModel )
+    
+    val header = new AutoFilterTableHeader( table )
+    table.setTableHeader( header )
+    header.setAutoFilterEnabled( true )
+    header.setUseNativeHeaderRenderer( true )
+    
     val scrollPane = new JScrollPane( table )
     scrollPane.getViewport.putClientProperty( "HierarchicalTable.mainViewport", Boolean.box( true ) )
     scrollPane
@@ -88,7 +97,6 @@ case class SpecificationComputedComponent[T <: AbstractHierarchicalDisposableTab
     override def removeTableModelListener( l: TableModelListener ) = ()
   }
 
-  val _group = new ListSelectionModelGroup()
 
   case class HierarchicaltableComputedComponentFactory() extends HierarchicalTableComponentFactory {
 
@@ -145,8 +153,12 @@ case class SpecificationComputedComponent[T <: AbstractHierarchicalDisposableTab
                     }
                   case _ => ()
                 }
+                
               case n: ReferenceNodeInfo =>
                 m.editSpecification( n.e )
+                
+              case n: LabelNodeInfo =>
+                ()
             }
           }
           ev.consume()
@@ -252,7 +264,7 @@ object SpecificationComputedComponent {
       case None => ()
       case Some( Left( aParent ) ) =>
         val bounds = aParent.getBounds
-        scrollRectToVisible( aParent, aRect, dx + bounds.x, dy + bounds.y )
+        scrollRectToVisible( aParent.getParent, aRect, dx + bounds.x, dy + bounds.y )
       case Some( Right( aMainParent ) ) =>
         aRect.x += dx
         aRect.y += dy

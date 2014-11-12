@@ -56,7 +56,11 @@
 			<excludes>
 				<exclude name="build*.xml"/>
 			</excludes>
-			<binary-includes/>
+			<binary-includes>
+				<include name="icons/**/*.png"/>
+				<include name="icons/**/*.gif"/>
+				<include name="icons/**/*.jpg"/>
+			</binary-includes>
 		</md.plugin.copyTo.root>
 		
 		<md.plugin.zip.root

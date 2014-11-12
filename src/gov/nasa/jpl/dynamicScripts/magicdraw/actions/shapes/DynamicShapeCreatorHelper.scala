@@ -56,19 +56,7 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.MetaclassDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedMetaclassDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ToplevelShapeInstanceCreator
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawClassifiedInstanceDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawElementKindDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawMetaclassDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawStereotypeDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawStereotypedClassifiedInstanceDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.ResolvedMagicDrawClassifiedInstanceDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.ResolvedMagicDrawMetaclassDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.ResolvedMagicDrawStereotypeDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.ResolvedMagicDrawStereotypedClassifiedInstanceDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.UnresolvedMagicDrawClassifiedInstanceDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.UnresolvedMagicDrawMetaclassDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.UnresolvedMagicDrawStereotypeDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.UnresolvedMagicDrawStereotypedClassifiedInstanceDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.designations._
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
