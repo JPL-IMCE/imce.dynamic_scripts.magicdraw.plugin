@@ -75,11 +75,10 @@ case class DerivedPropertyComputedRowInfo( e: Element,
                     return Seq()
 
                   case Success( cm ) =>
-                    val result = ClassLoaderHelper.invoke(
+                    val result = ClassLoaderHelper.invokeAndReport(
                       previousTime, Project.getProject( e ), null, cm, ek, e )
                     result match {
                       case Failure( t ) =>
-                        ClassLoaderHelper.reportError( computedDerivedProperty, message, t )
                         return Seq()
                       case Success( x ) =>
                         DerivedPropertyComputedInfo.anyToInfo( x ) match {

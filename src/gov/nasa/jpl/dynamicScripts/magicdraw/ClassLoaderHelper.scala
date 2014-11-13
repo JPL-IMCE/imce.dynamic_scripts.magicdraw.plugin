@@ -175,23 +175,57 @@ object ClassLoaderHelper {
   }
 
   /**
+   * Wrapper for a Throwable indicating that it's been already reported
+   */
+  case class ReportedException( t: Throwable ) extends Throwable
+
+  /**
+   * Reports Failure results of 'invoke()' unless they've been already reported
+   */
+  def invokeAndReport( previousTime: Long, p: Project, ev: ActionEvent, cm: ResolvedClassAndMethod, argumentValues: Object* ): Try[Any] =
+    invoke( previousTime, p, ev, cm, argumentValues: _* ) match {
+      case Success( x ) =>
+        Success( x )
+      case Failure( t @ ( _: MagicDrawValidationDataResultsException | _: ReportedException ) ) =>
+        Failure( t )
+      case Failure( t ) =>
+        ClassLoaderHelper.reportError( cm.s, t.getMessage, t )
+        Failure( t )
+    }
+
+  /**
    * Safely invoke a DynamicScriptInfo method
    *
-   * The method is expected to return one of the following:
-   * - `Try[Option[MagicDrawValidationDataResults]]`
-   * - `Try[Any]`
-   * - `Any`
+   * @param previousTime whose difference with the time after invoking the method will be logged
+   * @param p the active MagicDraw project
+   * @param ev the event that triggered this invocation
+   * @param cm the resolved JVM Class and Method from a DynamicScriptInfo
+   * @param argumentValues will be passed to the method invocation
+   * @return the result of invoking the resolved Method with the project, the event, the DynamicScriptInfo and the argument values
+   *
+   * The result is checked for one of the following:
+   * - 'Failure( t: MagicDrawValidationDataResultsException )' => 'Failure( t )', after opening MagicDraw's validation window
+   * - 'Failure( t )' => 'Failure( t )', possibly due to invocation-related runtime exceptions
+   * - 'Success( None )' => 'Success( Unit )'
+   * - 'Success( Some( MagicDrawValidationDataResults ) )' => opens MagicDraw's validation window and returns the 'Try[Unit]' result of executing post-processing actions
+   * - 'Success( Some( any ) )' => 'Success( any )'
+   * - 'Success( any )' => 'Success( any )'
+   * - 'any' => 'Success( any )'
    */
   def invoke( previousTime: Long, p: Project, ev: ActionEvent, cm: ResolvedClassAndMethod, argumentValues: Object* ): Try[Any] = {
     val log = MDGUILogHelper.getMDPluginsLog
     val message = cm.s.prettyPrint( "" ) + "\n"
+
     val sm = SessionManager.getInstance()
     if ( p != null )
       sm.createSession( p, message )
-    val actionAndArgumentValues0: Seq[Object] = argumentValues
-    val actionAndArgumentValues1: Seq[Object] = cm.s +: actionAndArgumentValues0
-    val actionAndArgumentValues2: Seq[Object] = ev +: actionAndArgumentValues1
-    val actionAndArgumentValues: Seq[Object] = p +: actionAndArgumentValues2
+
+    def cancelSessionIfNeeded =
+      if ( p != null && sm.isSessionCreated( p ) ) {
+        sm.cancelSession( p )
+      }
+    
+    val actionAndArgumentValues = Seq(p, ev, cm.s ) ++ argumentValues toSeq;
     try {
       val r = cm.m.invoke( null, actionAndArgumentValues: _* )
 
@@ -199,104 +233,72 @@ object ClassLoaderHelper {
       log.info( s"${message} took ${currentTime - previousTime} ms" )
 
       r match {
+        case Failure( t @ MagicDrawValidationDataResultsException( r ) ) =>
+          MagicDrawValidationDataResults.showMDValidationDataResultsAndExecutePostSessionActions( p, sm, r, message )
+          Failure( t )
+
         case Failure( t ) =>
-          if ( p != null && sm.isSessionCreated( p ) ) {
-            sm.cancelSession( p )
-          }
-          ClassLoaderHelper.reportError( cm.s, message, t )
-          return Failure( t )
+          cancelSessionIfNeeded
+          Failure( t )
 
         case Success( None ) =>
-          if ( p != null && sm.isSessionCreated( p ) ) {
-            sm.closeSession( p )
-          }
-          return Success( Unit )
+          cancelSessionIfNeeded
+          Success( Unit )
 
-        case Success( s ) =>
-          s match {
-            case Some( r: MagicDrawValidationDataResults ) =>
-              try {
-                MagicDrawValidationDataResults.showMDValidationDataResultsIfAny( Some( r ) )
-              }
-              finally {
-                if ( p != null && sm.isSessionCreated( p ) ) {
-                  sm.closeSession( p )
-                }
-              }
-              MagicDrawValidationDataResults.doPostSessionActions( p, message, r ) match {
-                case Success( _ ) =>
-                  Success( Unit )
-                case Failure( t ) =>
-                  ClassLoaderHelper.reportError( cm.s, message, t )
-                  Failure( t )
-              }
+        case Success( s ) => s match {
+          case Some( r: MagicDrawValidationDataResults ) =>
+            MagicDrawValidationDataResults.showMDValidationDataResultsAndExecutePostSessionActions( p, sm, r, message )
 
-            case Some( any ) =>
-              if ( p != null && sm.isSessionCreated( p ) ) {
-                sm.closeSession( p )
-              }
-              Success( any )
+          case Some( any ) =>
+            cancelSessionIfNeeded
+            Success( any )
 
-            case None =>
-              if ( p != null && sm.isSessionCreated( p ) ) {
-                sm.closeSession( p )
-              }
-              Success( Unit )
+          case None =>
+            cancelSessionIfNeeded
+            Success( Unit )
 
-            case any =>
-              if ( p != null && sm.isSessionCreated( p ) ) {
-                sm.closeSession( p )
-              }
-              Success( any )
-          }
+          case any =>
+            cancelSessionIfNeeded
+            Success( any )
+        }
 
         case any =>
-          if ( p != null && sm.isSessionCreated( p ) ) {
-            sm.closeSession( p )
-          }
+          cancelSessionIfNeeded
           Success( any )
       }
     }
     catch {
       case ex: InvocationTargetException =>
-        if ( p != null && sm.isSessionCreated( p ) ) {
-          sm.cancelSession( p )
-        }
+        cancelSessionIfNeeded
         val t = ex.getTargetException() match { case null => ex; case t => t }
         val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
         ClassLoaderHelper.reportError( cm.s, ex_message, t )
-        return Failure( t )
+        Failure( ReportedException( t ) )
 
       case t: IllegalArgumentException =>
-        if ( p != null && sm.isSessionCreated( p ) ) {
-          sm.cancelSession( p )
-        }
+        cancelSessionIfNeeded
         val parameterTypes = ( cm.m.getParameterTypes() map ( _.getName() ) ) mkString ( "\n parameter type: ", "\n parameter type: ", "" )
         val parameterValues = ( actionAndArgumentValues map ( getArgumentValueTypeName( _ ) ) ) mkString ( "\n argument type: ", "\n argument type: ", "" )
         val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n${parameterTypes}\n${parameterValues}(do not submit!)"
         ClassLoaderHelper.reportError( cm.s, ex_message, t )
-        return Failure( t )
+        Failure( ReportedException( t ) )
 
       case t @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalAccessException ) =>
-        if ( p != null && sm.isSessionCreated( p ) ) {
-          sm.cancelSession( p )
-        }
+        cancelSessionIfNeeded
         val ex_message = message + s"\nError: ${t.getClass().getName()}\nMessage: ${t.getMessage()}\n(do not submit!)"
         ClassLoaderHelper.reportError( cm.s, ex_message, t )
-        return Failure( t )
+        Failure( ReportedException( t ) )
 
     }
     finally {
-      if ( p != null && sm.isSessionCreated( p ) ) {
-        sm.cancelSession( p )
-      }
+      cancelSessionIfNeeded
     }
   }
 
-  def getArgumentValueTypeName( value: Any ): String = 
-    if (null == value) "<null>"
+  def getArgumentValueTypeName( value: Any ): String =
+    if ( null == value ) "<null>"
     else value.getClass.getName
-    
+
   private var dynamicScriptsRootPath: String = null
 
   def getDynamicScriptsRootPath(): String = {

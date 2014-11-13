@@ -87,7 +87,7 @@ case class DynamicScriptsLaunchToolbarMenuAction( action: MainToolbarMenuAction,
                 return
 
               case Success( cm: ResolvedClassAndMethod ) =>
-                ClassLoaderHelper.invoke( previousTime, Application.getInstance().getProject(), ev, cm )
+                ClassLoaderHelper.invokeAndReport( previousTime, Application.getInstance().getProject(), ev, cm )
             }
         }
         finally {

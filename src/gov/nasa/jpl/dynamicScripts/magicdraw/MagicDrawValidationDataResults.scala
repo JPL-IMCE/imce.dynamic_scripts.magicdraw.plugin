@@ -68,12 +68,19 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.utils.Utilities
 
 /**
+ * Convenient wrapper for MagicDraw validation results with a new capability for post-processing actions
+ * @see Validation chapter in MD Open API User Manual
+ * 
  * The MD Open API for creating validation annotations & actions requires references to
  * <<UML Standard Profile::Validation Profile::validationRule>>-stereotyped constraints defined in an
  * <<UML Standard Profile::Validation Profile::validationSuite>>-stereotyped package.
  *
- * Constructing a ValidationRunData object requires a reference to validation suite package.
- * For example, given a set of MD Annotations: Set<Annotation> annotations,
+ * The MD Open API manual does not have any concept of "post-processing action".
+ *
+ * @example Java's tediousness {{{
+ *
+ * // Constructing a ValidationRunData object requires a reference to validation suite package.
+ * // For example, given a set of MD Annotations: Set<Annotation> annotations,
  *
  * Application application = Application.getInstance();
  * Project project = application.getProject();
@@ -96,8 +103,8 @@ import com.nomagic.utils.Utilities
  *    ...
  *  }
  *
- * Constructing a RuleViolationResult object requires a reference to a validation constraint;
- * for example, in the context of the above:
+ * // Constructing a RuleViolationResult object requires a reference to a validation constraint;
+ * // for example, in the context of the above:
  *
  * 		if (null != validationSuite) {
  *    Collection<Constraint> validationConstraints = vsh.getValidationRules(validationSuite);
@@ -116,9 +123,9 @@ import com.nomagic.utils.Utilities
  *    List<RunnableWithProgress> postSessionActions = new ArrayList<RunnableWithProgress>();
  *    return new MagicDrawValidationDataResults("<title>", runData, results, postSessionActions);
  *  }
- *
+ * }}}
+ * 
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
- * @see Validation chapter in MD Open API User Manual
  */
 case class MagicDrawValidationDataResults(
   val title: String,
@@ -160,40 +167,65 @@ object MagicDrawValidationDataResults {
   val mdValidationProfileQName = "UML Standard Profile::Validation Profile::Composition Integrity"
   val mdValidationConstraintQName = "UML Standard Profile::Validation Profile::Composition Integrity::Illegal Reference"
 
+  /** Creates a `MagicDrawValidationDataResultsException` for elements, optionally with validation annotation actions
+   * 
+   * @param p the active MagicDraw project
+   * @param validationMessage to be shown as the title of MagicDraw's Validation results window
+   * @param elementMessages maps elements to a pair of a validation message and validation annotation actions
+   * @param validationSuiteQName the qualified name of a MagicDraw validation suite profile, defaults to [[mdValidationProfileQName]]
+   * @param validationConstraintQName the qualified name of a MagicDraw validation constraint, defaults to [[mdValidationConstraintQName]]
+   */
   def makeMDIllegalArgumentExceptionValidation(
     p: Project,
     validationMessage: String,
-    elementMessages: Map[Element, Either[String, ( String, List[NMAction] )]],
+    elementMessages: Map[Element, ( String, List[NMAction] )],
     validationSuiteQName: String = mdValidationProfileQName,
-    validationConstraintQName: String = mdValidationConstraintQName ): MagicDrawValidationDataResults =
+    validationConstraintQName: String = mdValidationConstraintQName ): MagicDrawValidationDataResultsException =
     getMDValidationProfileAndConstraint( p, validationSuiteQName, validationConstraintQName ) match {
       case None =>
         throw new IllegalArgumentException( s"Failed to find MD's Validation Profile '${validationSuiteQName}' & Constraint '${validationConstraintQName}'" )
       case Some( ( vSuite, c ) ) =>
         val runData = new ValidationRunData( vSuite.suite, false, elementMessages.keys, vSuite.vsh.getRuleSeverityLevel( c ) )
         val results = elementMessages map {
-          case ( element, Left( message ) ) =>
-            new RuleViolationResult( new Annotation( element, c, message, List[NMAction]() ), c )
-          case ( element, Right( ( message, actions ) ) ) =>
+          case ( element, ( message, actions ) ) =>
             new RuleViolationResult( new Annotation( element, c, message, actions ), c )
         }
-        MagicDrawValidationDataResults( validationMessage, runData, results, List[RunnableWithProgress]() )
+        MagicDrawValidationDataResultsException( MagicDrawValidationDataResults( validationMessage, runData, results, List[RunnableWithProgress]() ) )
     }
 
   def showMDValidationDataResultsIfAny( data: Option[MagicDrawValidationDataResults] ): Unit =
     data match {
-      case None => ()
-      case Some( d ) =>
-        if ( d.results.nonEmpty )
-          Utilities.invokeAndWaitOnDispatcher( new Runnable() {
-            override def run: Unit =
-              ValidationResultsWindowManager.updateValidationResultsWindow(
-                d.title + System.currentTimeMillis().toString,
-                d.title,
-                d.runData,
-                d.results )
-          } )
+      case None      => ()
+      case Some( d ) => showMDValidationDataResults( d )
     }
+
+  def showMDValidationDataResultsAndExecutePostSessionActions( p: Project, sm: SessionManager, r: MagicDrawValidationDataResults, message: String ): Try[Unit] =
+    try {
+      if ( p != null && sm.isSessionCreated( p ) ) {
+        sm.closeSession( p )
+      }
+      MagicDrawValidationDataResults.showMDValidationDataResults( r )
+      Success( Unit )
+    }
+    finally {
+      MagicDrawValidationDataResults.doPostSessionActions( p, message, r ) match {
+        case Success( _ ) =>
+          Success( Unit )
+        case Failure( t ) =>
+          Failure( t )
+      }
+    }
+
+  def showMDValidationDataResults( d: MagicDrawValidationDataResults ): Unit =
+    if ( d.results.nonEmpty )
+      Utilities.invokeAndWaitOnDispatcher( new Runnable() {
+        override def run: Unit =
+          ValidationResultsWindowManager.updateValidationResultsWindow(
+            d.title + System.currentTimeMillis().toString,
+            d.title,
+            d.runData,
+            d.results )
+      } )
 
   def doPostSessionActions( project: Project, message: String, data: MagicDrawValidationDataResults ): Try[Unit] = {
     if ( data.postSessionActions.isEmpty() )

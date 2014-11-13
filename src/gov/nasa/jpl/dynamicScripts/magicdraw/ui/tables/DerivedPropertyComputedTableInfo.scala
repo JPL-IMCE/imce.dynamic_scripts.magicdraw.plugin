@@ -25,15 +25,15 @@ case class DerivedPropertyComputedTableInfo( e: Element,
 
   require( computedDerivedTable.columnValueTypes.isDefined, s"A DerivedPropertyComputedTable must have explicitly-specified column value types!" )
   require( computedDerivedTable.columnValueTypes.get.nonEmpty, s"A DerivedPropertyComputedTable must have at least 1 column value type!" )
-  
+
   val columnValueTypes = computedDerivedTable.columnValueTypes.get
-  
-  var values: Seq[Map[String, Seq[AbstractTreeNodeInfo]]] = null
+
+  var values: Seq[Map[String, AbstractTreeNodeInfo]] = null
 
   override def dispose: Unit = values = null
 
   override def getLabel: String = s"/${computedDerivedTable.name.hname}"
-  
+
   override def getColumnCount: Int = columnValueTypes.size
 
   override def getColumnName( columnIndex: Int ): String = {
@@ -79,20 +79,19 @@ case class DerivedPropertyComputedTableInfo( e: Element,
                     return Seq()
 
                   case Success( cm ) =>
-                    val result = ClassLoaderHelper.invoke(
+                    val result = ClassLoaderHelper.invokeAndReport(
                       previousTime, Project.getProject( e ), null, cm, ek, e )
                     result match {
                       case Failure( t ) =>
-                        ClassLoaderHelper.reportError( computedDerivedTable, message, t )
                         return Seq()
                       case Success( rs: Seq[_] ) =>
-                        DerivedPropertyComputedTableInfo.asSeqOfMapOfStringToSeqOfAbstractTreeNodeInfo( rs ) match {
+                        DerivedPropertyComputedTableInfo.asSeqOfMapOfStringToAbstractTreeNodeInfo( rs ) match {
                           case None =>
                             ClassLoaderHelper.reportError( computedDerivedTable, message, new IllegalArgumentException( s"Unrecognized result -- expected: Seq[Map[String, Seq[AbstractTreeNodeInfo]]], got: ${rs.getClass.getName}" ) )
                             return Seq()
                           case Some( rTable ) =>
                             values = rTable
-                            values flatMap ( _.values flatMap ( _ flatMap ( _.getAnnotations ) ) )
+                            values flatMap ( _.values flatMap ( _.getAnnotations ) )
                         }
                       case Success( x ) =>
                         ClassLoaderHelper.reportError( computedDerivedTable, message, new IllegalArgumentException( s"Unrecognized result -- expected: Seq[Map[String, Seq[AbstractTreeNodeInfo]]], got: ${x.getClass.getName}" ) )
@@ -116,25 +115,18 @@ case class DerivedPropertyComputedTableInfo( e: Element,
 object DerivedPropertyComputedTableInfo {
 
   /**
-   * Seq[Map[String, Seq[AbstractTreeNodeInfo]]]
+   * Seq[Map[String, AbstractTreeNodeInfo]]
    */
-  def asSeqOfMapOfStringToSeqOfAbstractTreeNodeInfo( rs: Seq[_] ): Option[Seq[Map[String, Seq[AbstractTreeNodeInfo]]]] =
+  def asSeqOfMapOfStringToAbstractTreeNodeInfo( rs: Seq[_] ): Option[Seq[Map[String, AbstractTreeNodeInfo]]] =
     if ( rs.forall( _ match {
       case m: Map[_, _] =>
         m.forall( _ match {
-          case ( _: String, s: Seq[_] ) =>
-            s.forall( _ match {
-              case _: AbstractTreeNodeInfo => true
-              case _                       => false
-            } )
-            true
-          case ( _, _ ) =>
-            false
+          case ( _: String, _: AbstractTreeNodeInfo ) => true
+          case ( _, _ )                               => false
         } )
-        true
       case _ =>
         false
     } ) )
-      Some( rs.asInstanceOf[Seq[Map[String, Seq[AbstractTreeNodeInfo]]]] )
+      Some( rs.asInstanceOf[Seq[Map[String, AbstractTreeNodeInfo]]] )
     else None
 }

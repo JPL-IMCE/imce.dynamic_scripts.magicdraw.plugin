@@ -120,11 +120,11 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
                   return
 
                 case Success( cm2: ResolvedClassAndMethod ) =>
-                  ClassLoaderHelper.invoke( previousTime, project, ev, cm2, tree, triggerNode, triggerElement, selected )
+                  ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm2, tree, triggerNode, triggerElement, selected )
               }
 
             case Success( cm1: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invoke( previousTime, project, ev, cm1, tree, triggerNode, triggerElement, selected )
+              ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm1, tree, triggerNode, triggerElement, selected )
           }
         }
         finally {
