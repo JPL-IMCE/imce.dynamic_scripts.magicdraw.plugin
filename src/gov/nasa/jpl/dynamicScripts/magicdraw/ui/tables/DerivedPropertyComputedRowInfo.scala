@@ -26,13 +26,16 @@ case class DerivedPropertyComputedRowInfo( e: Element,
   var values: Seq[AbstractTreeNodeInfo] = null
 
   override def dispose: Unit = values = null
-
-  override def getLabel: String =
-    computedDerivedProperty.valueType match {
+  
+  val defaultLabel: String = computedDerivedProperty.valueType match {
     case None => s"/${computedDerivedProperty.name.hname}"
-    case Some( vt ) => vt.typeName.hname
+    case Some( vt ) => s"/${computedDerivedProperty.name.hname}: ${vt.typeName.hname}"
   }
   
+  var label: String = defaultLabel
+  
+  override def getLabel: String = label
+      
   override def getColumnCount: Int = 1
 
   override def getColumnName( columnIndex: Int ): String = {
@@ -87,6 +90,7 @@ case class DerivedPropertyComputedRowInfo( e: Element,
                             return Seq()
                           case Success( nodes ) =>
                             values = nodes
+                            label = s"${defaultLabel} => ${values.size} values"
                             values flatMap ( _.getAnnotations )
                         }
                     }

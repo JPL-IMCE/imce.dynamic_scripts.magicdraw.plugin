@@ -30,9 +30,12 @@ case class DerivedPropertyComputedTableInfo( e: Element,
 
   var values: Seq[Map[String, AbstractTreeNodeInfo]] = null
 
+  val defaultLabel: String = s"/${computedDerivedTable.name.hname}"
+  var label: String = defaultLabel
+  
   override def dispose: Unit = values = null
 
-  override def getLabel: String = s"/${computedDerivedTable.name.hname}"
+  override def getLabel: String = label
 
   override def getColumnCount: Int = columnValueTypes.size
 
@@ -91,6 +94,7 @@ case class DerivedPropertyComputedTableInfo( e: Element,
                             return Seq()
                           case Some( rTable ) =>
                             values = rTable
+                            label = s"${defaultLabel} => ${values.size} values"
                             values flatMap ( _.values flatMap ( _.getAnnotations ) )
                         }
                       case Success( x ) =>
