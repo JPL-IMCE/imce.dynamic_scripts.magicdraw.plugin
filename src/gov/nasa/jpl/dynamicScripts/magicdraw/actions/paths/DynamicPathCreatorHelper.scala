@@ -41,11 +41,9 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths
 
 import java.awt.Point
 import java.lang.reflect.Method
-
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
@@ -54,7 +52,6 @@ import com.nomagic.magicdraw.uml.symbols.paths.PathElement
 import com.nomagic.magicdraw.uml.symbols.shapes.InstanceSpecificationView
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.InstanceSpecification
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.MetaclassDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedClassifiedInstanceDesignation
@@ -62,6 +59,9 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedMetaclassDesig
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ToplevelPathInstanceCreator
 import gov.nasa.jpl.dynamicScripts.magicdraw.designations._
 import gov.nasa.jpl.dynamicScripts.magicdraw.designations.MagicDrawElementKindDesignation._
+import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
+import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
+import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResultsException
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -141,21 +141,13 @@ case class DynamicPathCreatorForClassifiedInstanceDesignation( project: Project,
   }
 
   def lookupMethod( clazz: java.lang.Class[_], action: ToplevelPathInstanceCreator ): Try[Method] =
-    try {
-      clazz.getMethod( action.methodName.sname,
+    ClassLoaderHelper.lookupMethod( clazz, action, 
         classOf[Project], classOf[ToplevelPathInstanceCreator],
         classOf[DiagramPresentationElement], classOf[Point],
         classOf[LinkView], classOf[InstanceSpecification],
         classOf[ResolvedMagicDrawClassifiedInstanceDesignation],
         classOf[InstanceSpecificationView], classOf[InstanceSpecification],
-        classOf[InstanceSpecificationView], classOf[InstanceSpecification] ) match {
-          case m: Method => Success( m )
-          case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}(LinkView, InstanceSpecification, Association, InstanceSpecification, InstanceSpecification)' not found in ${action.className.jname}" ) )
-        }
-    }
-    catch {
-      case ex: NoSuchMethodException => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}(LinkView, InstanceSpecification, Association, InstanceSpecification, InstanceSpecification)' not found in ${action.className.jname}" ) )
-    }
+        classOf[InstanceSpecificationView], classOf[InstanceSpecification] )
 
   def invokeMethod( method: Method, action: ToplevelPathInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object =
     md match {
@@ -171,7 +163,16 @@ case class DynamicPathCreatorForClassifiedInstanceDesignation( project: Project,
               case ( iv: InstanceSpecificationView, i: InstanceSpecification ) => ( iv, i )
               case _ => return Failure( new IllegalArgumentException( s"Cannot find supplier InstanceSpecification" ) )
             }
-            method.invoke( null, Project.getProject( e ), action, linkView.getDiagramPresentationElement, point, linkView, link, r, iSourceView, iSource, iTargetView, iTarget )
+            val project = Project.getProject( e )
+            method.invoke( null, project, action, 
+                linkView.getDiagramPresentationElement, point, 
+                linkView, link, r, iSourceView, iSource, iTargetView, iTarget ) match {
+              case Failure( t @ MagicDrawValidationDataResultsException( r ) ) =>
+                MagicDrawValidationDataResults.showMDValidationDataResults( r )
+                null
+              case x => 
+                x
+            }
           case ( _, _ ) =>
             Failure( new IllegalArgumentException( s"Cannot find created LinkView for InstanceSpecification" ) )
         }
@@ -201,22 +202,14 @@ case class DynamicPathCreatorForStereotypedClassifiedInstanceDesignation( projec
   }
 
   def lookupMethod( clazz: java.lang.Class[_], action: ToplevelPathInstanceCreator ): Try[Method] =
-    try {
-      clazz.getMethod( action.methodName.sname,
+    ClassLoaderHelper.lookupMethod( clazz, action, 
         classOf[Project], classOf[ToplevelPathInstanceCreator],
         classOf[DiagramPresentationElement], classOf[Point],
         classOf[LinkView], classOf[InstanceSpecification],
         classOf[ResolvedMagicDrawStereotypedClassifiedInstanceDesignation],
         classOf[InstanceSpecificationView], classOf[InstanceSpecification],
-        classOf[InstanceSpecificationView], classOf[InstanceSpecification] ) match {
-          case m: Method => Success( m )
-          case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}(LinkView, InstanceSpecification, Association, InstanceSpecification, InstanceSpecification)' not found in ${action.className.jname}" ) )
-        }
-    }
-    catch {
-      case ex: NoSuchMethodException => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}(LinkView, InstanceSpecification, Association, InstanceSpecification, InstanceSpecification)' not found in ${action.className.jname}" ) )
-    }
-
+        classOf[InstanceSpecificationView], classOf[InstanceSpecification] )
+        
   def invokeMethod( method: Method, action: ToplevelPathInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object =
     md match {
       case u: UnresolvedMagicDrawStereotypedClassifiedInstanceDesignation => Failure( u.error )
@@ -231,7 +224,16 @@ case class DynamicPathCreatorForStereotypedClassifiedInstanceDesignation( projec
               case ( iv: InstanceSpecificationView, i: InstanceSpecification ) => ( iv, i )
               case _ => return Failure( new IllegalArgumentException( s"Cannot find supplier InstanceSpecification" ) )
             }
-            method.invoke( null, Project.getProject( e ), action, linkView.getDiagramPresentationElement, point, linkView, link, r, iSourceView, iSource, iTargetView, iTarget )
+            val project = Project.getProject( e )
+            method.invoke( null, project, action, 
+                linkView.getDiagramPresentationElement, point, 
+                linkView, link, r, iSourceView, iSource, iTargetView, iTarget ) match {
+              case Failure( t @ MagicDrawValidationDataResultsException( r ) ) =>
+                MagicDrawValidationDataResults.showMDValidationDataResults( r )
+                null
+              case x => 
+                x
+            }
           case ( _, _ ) =>
             Failure( new IllegalArgumentException( s"Cannot find created LinkView for InstanceSpecification" ) )
         }

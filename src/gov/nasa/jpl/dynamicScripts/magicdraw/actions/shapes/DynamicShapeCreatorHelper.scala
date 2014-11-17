@@ -41,22 +41,22 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes
 
 import java.awt.Point
 import java.lang.reflect.Method
-
 import scala.language.existentials
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.MetaclassDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedMetaclassDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ToplevelShapeInstanceCreator
 import gov.nasa.jpl.dynamicScripts.magicdraw.designations._
+import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
+import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
+import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResultsException
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -82,22 +82,22 @@ case class DynamicShapeCreatorForMetaclassDesignation( project: Project, d: Meta
   }
 
   def lookupMethod( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator ): Try[Method] =
-    try {
-      clazz.getMethod( action.methodName.sname,
-        classOf[Project], classOf[ToplevelShapeInstanceCreator],
-        classOf[ResolvedMagicDrawClassifiedInstanceDesignation],
-        classOf[PresentationElement], classOf[Point], classOf[Element] ) match {
-          case m: Method => Success( m )
-          case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
-        }
-    }
-    catch {
-      case ex: NoSuchMethodException => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
-    }
+    ClassLoaderHelper.lookupMethod( clazz, action,
+      classOf[Project], classOf[ToplevelShapeInstanceCreator],
+      classOf[ResolvedMagicDrawMetaclassDesignation],
+      classOf[PresentationElement], classOf[Point], classOf[Element] )
 
   def invokeMethod( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object = md match {
-    case u: UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
-    case r: ResolvedMagicDrawMetaclassDesignation   => method.invoke( null, Project.getProject( e ), das, r, pe, point, e )
+    case u: UnresolvedMagicDrawMetaclassDesignation => 
+      Failure( u.error )
+    case r: ResolvedMagicDrawMetaclassDesignation   =>
+      method.invoke( null, Project.getProject( e ), das, r, pe, point, e ) match {
+        case Failure( t @ MagicDrawValidationDataResultsException( r ) ) =>
+          MagicDrawValidationDataResults.showMDValidationDataResults( r )
+          null
+        case x =>
+          x
+      }
   }
 }
 
@@ -113,22 +113,22 @@ case class DynamicShapeCreatorForStereotypedMetaclassDesignation( project: Proje
   }
 
   def lookupMethod( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator ): Try[Method] =
-    try {
-      clazz.getMethod( action.methodName.sname,
-        classOf[Project], classOf[ToplevelShapeInstanceCreator],
-        classOf[ResolvedMagicDrawClassifiedInstanceDesignation],
-        classOf[PresentationElement], classOf[Point], classOf[Element] ) match {
-          case m: Method => Success( m )
-          case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
-        }
-    }
-    catch {
-      case ex: NoSuchMethodException => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
-    }
+    ClassLoaderHelper.lookupMethod( clazz, action,
+      classOf[Project], classOf[ToplevelShapeInstanceCreator],
+      classOf[ResolvedMagicDrawStereotypeDesignation],
+      classOf[PresentationElement], classOf[Point], classOf[Element] )
 
   def invokeMethod( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object = md match {
-    case u: UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
-    case r: ResolvedMagicDrawMetaclassDesignation   => method.invoke( null, Project.getProject( e ), das, r, pe, point, e )
+    case u: UnresolvedMagicDrawMetaclassDesignation => 
+      Failure( u.error )
+    case r: ResolvedMagicDrawMetaclassDesignation   => 
+      method.invoke( null, Project.getProject( e ), das, r, pe, point, e ) match {
+        case Failure( t @ MagicDrawValidationDataResultsException( r ) ) =>
+          MagicDrawValidationDataResults.showMDValidationDataResults( r )
+          null
+        case x =>
+          x
+      }
   }
 }
 
@@ -143,22 +143,22 @@ case class DynamicShapeCreatorForClassifiedInstanceDesignation( project: Project
     case r: ResolvedMagicDrawClassifiedInstanceDesignation   => r.createElement( project )
   }
   def lookupMethod( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator ): Try[Method] =
-    try {
-      clazz.getMethod( action.methodName.sname,
-        classOf[Project], classOf[ToplevelShapeInstanceCreator],
-        classOf[ResolvedMagicDrawClassifiedInstanceDesignation],
-        classOf[PresentationElement], classOf[Point], classOf[Element] ) match {
-          case m: Method => Success( m )
-          case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
-        }
-    }
-    catch {
-      case ex: NoSuchMethodException => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
-    }
+    ClassLoaderHelper.lookupMethod( clazz, action,
+      classOf[Project], classOf[ToplevelShapeInstanceCreator],
+      classOf[ResolvedMagicDrawClassifiedInstanceDesignation],
+      classOf[PresentationElement], classOf[Point], classOf[Element] )
 
   def invokeMethod( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object = md match {
-    case u: UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
-    case r: ResolvedMagicDrawMetaclassDesignation   => method.invoke( null, Project.getProject( e ), das, r, pe, point, e )
+    case u: UnresolvedMagicDrawClassifiedInstanceDesignation => 
+      Failure( u.error )
+    case r: ResolvedMagicDrawClassifiedInstanceDesignation   => 
+      method.invoke( null, Project.getProject( e ), das, r, pe, point, e ) match {
+        case Failure( t @ MagicDrawValidationDataResultsException( r ) ) =>
+          MagicDrawValidationDataResults.showMDValidationDataResults( r )
+          null
+        case x =>
+          x
+      }
   }
 }
 
@@ -174,21 +174,21 @@ case class DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation( proje
   }
 
   def lookupMethod( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator ): Try[Method] =
-    try {
-      clazz.getMethod( action.methodName.sname,
-        classOf[Project], classOf[ToplevelShapeInstanceCreator],
-        classOf[ResolvedMagicDrawStereotypedClassifiedInstanceDesignation],
-        classOf[PresentationElement], classOf[Point], classOf[Element] ) match {
-          case m: Method => Success( m )
-          case null      => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
-        }
-    }
-    catch {
-      case ex: NoSuchMethodException => Failure( new IllegalArgumentException( s"method '${action.methodName.sname}()' not found in ${action.className.jname}" ) )
-    }
+    ClassLoaderHelper.lookupMethod( clazz, action,
+      classOf[Project], classOf[ToplevelShapeInstanceCreator],
+      classOf[ResolvedMagicDrawStereotypedClassifiedInstanceDesignation],
+      classOf[PresentationElement], classOf[Point], classOf[Element] )
 
   def invokeMethod( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object = md match {
-    case u: UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
-    case r: ResolvedMagicDrawMetaclassDesignation   => method.invoke( null, Project.getProject( e ), das, r, pe, point, e )
+    case u: UnresolvedMagicDrawMetaclassDesignation =>
+      Failure( u.error )
+    case r: ResolvedMagicDrawMetaclassDesignation =>
+      method.invoke( null, Project.getProject( e ), das, r, pe, point, e ) match {
+        case Failure( t @ MagicDrawValidationDataResultsException( r ) ) =>
+          MagicDrawValidationDataResults.showMDValidationDataResults( r )
+          null
+        case x =>
+          x
+      }
   }
 }
