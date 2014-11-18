@@ -46,14 +46,20 @@ case class DerivedPropertyComputedTableInfo( e: Element,
 
   override def getRowCount: Int = if ( null == values ) 0 else values.size
 
+  /**
+   * @todo Improve the display of empty cells.
+   * Currently, a cell is empty if getValueAt(r,c) == null.
+   * Instead of returning null, consider defining a special AbstractTreeNodeInfo, e.g., EmptyTreeNodeInfo, 
+   * that would be displayed as a grayed-out, crossed cell.
+   */
   override def getValueAt( rowIndex: Int, columnIndex: Int ): Object = {
     require( 0 <= columnIndex && columnIndex < columnValueTypes.size )
     require( null != values )
     require( 0 <= rowIndex && rowIndex < values.size )
     val row = values( rowIndex )
     val column = columnValueTypes( columnIndex ).key.sname
-    require( row.contains( column ) )
-    row( column )
+    if (row.contains( column )) row( column )
+    else null
   }
 
   override def update: Seq[ValidationAnnotation] =

@@ -220,6 +220,11 @@ object ClassLoaderHelper {
     if ( p != null )
       sm.createSession( p, message )
 
+    def closeSessionIfNeeded =
+      if ( p != null && sm.isSessionCreated( p ) ) {
+        sm.closeSession( p )
+      }
+    
     def cancelSessionIfNeeded =
       if ( p != null && sm.isSessionCreated( p ) ) {
         sm.cancelSession( p )
@@ -242,7 +247,7 @@ object ClassLoaderHelper {
           Failure( t )
 
         case Success( None ) =>
-          cancelSessionIfNeeded
+          closeSessionIfNeeded
           Success( Unit )
 
         case Success( s ) => s match {
@@ -250,20 +255,20 @@ object ClassLoaderHelper {
             MagicDrawValidationDataResults.showMDValidationDataResultsAndExecutePostSessionActions( p, sm, r, message )
 
           case Some( any ) =>
-            cancelSessionIfNeeded
+            closeSessionIfNeeded
             Success( any )
 
           case None =>
-            cancelSessionIfNeeded
+            closeSessionIfNeeded
             Success( Unit )
 
           case any =>
-            cancelSessionIfNeeded
+            closeSessionIfNeeded
             Success( any )
         }
 
         case any =>
-          cancelSessionIfNeeded
+          closeSessionIfNeeded
           Success( any )
       }
     }

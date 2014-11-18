@@ -240,8 +240,8 @@ object MagicDrawValidationDataResults {
           progressStatus.setIndeterminate( true )
           for ( request <- data.postSessionActions ) {
             if ( progressStatus.isCancel() ) {
-              if ( sm.isSessionCreated() )
-                sm.cancelSession()
+              if ( project != null && sm.isSessionCreated() )
+                sm.cancelSession( project )
               return
             }
 
@@ -256,7 +256,8 @@ object MagicDrawValidationDataResults {
               case null => ()
               case m    => m.invoke( request, progressStatus )
             }
-
+            if ( project != null && sm.isSessionCreated( project ) )
+              sm.closeSession( project )
           }
         }
         catch {
