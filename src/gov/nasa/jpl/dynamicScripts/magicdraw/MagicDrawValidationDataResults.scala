@@ -143,16 +143,18 @@ object MagicDrawValidationDataResults {
 
   case class ValidationSuiteInfo( vsh: ValidationSuiteHelper, suite: Package ) {}
 
+  import DynamicScriptsPlugin._
+  
   def lookupValidationSuite( p: Project, suiteQualifiedName: String ): Option[ValidationSuiteInfo] = {
     val vsh = ValidationSuiteHelper.getInstance( p )
-    vsh.getValidationSuites().find { s => s.getQualifiedName() == suiteQualifiedName } match {
+    vsh.getValidationSuites().find { s => wildCardMatch( s.getQualifiedName, suiteQualifiedName ) } match {
       case None                   => None
       case Some( suite: Package ) => Some( ValidationSuiteInfo( vsh, suite ) )
     }
   }
 
   def lookupValidationConstraint( vSuiteInfo: ValidationSuiteInfo, constraintQualifiedName: String ): Option[Constraint] =
-    vSuiteInfo.vsh.getValidationRules( vSuiteInfo.suite ) find { c => c.getQualifiedName() == constraintQualifiedName }
+    vSuiteInfo.vsh.getValidationRules( vSuiteInfo.suite ) find { c => wildCardMatch( c.getQualifiedName, constraintQualifiedName ) }
 
   def getMDValidationProfileAndConstraint( p: Project, validationSuiteQName: String, validationConstraintQName: String ): Option[( ValidationSuiteInfo, Constraint )] =
     lookupValidationSuite( p, validationSuiteQName ) match {

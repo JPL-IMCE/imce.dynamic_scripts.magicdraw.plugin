@@ -133,7 +133,9 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
           Some( message )
         }
     }
-
+  
+  import DynamicScriptsPlugin._
+  
   def getRelevantMetaclassComputedCharacterizations( metaclassShortName: String ): Map[String, SortedSet[ComputedCharacterization]] = {
     val scripts = for {
       ( key, availableCS ) <- registry.metaclassCharacterizations
@@ -161,8 +163,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
           ( key, availableCS ) <- registry.classifierCharacterizations
           applicableCS = availableCS.filter { cs: ComputedCharacterization =>
             cs.characterizesInstancesOf match {
-              case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == metaName && qName == clsQName
-              case _ => false
+              case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => 
+                mName == metaName && wildCardMatch( clsQName, qName )
+              case _ => 
+                false
             }
           }
           if ( applicableCS.nonEmpty )
@@ -177,8 +181,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
       ( key, availableCS ) <- registry.stereotypedMetaclassCharacterizations
       applicableCS = availableCS.filter { cs: ComputedCharacterization =>
         cs.characterizesInstancesOf match {
-          case StereotypedMetaclassDesignation( SName( mName ), QName( pfName ), QName( qName ) ) => mName == metaclassName && pfName == profileQName && qName == stereotypeQName
-          case _ => false
+          case StereotypedMetaclassDesignation( SName( mName ), QName( pfName ), QName( qName ) ) => 
+            mName == metaclassName && wildCardMatch( profileQName, pfName) && wildCardMatch( stereotypeQName, qName )
+          case _ => 
+            false
         }
       }
       if ( applicableCS.nonEmpty )
@@ -195,8 +201,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
         ( key, availableCS ) <- registry.stereotypedClassifierCharacterizations
         applicableCS = availableCS.filter { cs: ComputedCharacterization =>
           cs.characterizesInstancesOf match {
-            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == "InstanceSpecification" && qName == clsQName
-            case _ => false
+            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => 
+              mName == "InstanceSpecification" && wildCardMatch( clsQName, qName )
+            case _ => 
+              false
           }
         }
         if ( applicableCS.nonEmpty )
@@ -210,8 +218,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
         ( key, availableCS ) <- registry.stereotypedClassifierCharacterizations
         applicableCS = availableCS.filter { cs: ComputedCharacterization =>
           cs.characterizesInstancesOf match {
-            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == "Connector" && qName == clsQName
-            case _ => false
+            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => 
+              mName == "Connector" && wildCardMatch( clsQName, qName )
+            case _ => 
+              false
           }
         }
         if ( applicableCS.nonEmpty )
@@ -241,8 +251,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
       ( key, scripts ) <- registry.stereotypedMetaclassActions
       sScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
         s.applicableTo match {
-          case StereotypedMetaclassDesignation( SName( mName ), QName( pfName ), QName( qName ) ) => mName == metaclassName && pfName == profileQName && qName == stereotypeQName
-          case _ => false
+          case StereotypedMetaclassDesignation( SName( mName ), QName( pfName ), QName( qName ) ) => 
+            mName == metaclassName && wildCardMatch( profileQName, pfName) && wildCardMatch( stereotypeQName, qName )
+          case _ => 
+            false
         }
       }
       availableActions = sScript.scripts filter ( criteria( _ ) )
@@ -277,8 +289,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
           ( key, scripts ) <- registry.classifierActions
           cScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
             s.applicableTo match {
-              case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == metaName && qName == clsQName
-              case _ => false
+              case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => 
+                mName == metaName && wildCardMatch( clsQName, qName )
+              case _ => 
+                false
             }
           }
           availableActions = cScript.scripts filter ( criteria( _ ) )
@@ -297,8 +311,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
         ( key, scripts ) <- registry.stereotypedClassifierActions
         cScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
           s.applicableTo match {
-            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == "InstanceSpecification" && qName == clsQName
-            case _ => false
+            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => 
+              mName == "InstanceSpecification" && wildCardMatch( clsQName, qName )
+            case _ => 
+              false
           }
         }
         availableActions = cScript.scripts filter ( criteria( _ ) )
@@ -312,8 +328,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
         ( key, scripts ) <- registry.stereotypedClassifierActions
         cScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
           s.applicableTo match {
-            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == "Connector" && qName == clsQName
-            case _ => false
+            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => 
+              mName == "Connector" && wildCardMatch( clsQName, qName )
+            case _ => 
+              false
           }
         }
         availableActions = cScript.scripts filter ( criteria( _ ) )
@@ -482,4 +500,18 @@ object DynamicScriptsPlugin {
     ( getInstance().getDynamicScriptsRegistry(), elementPackageContext.toSet ++ diagramPackageContext.toSet ++ diagramDependencyContext.toSet )
   }
 
+  def wildCardMatch( text: String, pattern: String): Boolean =
+    wildCardMatch( true, pattern.endsWith("*"), pattern.split("\\*").toList, text )
+  
+  def wildCardMatch( matchHead: Boolean, anyTail: Boolean, cards: List[String], text: String ): Boolean =
+    cards match {
+    case Nil => anyTail || text.isEmpty
+    case c :: cs => 
+      text.indexOf(c) match {
+        case -1 => false
+        case idx => 
+          if ( matchHead && (idx > 1) ) false
+          else wildCardMatch( false, anyTail, cs, text.substring(idx + c.length))
+      }
+  }
 }
