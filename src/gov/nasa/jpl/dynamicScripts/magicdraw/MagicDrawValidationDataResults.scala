@@ -80,6 +80,7 @@ import DynamicScriptsPlugin.wildCardMatch
 import javax.swing.JComponent
 import javax.swing.KeyStroke
 import javax.swing.AbstractAction
+import com.nomagic.magicdraw.ui.MagicDrawProgressStatusRunner
 
 /**
  * Convenient wrapper for MagicDraw validation results with a new capability for post-processing actions
@@ -376,10 +377,10 @@ object MagicDrawValidationDataResults {
                     case as   => as.toList
                   } )
                   val actionsByID = actions groupBy ( _.getID )
-                  
-                  val messageSummary = s"Ok to execute all ${actions.size} selected dynamic validation annotion actions?\nSummary of actions by ID:\n" 
-                  val messageDetails = ( actionsByID map { case (id, actions) => s" - ${actions.size} ${id} " } ) mkString ("\n")
-                  
+
+                  val messageSummary = s"Ok to execute all ${actions.size} selected dynamic validation annotion actions?\nSummary of actions by ID:\n"
+                  val messageDetails = ( actionsByID map { case ( id, actions ) => s" - ${actions.size} ${id} " } ) mkString ( "\n" )
+
                   val status = JOptionPane.showConfirmDialog(
                     Application.getInstance.getMainFrame,
                     messageSummary + messageDetails,
@@ -387,13 +388,28 @@ object MagicDrawValidationDataResults {
                     JOptionPane.OK_CANCEL_OPTION )
 
                   if ( status == JOptionPane.OK_OPTION ) {
-                    System.out.println( s"**** Begin executing all ${actions.size} selected annotation actions" )
-                    actions foreach { action =>
-                      action.actionPerformed( null )
-                    }
-                    System.out.println( s"**** Finished execution of all ${actions.size} selected annotation actions" )
-                  }
+                    val runnable = new RunnableWithProgress() {
 
+                      def run( progressStatus: ProgressStatus ): Unit = {
+                        progressStatus.setCurrent( 0 )
+                        progressStatus.setMax( 0 )
+                        progressStatus.setMax( actions.size )
+                        
+                        actions foreach { action =>
+                          if (progressStatus.isCancel())
+                            return
+                          progressStatus.setDescription(s"Executing ${actions.size - progressStatus.getCurrent} dynamic validation annotation actions...")
+                          action.actionPerformed( null )
+                          progressStatus.increase
+                        }
+                      }
+                    }
+                    
+                    MagicDrawProgressStatusRunner.runWithProgressStatus(
+                      runnable,
+                      s"Executing ${actions.size} dynamic validation annotation actions",
+                      true, 0 )
+                  }
                 }
               } )
 
