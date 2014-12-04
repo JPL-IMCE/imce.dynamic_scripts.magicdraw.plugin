@@ -1,28 +1,26 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables
 
+import scala.language.postfixOps
 import java.awt.Component
 import java.awt.Graphics
 import java.awt.Rectangle
-
+import javax.swing.table.AbstractTableModel
 import javax.swing.table.DefaultTableModel
-
 import com.jidesoft.grid.CellPainter
 import com.jidesoft.grid.CellStyle
 import com.jidesoft.grid.StyleModel
 import com.jidesoft.swing.OverlayableIconsFactory
-
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AnnotationNodeInfo
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
+import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AbstractTreeNodeInfo
+import com.nomagic.magicdraw.annotation.Annotation
 
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-abstract class AbstractDisposableTableModel(
-  val table: java.util.Vector[java.util.Vector[String]],
-  val columns: java.util.Vector[String] )
-  extends DefaultTableModel( table, columns )
-  with Comparable[AbstractDisposableTableModel]
-  with StyleModel {
+trait AbstractDisposableTableModel 
+extends Comparable[AbstractDisposableTableModel] 
+with StyleModel {
 
   def dispose: Unit
 
@@ -48,14 +46,26 @@ object AbstractDisposableTableModel {
     override def paint( g: Graphics, component: Component, row: Int, column: Int, cellRect: Rectangle, value: Object ): Unit =
       value match {
       
-        case ai: AnnotationNodeInfo =>
-          val iconKind = if ( ai.isError ) OverlayableIconsFactory.ERROR
-          else if ( ai.isWarning ) OverlayableIconsFactory.ATTENTION
-          else if ( ai.isInfo ) OverlayableIconsFactory.CORRECT
-          else OverlayableIconsFactory.QUESTION
-          val icon = OverlayableIconsFactory.getImageIcon( iconKind )
-          icon.paintIcon( component, g, cellRect.x + cellRect.width - icon.getIconWidth() - 1, cellRect.y )
-
+      case node: AbstractTreeNodeInfo =>
+        node.getAnnotations match {
+          case Seq() => ()
+          case validationAnnotations => 
+            val validationSeverities = validationAnnotations map ( _.annotation.getSeverity ) toSet
+            val lowestSeverity = validationSeverities.toList sorted ( ValidationAnnotation.SEVERITY_LEVEL_ORDERING ) head
+            val lowestAnnotations = validationAnnotations filter ( _.annotation.getSeverity == lowestSeverity )
+            require( lowestAnnotations.nonEmpty )
+            
+            val annotationIcon = lowestAnnotations find ( null != _.annotation.getSeverityImageIcon ) match {
+              case None => ValidationAnnotation.severity2Icon(lowestSeverity) 
+              case Some( a ) => Some( Annotation.getIcon( a.annotation ) )
+            }
+            
+            annotationIcon match {
+              case None => ()
+              case Some( icon ) => icon.paintIcon( component, g, cellRect.x + cellRect.width - icon.getIconWidth() - 1, cellRect.y )
+            }
+        } 
+        
         case _ =>
           ()
       }

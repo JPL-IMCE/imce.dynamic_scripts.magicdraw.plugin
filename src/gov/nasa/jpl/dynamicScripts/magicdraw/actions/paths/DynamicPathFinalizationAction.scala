@@ -55,6 +55,7 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ToplevelPathInstanceCreat
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.UncaughtExceptionHandler
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -78,6 +79,7 @@ case class DynamicPathFinalizationAction(
     val message = action.prettyPrint( "" )
     val guiLog = Application.getInstance().getGUILog()
 
+    UncaughtExceptionHandler( message )
     ClassLoaderHelper.createDynamicScriptClassLoader( action ) match {
       case Failure( ex ) =>
         val error = "${message}: project not found '${menuAction.projectName.jname}'"
@@ -131,7 +133,7 @@ case class DynamicPathFinalizationAction(
                   }
                 } )
               if ( !postSessionActions.isEmpty() )
-                guiLog.showError( s"There are ${postSessionActions.size()} post-session actions that will not be executed because session management is not accessible for MD shape finalization actions")
+                guiLog.showError( s"There are ${postSessionActions.size()} post-session actions that will not be executed because session management is not accessible for MD shape finalization actions" )
               false
 
             case b: java.lang.Boolean => b.booleanValue()

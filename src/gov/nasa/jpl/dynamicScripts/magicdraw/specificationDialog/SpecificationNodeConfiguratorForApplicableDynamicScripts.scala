@@ -44,7 +44,6 @@ import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.immutable.SortedSet
 import scala.language.implicitConversions
 import scala.language.postfixOps
-
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.ui.dialogs.specifications.configurator.ISpecificationNodeConfigurator
 import com.nomagic.magicdraw.ui.dialogs.specifications.tree.node.ConfigurableNodeFactory
@@ -52,7 +51,6 @@ import com.nomagic.magicdraw.ui.dialogs.specifications.tree.node.IConfigurableNo
 import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.BinaryDerivationRefresh.DELAYED_COMPUTATION_UNTIL_INVOKED
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.BinaryDerivationRefresh.EAGER_COMPUTATION_AS_NEEDED
@@ -60,10 +58,7 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ComputedDerivedFeature
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsProjectListener
 import gov.nasa.jpl.dynamicScripts.magicdraw.designations.MagicDrawElementKindDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.DerivedPropertiesHierarchicalTableModel
-import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.DerivedPropertyComputedInfo
-import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.DerivedPropertyComputedRowInfo
-import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.DerivedPropertyComputedTableInfo
+import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables._
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 
 /**
@@ -108,7 +103,7 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
     allDerivedFeatures: Map[String, SortedSet[DynamicScriptsTypes.ComputedCharacterization]],
     e: Element ): Unit = {
 
-    type DerivedHierarchicalTable = DerivedPropertiesHierarchicalTableModel[DerivedPropertyComputedInfo]
+    type DerivedHierarchicalTable = DerivedPropertiesHierarchicalTableModel[AbstractDisposableTableModel]
 
     val entries = allDerivedFeatures.keys.toList sorted;
     entries foreach { entry =>
@@ -147,10 +142,14 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
   def computedFeatureToInfo(
     e: Element,
     ek: MagicDrawElementKindDesignation,
-    computedDerivedFeature: ComputedDerivedFeature ): DerivedPropertyComputedInfo = computedDerivedFeature match {
-    case p: DynamicScriptsTypes.ComputedDerivedProperty =>
-      DerivedPropertyComputedRowInfo( e, ek, p )
-    case t: DynamicScriptsTypes.ComputedDerivedTable =>
-      DerivedPropertyComputedTableInfo( e, ek, t )
+    computedDerivedFeature: ComputedDerivedFeature ): AbstractDisposableTableModel = computedDerivedFeature match {
+    case f: DynamicScriptsTypes.ComputedDerivedProperty =>
+      DerivedPropertyComputedRowInfo( e, ek, f )
+    case f: DynamicScriptsTypes.ComputedDerivedTable =>
+      DerivedPropertyComputedTableInfo( e, ek, f )
+    case f: DynamicScriptsTypes.ComputedDerivedTree =>
+      DerivedPropertyComputedTreeInfo( e, ek, f )
+    case f: DynamicScriptsTypes.ComputedDerivedWidget =>
+      DerivedPropertyComputedWidget( e, ek, f )
   }
 }

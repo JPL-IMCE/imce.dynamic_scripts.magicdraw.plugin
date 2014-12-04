@@ -21,7 +21,7 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.ReferenceNodeInfo
 abstract class DerivedPropertyComputedInfo( e: Element,
                                             ek: MagicDrawElementKindDesignation,
                                             computedDerivedFeature: ComputedDerivedFeature )
-  extends AbstractDisposableTableModel(
+  extends AbstractDefaultDisposableTableModel(
     table = new java.util.Vector[java.util.Vector[String]](),
     columns = new java.util.Vector[String]() ) {
 
@@ -53,15 +53,9 @@ object DerivedPropertyComputedInfo {
    */
   def anyToInfo( x: Any ): Try[Seq[AbstractTreeNodeInfo]] = x match {
     case r: InstanceSpecification =>
-      Success( Seq( ReferenceNodeInfo(
-        r.getQualifiedName, r,
-        r.getQualifiedName,
-        s"${r.getHumanName} [UUID=${UUIDRegistry.getUUID( r )}]" ) ) )
+      Success( Seq( ReferenceNodeInfo( r.getQualifiedName, r ) ) )
     case r: Element =>
-      Success( Seq( ReferenceNodeInfo(
-        r.getHumanName, r,
-        s"${r.getHumanName} [ID=${r.getID}]",
-        s"${r.getHumanName} [UUID=${UUIDRegistry.getUUID( r )}]" ) ) )
+      Success( Seq( ReferenceNodeInfo( r.getHumanName, r ) ) )
     case r: AbstractTreeNodeInfo =>
       Success( Seq( r ) )
     case r: Int =>

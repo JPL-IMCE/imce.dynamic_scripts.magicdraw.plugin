@@ -8,7 +8,7 @@ import com.jidesoft.grid.HierarchicalTableModel
 abstract class AbstractHierarchicalDisposableTableModel(
   override val table: java.util.Vector[java.util.Vector[String]],
   override val columns: java.util.Vector[String] )
-  extends AbstractDisposableTableModel( table, columns )
+  extends AbstractDefaultDisposableTableModel( table, columns )
   with HierarchicalTableModel {
 
   override def dispose: Unit

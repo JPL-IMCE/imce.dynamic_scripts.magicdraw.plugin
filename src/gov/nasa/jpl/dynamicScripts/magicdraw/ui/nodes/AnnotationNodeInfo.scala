@@ -21,10 +21,7 @@ case class AnnotationNodeInfo(
   if ( a.annotation.getKind == null )
     throw new IllegalArgumentException( "Annotation.kind should not be null!" )
 
-  val key: String = identifier + a.annotation.getTarget.getHumanType + a.annotation.getTarget.getID
-
-  def comparePrimaryKey = key
-  def compareSecondaryKey = key
+  val compareKey: String = identifier + a.annotation.getTarget.getHumanType + a.annotation.getTarget.getID
 
   def getAnnotation: Annotation = a.annotation
   def getAnnotationKind: String = a.annotation.getKind

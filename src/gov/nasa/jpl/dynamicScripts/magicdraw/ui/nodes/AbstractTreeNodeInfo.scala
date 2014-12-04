@@ -13,22 +13,31 @@ abstract class AbstractTreeNodeInfo( val identifier: String )
 
   def dispose: Unit = {}
 
-  def comparePrimaryKey: String
-  def compareSecondaryKey: String
-
+  val compareKey: String
+  
   override def compareTo( o: AbstractTreeNodeInfo ): Int =
-    AbstractTreeNodeInfo.expandSIPrefixes( this.comparePrimaryKey ) compareTo
-      AbstractTreeNodeInfo.expandSIPrefixes( o.comparePrimaryKey ) match {
-        case 0 => AbstractTreeNodeInfo.expandSIPrefixes( this.compareSecondaryKey ) compareTo
-        AbstractTreeNodeInfo.expandSIPrefixes( o.compareSecondaryKey )
-        case x => x
-      }
-
+    AbstractTreeNodeInfo.expandSIPrefixes( this.compareKey ) compareTo
+      AbstractTreeNodeInfo.expandSIPrefixes( o.compareKey )
+      
   def getAnnotations: Seq[ValidationAnnotation]
 }
 
 object AbstractTreeNodeInfo {
 
+  def collectAnnotationsRecursively( info: AbstractTreeNodeInfo, rows: Map[String, AbstractTreeNodeInfo] ): Iterable[ValidationAnnotation] = 
+    ( Iterable(info) ++ rows.values ) flatMap ( collectAnnotationsRecursively( _ ) )
+    
+  def collectAnnotationsRecursively( info: AbstractTreeNodeInfo ): Iterable[ValidationAnnotation] = info match {
+    case i: AnnotationNodeInfo => 
+      i.getAnnotations 
+    case i: LabelNodeInfo => 
+      i.getAnnotations
+    case i: ReferenceNodeInfo => 
+      i.getAnnotations
+    case TreeNodeInfo( _, nested, annotations ) => 
+      annotations ++ ( nested flatMap { case (info, row) => collectAnnotationsRecursively( info, row ) } )
+  }
+  
   val ALPHANUM_COMPARATOR = new AlphanumComparator()
 
   val SI_PREFIXES_ORDERING_VALUES = Seq(

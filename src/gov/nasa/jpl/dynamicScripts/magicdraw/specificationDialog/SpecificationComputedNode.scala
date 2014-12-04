@@ -1,17 +1,16 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.specificationDialog
 
 import java.beans.PropertyChangeEvent
-
 import com.nomagic.magicdraw.ui.dialogs.specifications.tree.node.ISpecificationNode
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel
+import javax.swing.table.AbstractTableModel
 
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-case class SpecificationComputedNode[T <: AbstractHierarchicalDisposableTableModel](
+case class SpecificationComputedNode[T <: AbstractHierarchicalDisposableTableModel with AbstractTableModel](
   ID: String, label: String, e: Element, table: T )
   extends ISpecificationNode {
 
