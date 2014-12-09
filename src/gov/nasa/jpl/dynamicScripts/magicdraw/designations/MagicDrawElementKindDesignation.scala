@@ -85,6 +85,7 @@ import com.nomagic.uml2.impl.ElementsFactory
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
 import scala.collection.JavaConversions._
 import scala.language.existentials
+import scala.language.postfixOps
 import scala.util.Success
 import scala.util.Failure
 import scala.util.Try
@@ -304,6 +305,22 @@ object MagicDrawElementKindDesignation {
     classOf[InstanceSpecification] -> getInstanceSpecificationClassifiers )
 
     
+  val elementMC = ClassTypes.getClassType("Element")
+  val allMCs = ClassTypes.getSubtypes( elementMC, true ).toSet;
+  val concreteMCs = ClassTypes.getSubtypes( elementMC, false ).toSet;
+  val abstractMCs = allMCs -- concreteMCs
+  
+  val METACLASS_2_SUPERCLASSES = concreteMCs map { cMC =>
+    val superclasses = cMC :: ClassTypes.getSupertypes( cMC ).toList
+    ( ClassTypes.getShortName( cMC ) -> ( superclasses map ( ClassTypes.getShortName( _ )) ) )
+  } toMap;
+  
+  def getSuperclassesOfMetaclassShortName( metaclassShortName: String ): List[String] = {
+    val superclasses = METACLASS_2_SUPERCLASSES.get( metaclassShortName )
+    require( superclasses.isDefined )
+    superclasses.get
+  }
+  
   val METACLASS_NAME_2_FACTORY_METHOD = Map[String, ElementsFactory => Element](
     "Abstraction" -> ( ( f: ElementsFactory ) => f.createAbstractionInstance() ),
     "AcceptCallAction" -> ( ( f: ElementsFactory ) => f.createAcceptCallActionInstance() ),

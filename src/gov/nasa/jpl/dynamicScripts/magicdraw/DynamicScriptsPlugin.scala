@@ -102,6 +102,7 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ComputedCharacterization
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ComputedDerivedFeature
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 import com.nomagic.magicdraw.evaluation.EvaluationConfigurator
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -114,8 +115,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
   override def updateByEnvironmentProperties( props: java.util.List[Property] ): Unit =
     for ( prop <- props; if ( prop.getID() == DynamicScriptsOptions.DYNAMIC_SCRIPT_CONFIGURATION_FILES_ID ) ) {
       prop match {
-        case p: StringProperty => updateRegistryForConfigurationFiles( DynamicScriptsConfigurationProperty.getDynamicScriptConfigurationFiles( p ) )
-        case _                 => ()
+        case p: StringProperty => 
+          updateRegistryForConfigurationFiles( DynamicScriptsConfigurationProperty.getDynamicScriptConfigurationFiles( p ) )
+        case _                 => 
+          ()
       }
     }
 
@@ -142,8 +145,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
       ( key, availableCS ) <- registry.metaclassCharacterizations
       applicableCS = availableCS.filter { cs: ComputedCharacterization =>
         cs.characterizesInstancesOf match {
-          case MetaclassDesignation( SName( mName ) ) => mName == metaclassShortName
-          case _                                      => false
+          case MetaclassDesignation( SName( mName ) ) => 
+            MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaclassShortName).contains(mName)
+          case _                                      => 
+            false
         }
       }
       if ( applicableCS.nonEmpty )
@@ -165,7 +170,8 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
           applicableCS = availableCS.filter { cs: ComputedCharacterization =>
             cs.characterizesInstancesOf match {
               case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) =>
-                mName == metaName && wildCardMatch( clsQName, qName )
+                MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaName).contains(mName) &&
+                wildCardMatch( clsQName, qName )
               case _ =>
                 false
             }
@@ -178,12 +184,12 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
 
   def getRelevantStereotypeComputedCharacterizations( metaclassName: String, profileQName: String, stereotypeQName: String ): Map[String, SortedSet[ComputedCharacterization]] = {
     val scripts = for {
-
       ( key, availableCS ) <- registry.stereotypedMetaclassCharacterizations
       applicableCS = availableCS.filter { cs: ComputedCharacterization =>
         cs.characterizesInstancesOf match {
           case StereotypedMetaclassDesignation( SName( mName ), QName( pfName ), QName( qName ) ) =>
-            mName == metaclassName && wildCardMatch( profileQName, pfName ) && wildCardMatch( stereotypeQName, qName )
+            MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaclassName).contains(mName) && 
+            wildCardMatch( profileQName, pfName ) && wildCardMatch( stereotypeQName, qName )
           case _ =>
             false
         }
@@ -232,18 +238,21 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
       Map()
   }
 
-  def getRelevantMetaclassActions( metaclassShortName: String, criteria: DynamicActionScript => Boolean ): Map[String, Seq[DynamicActionScript]] = {
+  def getRelevantMetaclassActions( metaclassShortName: String, criteria: DynamicActionScript => Boolean ): Map[String, Seq[DynamicActionScript]] = {    
     val scripts = for {
       ( key, scripts ) <- registry.metaclassActions
       sScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
         s.applicableTo match {
-          case MetaclassDesignation( SName( mName ) ) => mName == metaclassShortName
-          case _                                      => false
+          case MetaclassDesignation( SName( mName ) ) => 
+            MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaclassShortName).contains(mName)
+          case _                                      => 
+            false
         }
       }
       availableActions = sScript.scripts filter ( criteria( _ ) )
       if ( availableActions.nonEmpty )
     } yield ( key -> availableActions )
+    
     scripts.toMap
   }
 
@@ -253,7 +262,8 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
       sScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
         s.applicableTo match {
           case StereotypedMetaclassDesignation( SName( mName ), QName( pfName ), QName( qName ) ) =>
-            mName == metaclassName && wildCardMatch( profileQName, pfName ) && wildCardMatch( stereotypeQName, qName )
+            MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaclassName).contains(mName) && 
+            wildCardMatch( profileQName, pfName ) && wildCardMatch( stereotypeQName, qName )
           case _ =>
             false
         }
@@ -291,7 +301,8 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
           cScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
             s.applicableTo match {
               case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) =>
-                mName == metaName && wildCardMatch( clsQName, qName )
+                MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaName).contains(mName) &&
+                wildCardMatch( clsQName, qName )
               case _ =>
                 false
             }
