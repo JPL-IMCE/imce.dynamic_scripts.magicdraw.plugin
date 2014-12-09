@@ -114,10 +114,10 @@ case class DynamicDiagramContextMenuActionForTriggerAndSelection(
                   ClassLoaderHelper.reportError( menuAction, message, t1 )
                   return
                 case Success( cm2: ResolvedClassAndMethod ) =>
-                 ClassLoaderHelper.invoke( previousTime, project, ev, cm2, diagram, trigger, element, selected )
+                 ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm2, diagram, trigger, element, selected )
               }
             case Success( cm1: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invoke( previousTime, project, ev, cm1, diagram, trigger, element, selected )
+              ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm1, diagram, trigger, element, selected )
           }
         }
         finally {

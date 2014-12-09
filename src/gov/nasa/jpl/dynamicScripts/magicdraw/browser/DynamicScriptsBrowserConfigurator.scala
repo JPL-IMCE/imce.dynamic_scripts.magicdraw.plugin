@@ -54,7 +54,6 @@ import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.ui.browser.Node
 import com.nomagic.magicdraw.ui.browser.Tree
 import com.nomagic.magicdraw.uml.ClassTypes
-import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 
@@ -63,6 +62,7 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicBrowserContextMenuActionForTriggerAndSelection
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 import gov.nasa.jpl.magicdraw.enhanced.ui.browser.EnhancedBrowserContextAMConfigurator
 
 /**
@@ -79,7 +79,7 @@ class DynamicScriptsBrowserConfigurator extends EnhancedBrowserContextAMConfigur
    */
   override def configure( manager: ActionsManager, tree: Tree, mouseEvent: MouseEvent, trigger: Node, selection: java.util.Collection[Node] ): Unit = {
 
-    val log = MDLog.getPluginsLog()
+    val log = MDGUILogHelper.getMDPluginsLog
     val previousTime = System.currentTimeMillis()
       
     def getSelectedElement( node: Node ): Option[Element] = node.getUserObject() match {

@@ -37,14 +37,13 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.nasa.jpl.dynamicScripts.magicdraw.actions
+package gov.nasa.jpl.dynamicScripts.magicdraw.designations
 
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.magicdraw.uml.symbols.paths._
 import com.nomagic.magicdraw.uml.symbols.shapes._
-
 import com.nomagic.uml2.ext.jmi.helpers.ModelHelper
 import com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper
 import com.nomagic.uml2.ext.magicdraw.actions.mdbasicactions._
@@ -83,14 +82,14 @@ import com.nomagic.uml2.ext.magicdraw.mdusecases._
 import com.nomagic.uml2.ext.magicdraw.statemachines.mdbehaviorstatemachines._
 import com.nomagic.uml2.ext.magicdraw.statemachines.mdprotocolstatemachines._
 import com.nomagic.uml2.impl.ElementsFactory
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
-
 import scala.collection.JavaConversions._
 import scala.language.existentials
+import scala.language.postfixOps
 import scala.util.Success
 import scala.util.Failure
 import scala.util.Try
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -168,9 +167,9 @@ object MagicDrawElementKindDesignation {
     resolveMagicDrawMetaclass( metaclassName ) match {
       case Failure( e ) => Failure( e )
       case Success( ( creator, metaclass ) ) => StereotypesHelper.getProfile( project, profileQName ) match {
-        case null => Failure( new IllegalArgumentException( s"No MagicDraw profile named '${profileQName}' in project '${project.getPrimaryProject().getLocationURI()}'" ) )
+        case null => Failure( new IllegalArgumentException( s"No MagicDraw profile named '${profileQName}' in project '${MDUML.getProjectLocationURI( project )}'" ) )
         case pf: Profile => StereotypesHelper.getStereotype( project, stereotypeQName, pf ) match {
-          case null          => Failure( new IllegalArgumentException( s"No MagicDraw stereotype named '${stereotypeQName}' in profile '${profileQName}' in project '${project.getPrimaryProject().getLocationURI()}'" ) )
+          case null          => Failure( new IllegalArgumentException( s"No MagicDraw stereotype named '${stereotypeQName}' in profile '${profileQName}' in project '${MDUML.getProjectLocationURI( project )}'" ) )
           case s: Stereotype => Success( ( creator, metaclass, pf, s ) )
         }
       }
@@ -194,7 +193,7 @@ object MagicDrawElementKindDesignation {
             case null => ()
           }
         }
-        return Failure( new IllegalArgumentException( s"No MagicDraw classifier named '${classifierQName}' in project '${project.getPrimaryProject().getLocationURI()}'" ) )
+        return Failure( new IllegalArgumentException( s"No MagicDraw classifier named '${classifierQName}' in project '${MDUML.getProjectLocationURI( project )}'" ) )
       }
     }
 
@@ -230,8 +229,10 @@ object MagicDrawElementKindDesignation {
    * - the script specifies no diagram types
 	 * - at least one of the script's diagram stereotypes matches a stereotype applied to the current diagram
    */
-  def isDynamicContextDiagramActionScriptAvailable( das: DynamicContextDiagramActionScript, d: Diagram, dType: String, ds: List[Stereotype] ): Boolean = {
-    val isAvailableByType = das.diagramTypes.isEmpty || ( das.diagramTypes exists ( sn => sn.sname == dType ) )
+  def isDynamicContextDiagramActionScriptAvailable( 
+      das: DynamicContextDiagramActionScript, 
+      d: Diagram, dType: String, ds: List[Stereotype] ): Boolean = {
+    val isAvailableByType = das.diagramTypes.isEmpty || ( das.diagramTypes exists ( hn => hn.hname == dType ) )
     val isAvailableByStereotype = das.diagramStereotypes.isEmpty || ( das.diagramStereotypes exists ( dsn => ds exists { s => dsn.qname == s.getQualifiedName() } ) )
     isAvailableByType && isAvailableByStereotype
   }
@@ -304,6 +305,22 @@ object MagicDrawElementKindDesignation {
     classOf[InstanceSpecification] -> getInstanceSpecificationClassifiers )
 
     
+  val elementMC = ClassTypes.getClassType("Element")
+  val allMCs = ClassTypes.getSubtypes( elementMC, true ).toSet;
+  val concreteMCs = ClassTypes.getSubtypes( elementMC, false ).toSet;
+  val abstractMCs = allMCs -- concreteMCs
+  
+  val METACLASS_2_SUPERCLASSES = concreteMCs map { cMC =>
+    val superclasses = cMC :: ClassTypes.getSupertypes( cMC ).toList
+    ( ClassTypes.getShortName( cMC ) -> ( superclasses map ( ClassTypes.getShortName( _ )) ) )
+  } toMap;
+  
+  def getSuperclassesOfMetaclassShortName( metaclassShortName: String ): List[String] = {
+    val superclasses = METACLASS_2_SUPERCLASSES.get( metaclassShortName )
+    require( superclasses.isDefined )
+    superclasses.get
+  }
+  
   val METACLASS_NAME_2_FACTORY_METHOD = Map[String, ElementsFactory => Element](
     "Abstraction" -> ( ( f: ElementsFactory ) => f.createAbstractionInstance() ),
     "AcceptCallAction" -> ( ( f: ElementsFactory ) => f.createAcceptCallActionInstance() ),

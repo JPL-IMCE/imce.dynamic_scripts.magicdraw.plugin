@@ -37,28 +37,32 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.nasa.jpl.dynamicScripts.magicdraw.scripts
+package gov.nasa.jpl.dynamicScripts.magicdraw.utils
 
-import com.nomagic.magicdraw.uml.symbols.PresentationElement
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
-import gov.nasa.jpl.dynamicScripts.magicdraw.designations._
-import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
+import com.nomagic.utils.Utilities
+import com.nomagic.magicdraw.core.Application
 
 /**
- * @author Nicolas.F.Rouquette@jpl.nasa.gov
+ * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-object DynamicShapeCreatorScriptForStereotypedClassifiedInstanceDesignation {
+case class UncaughtExceptionHandler( val title: String, implicit val thread: Thread = Thread.currentThread ) extends Thread.UncaughtExceptionHandler {
 
-  def postCreateCallback(das: DynamicActionScript, r: MagicDrawStereotypedClassifiedInstanceDesignation, pe: PresentationElement, e: Element): Boolean = {
-    val log = MDGUILogHelper.getMDPluginsLog
-    log.info(s"""|DynamicShapeCreatorScriptForStereotypedClassifiedInstanceDesignation.postCreateCallback
-                 |- action : ${das.prettyPrint("  ")}
-                 |- element: ${e.getHumanType()}: ${e.getID()}
-                 |- shape  : ${pe.getHumanType()}
-                 |""".stripMargin)
-    true
+  val parent: Option[Thread.UncaughtExceptionHandler] = {
+    val p = Option.apply(thread.getUncaughtExceptionHandler)
+    thread.setUncaughtExceptionHandler(this)    
+    p
   }
+  
+  def uncaughtException( t: Thread, e: Throwable ): Unit = {
+    Utilities.dumpThreads
+    val message = s"${title} - ${e.getClass.getCanonicalName}: ${e.getMessage}"
+    MDGUILogHelper.getMDPluginsLog.fatal( message, e )
+    Application.getInstance.getGUILog.showError( message, e )
     
+    parent match {
+      case None => ()
+      case Some( p ) =>
+        p.uncaughtException(t, e)
+    }    
+  }
 }

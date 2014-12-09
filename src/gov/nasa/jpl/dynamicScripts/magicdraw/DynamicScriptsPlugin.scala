@@ -42,18 +42,16 @@ package gov.nasa.jpl.dynamicScripts.magicdraw
 import java.io.File
 import java.net.MalformedURLException
 import java.net.URL
-
 import javax.swing.Icon
 import javax.swing.ImageIcon
-
-import scala.collection.JavaConversions.asScalaBuffer
-import scala.collection.JavaConversions.collectionAsScalaIterable
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import scala.collection.immutable.SortedSet
 import scala.collection.TraversableOnce.MonadOps
 import scala.collection.TraversableOnce.OnceCanBuildFrom
 import scala.collection.TraversableOnce.flattenTraversableOnce
 import scala.language.implicitConversions
 import scala.language.postfixOps
-
 import com.nomagic.actions.AMConfigurator
 import com.nomagic.actions.ActionsCategory
 import com.nomagic.actions.ActionsManager
@@ -81,7 +79,6 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.InstanceSpecification
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.uml2.ext.magicdraw.compositestructures.mdinternalstructures.Connector
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsRegistry
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
@@ -92,10 +89,8 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.QName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.SName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedMetaclassDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicScriptsMainMenuActionsCategory
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.MagicDrawElementKindDesignation
+import gov.nasa.jpl.dynamicScripts.magicdraw.designations._
 import gov.nasa.jpl.dynamicScripts.magicdraw.actions.RefreshableActionsCategory
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.ResolvedMagicDrawDesignation
-import gov.nasa.jpl.dynamicScripts.magicdraw.actions.UnresolvedMagicDrawDesignation
 import gov.nasa.jpl.dynamicScripts.magicdraw.browser.DynamicScriptsBrowserConfigurator
 import gov.nasa.jpl.dynamicScripts.magicdraw.commands.LoadDynamicScriptFilesCommand
 import gov.nasa.jpl.dynamicScripts.magicdraw.diagram.DynamicScriptsDiagramConfigurator
@@ -103,6 +98,11 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsConfiguration
 import gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions
 import gov.nasa.jpl.dynamicScripts.magicdraw.specificationDialog.SpecificationNodeConfiguratorForApplicableDynamicScripts
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ComputedCharacterization
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ComputedDerivedFeature
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
+import com.nomagic.magicdraw.evaluation.EvaluationConfigurator
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -115,16 +115,18 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
   override def updateByEnvironmentProperties( props: java.util.List[Property] ): Unit =
     for ( prop <- props; if ( prop.getID() == DynamicScriptsOptions.DYNAMIC_SCRIPT_CONFIGURATION_FILES_ID ) ) {
       prop match {
-        case p: StringProperty => updateRegistryForConfigurationFiles( DynamicScriptsConfigurationProperty.getDynamicScriptConfigurationFiles( p ) )
-        case _                 => ()
+        case p: StringProperty => 
+          updateRegistryForConfigurationFiles( DynamicScriptsConfigurationProperty.getDynamicScriptConfigurationFiles( p ) )
+        case _                 => 
+          ()
       }
     }
 
-  def updateRegistryForConfigurationFiles( files: List[String] ): Option[String] = 
+  def updateRegistryForConfigurationFiles( files: List[String] ): Option[String] =
     DynamicScriptsRegistry.mergeDynamicScripts( DynamicScriptsRegistry.init(), files ) match {
       case ( r: DynamicScriptsRegistry, errors: List[String] ) =>
         registry = r
-        val log = MDLog.getPluginsLog()
+        val log = MDGUILogHelper.getMDPluginsLog
         log.info( s"${this.getPluginName()} -- updateRegistryForConfigurationFiles: current dynamic scripts registry:\n${registry}" )
         if ( errors.isEmpty )
           None
@@ -136,18 +138,121 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
         }
     }
 
-  def getRelevantMetaclassActions( metaclassShortName: String, criteria: DynamicActionScript => Boolean ): Map[String, Seq[DynamicActionScript]] = {
+  import DynamicScriptsPlugin._
+
+  def getRelevantMetaclassComputedCharacterizations( metaclassShortName: String ): Map[String, SortedSet[ComputedCharacterization]] = {
+    val scripts = for {
+      ( key, availableCS ) <- registry.metaclassCharacterizations
+      applicableCS = availableCS.filter { cs: ComputedCharacterization =>
+        cs.characterizesInstancesOf match {
+          case MetaclassDesignation( SName( mName ) ) => 
+            MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaclassShortName).contains(mName)
+          case _                                      => 
+            false
+        }
+      }
+      if ( applicableCS.nonEmpty )
+    } yield ( key -> applicableCS )
+    scripts.toMap
+  }
+
+  def getRelevantClassifierComputedCharacterizations( e: Element ): Map[String, SortedSet[ComputedCharacterization]] = {
+    val meta = e.getClassType().asSubclass( classOf[Element] )
+    val metaName = ClassTypes.getShortName( meta )
+    MagicDrawElementKindDesignation.METACLASS_2_CLASSIFIER_QUERY.get( meta ) match {
+      case None => Map()
+      case Some( query ) =>
+        val scripts = for {
+          c <- query( e )
+          cls <- MDUML.getAllGeneralClassifiersIncludingSelf( c )
+          clsQName = cls.getQualifiedName()
+          ( key, availableCS ) <- registry.classifierCharacterizations
+          applicableCS = availableCS.filter { cs: ComputedCharacterization =>
+            cs.characterizesInstancesOf match {
+              case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) =>
+                MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaName).contains(mName) &&
+                wildCardMatch( clsQName, qName )
+              case _ =>
+                false
+            }
+          }
+          if ( applicableCS.nonEmpty )
+        } yield ( key -> applicableCS )
+        scripts.toMap
+    }
+  }
+
+  def getRelevantStereotypeComputedCharacterizations( metaclassName: String, profileQName: String, stereotypeQName: String ): Map[String, SortedSet[ComputedCharacterization]] = {
+    val scripts = for {
+      ( key, availableCS ) <- registry.stereotypedMetaclassCharacterizations
+      applicableCS = availableCS.filter { cs: ComputedCharacterization =>
+        cs.characterizesInstancesOf match {
+          case StereotypedMetaclassDesignation( SName( mName ), QName( pfName ), QName( qName ) ) =>
+            MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaclassName).contains(mName) && 
+            wildCardMatch( profileQName, pfName ) && wildCardMatch( stereotypeQName, qName )
+          case _ =>
+            false
+        }
+      }
+      if ( applicableCS.nonEmpty )
+    } yield ( key -> applicableCS )
+    scripts.toMap
+  }
+
+  def getRelevantStereotypedClassifierComputedCharacterizations( e: Element ): Map[String, SortedSet[ComputedCharacterization]] = e match {
+    case is: InstanceSpecification =>
+      val scripts = for {
+        c <- is.getClassifier()
+        cls <- MDUML.getAllGeneralClassifiersIncludingSelf( c )
+        clsQName = cls.getQualifiedName()
+        ( key, availableCS ) <- registry.stereotypedClassifierCharacterizations
+        applicableCS = availableCS.filter { cs: ComputedCharacterization =>
+          cs.characterizesInstancesOf match {
+            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) =>
+              mName == "InstanceSpecification" && wildCardMatch( clsQName, qName )
+            case _ =>
+              false
+          }
+        }
+        if ( applicableCS.nonEmpty )
+      } yield ( key -> applicableCS )
+      scripts.toMap
+    case is: Connector =>
+      val scripts = for {
+        cls <- MDUML.getAllGeneralClassifiersIncludingSelf( is.getType() )
+        clsQName = cls.getQualifiedName()
+
+        ( key, availableCS ) <- registry.stereotypedClassifierCharacterizations
+        applicableCS = availableCS.filter { cs: ComputedCharacterization =>
+          cs.characterizesInstancesOf match {
+            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) =>
+              mName == "Connector" && wildCardMatch( clsQName, qName )
+            case _ =>
+              false
+          }
+        }
+        if ( applicableCS.nonEmpty )
+      } yield ( key -> applicableCS )
+      scripts.toMap
+    case _ =>
+      Map()
+  }
+
+  def getRelevantMetaclassActions( metaclassShortName: String, criteria: DynamicActionScript => Boolean ): Map[String, Seq[DynamicActionScript]] = {    
     val scripts = for {
       ( key, scripts ) <- registry.metaclassActions
       sScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
         s.applicableTo match {
-          case MetaclassDesignation( SName( mName ) ) => mName == metaclassShortName
-          case _                                      => false
+          case MetaclassDesignation( SName( mName ) ) => 
+            MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaclassShortName).contains(mName)
+          case _                                      => 
+            false
         }
       }
       availableActions = sScript.scripts filter ( criteria( _ ) )
       if ( availableActions.nonEmpty )
     } yield ( key -> availableActions )
+    
     scripts.toMap
   }
 
@@ -156,8 +261,11 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
       ( key, scripts ) <- registry.stereotypedMetaclassActions
       sScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
         s.applicableTo match {
-          case StereotypedMetaclassDesignation( SName( mName ), QName( pfName ), QName( qName ) ) => mName == metaclassName && pfName == profileQName && qName == stereotypeQName
-          case _ => false
+          case StereotypedMetaclassDesignation( SName( mName ), QName( pfName ), QName( qName ) ) =>
+            MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaclassName).contains(mName) && 
+            wildCardMatch( profileQName, pfName ) && wildCardMatch( stereotypeQName, qName )
+          case _ =>
+            false
         }
       }
       availableActions = sScript.scripts filter ( criteria( _ ) )
@@ -192,8 +300,11 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
           ( key, scripts ) <- registry.classifierActions
           cScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
             s.applicableTo match {
-              case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == metaName && qName == clsQName
-              case _ => false
+              case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) =>
+                MagicDrawElementKindDesignation.getSuperclassesOfMetaclassShortName(metaName).contains(mName) &&
+                wildCardMatch( clsQName, qName )
+              case _ =>
+                false
             }
           }
           availableActions = cScript.scripts filter ( criteria( _ ) )
@@ -212,8 +323,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
         ( key, scripts ) <- registry.stereotypedClassifierActions
         cScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
           s.applicableTo match {
-            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == "InstanceSpecification" && qName == clsQName
-            case _ => false
+            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) =>
+              mName == "InstanceSpecification" && wildCardMatch( clsQName, qName )
+            case _ =>
+              false
           }
         }
         availableActions = cScript.scripts filter ( criteria( _ ) )
@@ -227,8 +340,10 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
         ( key, scripts ) <- registry.stereotypedClassifierActions
         cScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
           s.applicableTo match {
-            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) => mName == "Connector" && qName == clsQName
-            case _ => false
+            case ClassifiedInstanceDesignation( SName( mName ), QName( qName ) ) =>
+              mName == "Connector" && wildCardMatch( clsQName, qName )
+            case _ =>
+              false
           }
         }
         availableActions = cScript.scripts filter ( criteria( _ ) )
@@ -256,7 +371,7 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
       case None => getJPLCustomLinkIcon()
       case Some( iconPath ) =>
         try {
-          val iconURL = new File( ApplicationEnvironment.getInstallRoot() + File.separator + iconPath.path ).toURI().toURL()
+          val iconURL = new File( MDUML.getInstallRoot() + File.separator + iconPath.path ).toURI().toURL()
           new ImageIcon( iconURL )
         }
         catch {
@@ -268,18 +383,18 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
   override def getPluginVersion(): String = getDescriptor().getVersion()
   override def isPluginRequired( p: Project ): Boolean = false
 
-  val refreshableActionsCategories: Map[String, ActionsCategory with RefreshableActionsCategory] = 
+  val refreshableActionsCategories: Map[String, ActionsCategory with RefreshableActionsCategory] =
     Map( DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_ID -> DynamicScriptsMainMenuActionsCategory() )
-    
-  def getRefreshableActionsCategory(id: String): ActionsCategory with RefreshableActionsCategory = {
-    require(refreshableActionsCategories.contains(id))
-    refreshableActionsCategories.get(id).get
+
+  def getRefreshableActionsCategory( id: String ): ActionsCategory with RefreshableActionsCategory = {
+    require( refreshableActionsCategories.contains( id ) )
+    refreshableActionsCategories.get( id ).get
   }
-  
-  def doRefreshActionsCategories(): Unit = 
-    refreshableActionsCategories.values foreach (_.doRefresh())
-  
-  protected val loadDynamicScriptsRefreshCommand = new LoadDynamicScriptFilesCommand( () => { this.doRefreshActionsCategories()} )
+
+  def doRefreshActionsCategories(): Unit =
+    refreshableActionsCategories.values foreach ( _.doRefresh() )
+
+  protected val loadDynamicScriptsRefreshCommand = new LoadDynamicScriptFilesCommand( () => { this.doRefreshActionsCategories() } )
 
   def loadDynamicScriptsFiles(): Unit =
     MagicDrawProgressStatusRunner.runWithProgressStatus( loadDynamicScriptsRefreshCommand, "Reload DynamicScripts", true, 0 )
@@ -287,7 +402,7 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
   override def init(): Unit = {
     DynamicScriptsPlugin.instance = this
 
-    val log = MDLog.getPluginsLog()
+    val log = MDGUILogHelper.getMDPluginsLog
     log.info( s"INIT: >> ${this.getClass().getName()}" )
     try {
       projectListener = new DynamicScriptsProjectListener()
@@ -327,7 +442,9 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
             JPLcustomLink = ImageMap16.LINK
           }
         }
-
+      			
+			EvaluationConfigurator.getInstance.registerBinaryImplementers(classOf[DynamicScriptsPlugin].getClassLoader);
+      
       val dynamicScriptsMainMenuActionsCategory = DynamicScriptsMainMenuActionsCategory()
 
       val manager: ActionsConfiguratorsManager = ActionsConfiguratorsManager.getInstance()
@@ -336,7 +453,7 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
         override def getPriority(): Int = ConfiguratorWithPriority.MEDIUM_PRIORITY
         override def configure( manager: ActionsManager ): Unit = {
           if ( null == manager.getActionFor( DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_ID ) )
-            manager.addCategory( getRefreshableActionsCategory( DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_ID ))
+            manager.addCategory( getRefreshableActionsCategory( DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_ID ) )
         }
       } )
 
@@ -360,7 +477,7 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
   }
 
   override def close(): Boolean = {
-    val log = MDLog.getPluginsLog()
+    val log = MDGUILogHelper.getMDPluginsLog
     log.info( s"CLOSE: >> ${this.getClass().getName()}" )
     try {
       Application.getInstance().removeProjectEventListener( projectListener )
@@ -397,4 +514,24 @@ object DynamicScriptsPlugin {
     ( getInstance().getDynamicScriptsRegistry(), elementPackageContext.toSet ++ diagramPackageContext.toSet ++ diagramDependencyContext.toSet )
   }
 
+  /**
+   * Adapted from a Java algorithm
+   * @see: http://www.adarshr.com/simple-implementation-of-wildcard-text-matching-using-java
+   */
+  def wildCardMatch( text: String, pattern: String ): Boolean = {
+
+    def wildCardMatch( matchHead: Boolean, anyTail: Boolean, cards: List[String], text: String ): Boolean =
+      cards match {
+        case Nil => anyTail || text.isEmpty
+        case c :: cs =>
+          text.indexOf( c ) match {
+            case -1 => false
+            case idx =>
+              if ( matchHead && ( idx > 1 ) ) false
+              else wildCardMatch( false, anyTail, cs, text.substring( idx + c.length ) )
+          }
+      }
+
+    wildCardMatch( true, pattern.endsWith( "*" ), pattern.split( "\\*" ).toList, text )
+  }
 }

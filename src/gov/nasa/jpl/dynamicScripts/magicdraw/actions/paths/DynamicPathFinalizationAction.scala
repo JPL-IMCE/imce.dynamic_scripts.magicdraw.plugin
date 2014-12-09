@@ -42,28 +42,26 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.actions.paths
 import java.awt.Point
 import java.lang.reflect.InvocationTargetException
 import java.net.MalformedURLException
-
-import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.implicitConversions
 import scala.util.Failure
 import scala.util.Success
-
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.magicdraw.uml.symbols.manipulators.drawactions.AdditionalDrawAction
 import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
 import com.nomagic.utils.Utilities
-
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
+import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ToplevelPathInstanceCreator
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResults
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.UncaughtExceptionHandler
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
 case class DynamicPathFinalizationAction(
-  val action: DynamicActionScript,
+  val action: ToplevelPathInstanceCreator,
   val creatorHelper: DynamicPathCreatorHelper )
   extends AdditionalDrawAction {
 
@@ -73,7 +71,7 @@ case class DynamicPathFinalizationAction(
     ClassLoaderHelper.isDynamicActionScriptAvailable( action ) && creatorHelper.isResolved
 
   override def execute( pe: PresentationElement, point: Point ): Boolean = {
-    val log = MDLog.getPluginsLog()
+    val log = MDGUILogHelper.getMDPluginsLog
     val e = pe.getElement()
 
     val previousTime = System.currentTimeMillis()
@@ -81,6 +79,7 @@ case class DynamicPathFinalizationAction(
     val message = action.prettyPrint( "" )
     val guiLog = Application.getInstance().getGUILog()
 
+    UncaughtExceptionHandler( message )
     ClassLoaderHelper.createDynamicScriptClassLoader( action ) match {
       case Failure( ex ) =>
         val error = "${message}: project not found '${menuAction.projectName.jname}'"
@@ -111,7 +110,7 @@ case class DynamicPathFinalizationAction(
             case Success( m ) => m
           }
 
-          val r = creatorHelper.invokeMethod( m, pe, e )
+          val r = creatorHelper.invokeMethod( m, action, pe, point, e )
 
           val currentTime = System.currentTimeMillis()
           log.info( s"${message} took ${currentTime - previousTime} ms" )
@@ -134,7 +133,7 @@ case class DynamicPathFinalizationAction(
                   }
                 } )
               if ( !postSessionActions.isEmpty() )
-                guiLog.showError( s"There are ${postSessionActions.size()} post-session actions that will not be executed because session management is not accessible for MD shape finalization actions")
+                guiLog.showError( s"There are ${postSessionActions.size()} post-session actions that will not be executed because session management is not accessible for MD shape finalization actions" )
               false
 
             case b: java.lang.Boolean => b.booleanValue()

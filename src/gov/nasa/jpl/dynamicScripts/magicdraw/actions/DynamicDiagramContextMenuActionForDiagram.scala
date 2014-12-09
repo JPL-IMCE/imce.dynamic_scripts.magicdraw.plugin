@@ -99,7 +99,7 @@ case class DynamicDiagramContextMenuActionForDiagram(
               return
 
             case Success( cm: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invoke( previousTime, project, ev, cm, diagram )
+              ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm, diagram )
           }
         }
         finally {

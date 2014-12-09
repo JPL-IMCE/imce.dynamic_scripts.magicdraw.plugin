@@ -37,7 +37,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.nasa.jpl.dynamicScripts.magicdraw.actions
+package gov.nasa.jpl.dynamicScripts.magicdraw.designations
 
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.uml.ClassTypes
@@ -95,21 +95,4 @@ import scala.util.Try
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
-case class ResolvedMagicDrawClassifiedInstanceDesignation(
-  project: Project, d: ClassifiedInstanceDesignation,
-  creator: ElementsFactory => Element,
-  metaclass: java.lang.Class[_ <: Element],
-  classifier: Classifier ) extends MagicDrawClassifiedInstanceDesignation with ResolvedMagicDrawDesignation {
-
-  val isResolved = true
-  val resolutionError = None
-
-  def designationMatches( e: Element ): Boolean = metaclass.isInstance( e ) &&
-    ( MagicDrawElementKindDesignation.METACLASS_2_CLASSIFIER_PREDICATE.get( metaclass ) match {
-      case Some( f ) => f( e, classifier )
-      case None      => false
-    } )
-
-  def createElement( project: Project ): Try[Element] =
-    MagicDrawElementKindDesignation.createClassifiedInstanceElement( project, d, d.metaclass.sname, creator, classifier )
-}
+trait MagicDrawStereotypeDesignation extends MagicDrawElementKindDesignation {}

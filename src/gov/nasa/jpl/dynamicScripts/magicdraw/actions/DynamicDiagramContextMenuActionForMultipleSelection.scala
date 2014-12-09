@@ -103,7 +103,7 @@ case class DynamicDiagramContextMenuActionForMultipleSelection(
               return
 
             case Success( cm: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invoke( previousTime, project, ev, cm, diagram, selected )
+              ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm, diagram, selected )
           }
         }
         finally {

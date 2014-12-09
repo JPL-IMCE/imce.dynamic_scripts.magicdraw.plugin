@@ -37,28 +37,29 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.nasa.jpl.dynamicScripts.magicdraw.scripts
+package gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes
 
-import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
-import gov.nasa.jpl.dynamicScripts.magicdraw.designations._
-import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
 
 /**
- * @author Nicolas.F.Rouquette@jpl.nasa.gov
+ * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-object DynamicShapeCreatorScriptForStereotypedClassifiedInstanceDesignation {
+case class TreeNodeInfo( 
+    override val identifier: String, 
+    val nested: Seq[(AbstractTreeNodeInfo, Map[String, AbstractTreeNodeInfo])] = Seq(),
+    val annotations: Seq[ValidationAnnotation] = Seq() )
+extends AbstractTreeNodeInfo( identifier ) {
+  
+  val compareKey = identifier
+  
+  def getAnnotations = annotations
+}
 
-  def postCreateCallback(das: DynamicActionScript, r: MagicDrawStereotypedClassifiedInstanceDesignation, pe: PresentationElement, e: Element): Boolean = {
-    val log = MDGUILogHelper.getMDPluginsLog
-    log.info(s"""|DynamicShapeCreatorScriptForStereotypedClassifiedInstanceDesignation.postCreateCallback
-                 |- action : ${das.prettyPrint("  ")}
-                 |- element: ${e.getHumanType()}: ${e.getID()}
-                 |- shape  : ${pe.getHumanType()}
-                 |""".stripMargin)
-    true
+object TreeNodeInfo {  
+  
+  def isTable( o: Object ): Boolean = o match {
+    case _: TreeNodeInfo => true
+    case _ => false
   }
-    
 }
