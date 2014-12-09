@@ -71,7 +71,8 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
 
     val previousTime = System.currentTimeMillis()
     try {
-      val characterizationContext: DynamicScriptsProjectListener = DynamicScriptsPlugin.getInstance().getCharacterizationContext()
+      val characterizationContext: DynamicScriptsProjectListener =
+        DynamicScriptsPlugin.getInstance().getCharacterizationContext()
       log.info( s"${this.getClass().getName()}: configure specification dialog for ${e.getHumanType()}}" )
 
       val project = Project.getProject( e )
@@ -83,7 +84,14 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
       val es = StereotypesHelper.getStereotypes( e ).toList
 
       val mDerivedFeatures = p.getRelevantMetaclassComputedCharacterizations( mName )
-      val sDerivedFeatures = StereotypesHelper.getStereotypesHierarchy( e ) flatMap ( s => p.getRelevantStereotypeComputedCharacterizations( mName, s.getProfile().getQualifiedName(), s.getQualifiedName() ) )
+      val sDerivedFeatures = StereotypesHelper.getStereotypesHierarchy( e ) flatMap ( s =>
+        Option.apply( s.getProfile ) match {
+          case Some( pf ) =>
+            p.getRelevantStereotypeComputedCharacterizations(
+              mName, pf.getQualifiedName(), s.getQualifiedName() )
+          case None =>
+            Map[String, SortedSet[DynamicScriptsTypes.ComputedCharacterization]]()
+        } )
       val cDerivedFeatures = p.getRelevantClassifierComputedCharacterizations( e )
       val csDerivedFeatures = p.getRelevantStereotypedClassifierComputedCharacterizations( e )
 
@@ -113,8 +121,11 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
 
           val ek = MagicDrawElementKindDesignation.getMagicDrawDesignation( project, cs.characterizesInstancesOf )
 
-          val early = cs.computedDerivedFeatures filter ( EAGER_COMPUTATION_AS_NEEDED == _.refresh ) map ( computedFeatureToInfo( e, ek, _ ) )
-          val delayed = cs.computedDerivedFeatures filter ( DELAYED_COMPUTATION_UNTIL_INVOKED == _.refresh ) map ( computedFeatureToInfo( e, ek, _ ) )
+          val early = cs.computedDerivedFeatures filter ( EAGER_COMPUTATION_AS_NEEDED == _.refresh ) map
+            ( computedFeatureToInfo( e, ek, _ ) )
+
+          val delayed = cs.computedDerivedFeatures filter ( DELAYED_COMPUTATION_UNTIL_INVOKED == _.refresh ) map
+            ( computedFeatureToInfo( e, ek, _ ) )
 
           val earlyNode = ConfigurableNodeFactory.createConfigurableNode( SpecificationComputedNode[DerivedHierarchicalTable](
             ID = s"${entry} EARLY",
@@ -126,11 +137,12 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
 
           if ( delayed nonEmpty ) {
 
-            val delayedNode = ConfigurableNodeFactory.createConfigurableNode( SpecificationComputedNode[DerivedHierarchicalTable](
-              ID = s"${entry} DELAYED",
-              label = s"${cs.name.hname} (derivations computed on-demand)",
-              e,
-              table = new DerivedHierarchicalTable( e, delayed ) ) )
+            val delayedNode = ConfigurableNodeFactory.createConfigurableNode(
+              SpecificationComputedNode[DerivedHierarchicalTable](
+                ID = s"${entry} DELAYED",
+                label = s"${cs.name.hname} (derivations computed on-demand)",
+                e,
+                table = new DerivedHierarchicalTable( e, delayed ) ) )
 
             earlyNode.addNode( delayedNode )
 

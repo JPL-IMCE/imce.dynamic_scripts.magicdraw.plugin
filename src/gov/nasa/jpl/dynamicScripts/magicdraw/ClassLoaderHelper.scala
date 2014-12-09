@@ -46,7 +46,6 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
-
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.TraversableOnce.OnceCanBuildFrom
 import scala.language.existentials
@@ -55,13 +54,11 @@ import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.openapi.uml.SessionManager
 import com.nomagic.magicdraw.plugins.Plugin
 import com.nomagic.magicdraw.plugins.PluginUtils
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicScriptInfo
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.HName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.JName
@@ -69,6 +66,10 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.PluginContext
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ProjectContext
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
+import java.nio.file.Paths
+import java.nio.file.Files
+import java.nio.charset.spi.CharsetProvider
+import java.nio.charset.StandardCharsets
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -224,13 +225,13 @@ object ClassLoaderHelper {
       if ( p != null && sm.isSessionCreated( p ) ) {
         sm.closeSession( p )
       }
-    
+
     def cancelSessionIfNeeded =
       if ( p != null && sm.isSessionCreated( p ) ) {
         sm.cancelSession( p )
       }
-    
-    val actionAndArgumentValues = Seq(p, ev, cm.s ) ++ argumentValues toSeq;
+
+    val actionAndArgumentValues = Seq( p, ev, cm.s ) ++ argumentValues toSeq;
     try {
       val r = cm.m.invoke( null, actionAndArgumentValues: _* )
 
@@ -366,31 +367,62 @@ object ClassLoaderHelper {
     return jars.nonEmpty
   }
 
+  val classpathLibEntry = """(?s)<classpathentry.*?\s+?kind="lib".*?\s+?path="(.*?)".*?/>""".r
+  val classpathSrcEntry = """(?s)<classpathentry.*?\s+?kind="src".*?\s+?path="/(.*?)".*?/>""".r
+  val classpathBinEntry = """(?s)<classpathentry.*?\s+?kind="output".*?\s+?path="(.*?)".*?/>""".r
+  
   def resolveProjectPaths( urls: Try[List[URL]], projectName: JName ): Try[List[URL]] =
 
     urls match {
       case Failure( t ) => Failure( t )
       case Success( list ) =>
 
-        val scriptProjectPath = getDynamicScriptsRootPath() + File.separator + projectName.jname + File.separator
-        val scriptProjectDir = new File( scriptProjectPath )
+        val scriptProjectPathname = getDynamicScriptsRootPath() + File.separator + projectName.jname + File.separator
+        val scriptProjectPath = Paths.get( new File( scriptProjectPathname ).toURI ).toRealPath()
+        val scriptProjectDir = scriptProjectPath.toFile
+
         if ( !isFolderAvailable( scriptProjectDir ) )
           return Failure( DynamicScriptsProjectNotFound( projectName.jname, scriptProjectDir ) )
 
-        val scriptProjectBin = new File( scriptProjectPath + "bin" )
-        val binURL = if ( isFolderAvailable( scriptProjectBin ) ) Some( scriptProjectBin.toURI().toURL() ) else None
+        val classpathFilepath = scriptProjectPath.resolve( ".classpath" )
+        if ( Files.isReadable( classpathFilepath ) && Files.isRegularFile( classpathFilepath ) ) {
+          val classpathContent = new String(Files.readAllBytes(classpathFilepath))
+          val libs = classpathLibEntry.findAllMatchIn(classpathContent).map { m =>
+             val libpath = scriptProjectPath.resolve(m.group(1))
+             require(Files.isRegularFile(libpath), s"lib path: ${libpath}")
+             require(Files.isReadable(libpath), s"lib path: ${libpath}")                
+             libpath.toUri.toURL
+          } toList;
+          val bins = classpathBinEntry.findAllMatchIn(classpathContent).map { m =>
+             val binpath = scriptProjectPath.resolve(m.group(1))
+             require(Files.isDirectory(binpath), s"bin path: ${binpath}")
+             require(Files.isReadable(binpath), s"bin path: ${binpath}")             
+             binpath.toUri.toURL
+          } toList;
+          val combinedList = ( list /: (bins ++ libs) ) { case ( urls, url ) =>
+            if (urls.contains(url)) urls else urls :+ url 
+          }
+          val srcs = classpathSrcEntry.findAllMatchIn(classpathContent).map { m => JName(m.group(1)) }
+          val resolved0: Try[List[URL]] = Success( combinedList )
+          val resolvedN = ( resolved0 /: srcs ) ( resolveProjectPaths _ )
+          resolvedN
+        }
+        else {
+          val scriptProjectBin = scriptProjectPath.resolve( "bin" ).toFile
+          val binURL = if ( isFolderAvailable( scriptProjectBin ) ) Some( scriptProjectBin.toURI().toURL() ) else None
 
-        val scriptProjectLib = new File( scriptProjectPath + "lib" )
-        val jars =
-          if ( isFolderAvailable( scriptProjectLib ) )
-            scriptProjectLib.listFiles( jarFilenameFilter ).toList map ( _.toURI().toURL() ) toList
-          else
-            List[URL]()
+          val scriptProjectLib = scriptProjectPath.resolve( "lib" ).toFile
+          val jars =
+            if ( isFolderAvailable( scriptProjectLib ) )
+              scriptProjectLib.listFiles( jarFilenameFilter ).toList map ( _.toURI().toURL() ) toList
+            else
+              List[URL]()
 
-        ( binURL, jars ) match {
-          case ( None, Nil )         => Failure( DynamicScriptsProjectNotFound( projectName.jname, scriptProjectDir ) )
-          case ( None, libs )        => Success( libs )
-          case ( Some( url ), libs ) => Success( url :: libs ::: list )
+          ( binURL, jars ) match {
+            case ( None, Nil )         => Failure( DynamicScriptsProjectNotFound( projectName.jname, scriptProjectDir ) )
+            case ( None, libs )        => Success( libs )
+            case ( Some( url ), libs ) => Success( url :: libs ::: list )
+          }
         }
     }
 
