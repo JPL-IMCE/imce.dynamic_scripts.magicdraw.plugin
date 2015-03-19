@@ -98,8 +98,7 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
       val allDerivedFeatures = mDerivedFeatures ++ sDerivedFeatures ++ cDerivedFeatures ++ csDerivedFeatures
       addDerivedFeatures( project, node, allDerivedFeatures, e )
 
-    }
-    finally {
+    } finally {
       val currentTime = System.currentTimeMillis()
       log.info( s"SpecificationNodeConfiguratorForApplicableDynamicScripts.configure took ${currentTime - previousTime} ms" )
     }
@@ -121,11 +120,11 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
 
           val ek = MagicDrawElementKindDesignation.getMagicDrawDesignation( project, cs.characterizesInstancesOf )
 
-          val early = cs.computedDerivedFeatures filter ( EAGER_COMPUTATION_AS_NEEDED == _.refresh ) map
-            ( computedFeatureToInfo( e, ek, _ ) )
+          val early = cs.computedDerivedFeatures filter ( EAGER_COMPUTATION_AS_NEEDED == _.refresh ) flatMap
+            ( computedFeatureToInfo( cs, e, ek, _ ) )
 
-          val delayed = cs.computedDerivedFeatures filter ( DELAYED_COMPUTATION_UNTIL_INVOKED == _.refresh ) map
-            ( computedFeatureToInfo( e, ek, _ ) )
+          val delayed = cs.computedDerivedFeatures filter ( DELAYED_COMPUTATION_UNTIL_INVOKED == _.refresh ) flatMap
+            ( computedFeatureToInfo( cs, e, ek, _ ) )
 
           val earlyNode = ConfigurableNodeFactory.createConfigurableNode( SpecificationComputedNode[DerivedHierarchicalTable](
             ID = s"${entry} EARLY",
@@ -152,16 +151,26 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
   }
 
   def computedFeatureToInfo(
+    cs: DynamicScriptsTypes.ComputedCharacterization,
     e: Element,
     ek: MagicDrawElementKindDesignation,
-    computedDerivedFeature: ComputedDerivedFeature ): AbstractDisposableTableModel = computedDerivedFeature match {
-    case f: DynamicScriptsTypes.ComputedDerivedProperty =>
-      DerivedPropertyComputedRowInfo( e, ek, f )
-    case f: DynamicScriptsTypes.ComputedDerivedTable =>
-      DerivedPropertyComputedTableInfo( e, ek, f )
-    case f: DynamicScriptsTypes.ComputedDerivedTree =>
-      DerivedPropertyComputedTreeInfo( e, ek, f )
-    case f: DynamicScriptsTypes.ComputedDerivedWidget =>
-      DerivedPropertyComputedWidget( e, ek, f )
-  }
+    computedDerivedFeature: ComputedDerivedFeature ): Option[AbstractDisposableTableModel] =
+    try {
+      Some( computedDerivedFeature match {
+        case f: DynamicScriptsTypes.ComputedDerivedProperty =>
+          DerivedPropertyComputedRowInfo( cs, e, ek, f )
+        case f: DynamicScriptsTypes.ComputedDerivedTable =>
+          DerivedPropertyComputedTableInfo( cs, e, ek, f )
+        case f: DynamicScriptsTypes.ComputedDerivedTree =>
+          DerivedPropertyComputedTreeInfo( cs, e, ek, f )
+        case f: DynamicScriptsTypes.ComputedDerivedWidget =>
+          DerivedPropertyComputedWidget( cs, e, ek, f )
+      } )
+    } catch {
+      case t: Throwable =>
+        val log = MDGUILogHelper.getMDPluginsLog
+        log.error(s"Cannot create computed derived feature for '${computedDerivedFeature}' because of an error", t)
+        None
+    }
+
 }

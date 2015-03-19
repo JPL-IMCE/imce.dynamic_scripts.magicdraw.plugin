@@ -54,18 +54,28 @@ import com.jidesoft.grid.Row
 import com.jidesoft.grid.TreeTableModel
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.TreeNodeInfo
 import com.nomagic.utils.Utilities
+import com.nomagic.magicdraw.uml.ClassTypes
 
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-case class DerivedPropertyComputedTreeInfo( e: Element,
-                                            ek: MagicDrawElementKindDesignation,
-                                            computedDerivedTree: ComputedDerivedTree )
+case class DerivedPropertyComputedTreeInfo(
+  cs: ComputedCharacterization,
+  e: Element,
+  ek: MagicDrawElementKindDesignation,
+  computedDerivedTree: ComputedDerivedTree )
   extends TreeTableModel[DerivedPropertyComputedTreeRow]
   with AbstractDisposableTableModel {
 
   require( computedDerivedTree.columnValueTypes.isDefined, s"A DerivedPropertyComputedTree must have explicitly-specified column value types!" )
   require( computedDerivedTree.columnValueTypes.get.nonEmpty, s"A DerivedPropertyComputedTree must have at least 1 column value type!" )
+
+  val derivedElementClassType = {
+    val classTypeName = cs.characterizesInstancesOf.metaclass.sname
+    val classTypeDef = ClassTypes.getClassType( classTypeName )
+    require( classTypeDef != null, "No MagicDraw ClassType available for ComputedDerivedTree className: '"+classTypeName+"'" )
+    classTypeDef
+  }
 
   val columnValueTypes = computedDerivedTree.columnValueTypes.get
 
@@ -83,22 +93,22 @@ case class DerivedPropertyComputedTreeInfo( e: Element,
 
   override def getLabel: String = label
 
-  override def getColumnClass( columnIndex: Int ): Class[_] = 
-    if (0 == columnIndex)
+  override def getColumnClass( columnIndex: Int ): Class[_] =
+    if ( 0 == columnIndex )
       classOf[DerivedPropertyComputedTreeRow]
     else {
-      require( 0 < columnIndex && columnIndex <= columnValueTypes.size )  
+      require( 0 < columnIndex && columnIndex <= columnValueTypes.size )
       classOf[Object]
     }
 
   override def getColumnCount: Int = 1 + columnValueTypes.size
 
-  override def getColumnName( columnIndex: Int ): String = 
-    if (0 == columnIndex)
+  override def getColumnName( columnIndex: Int ): String =
+    if ( 0 == columnIndex )
       defaultLabel
     else {
       require( 0 < columnIndex && columnIndex <= columnValueTypes.size )
-      columnValueTypes( columnIndex-1 ).typeName.hname    
+      columnValueTypes( columnIndex - 1 ).typeName.hname
     }
 
   protected def makeTreeRow( tree: TreeNodeInfo, row: Map[String, AbstractTreeNodeInfo] ): DerivedPropertyComputedTreeRow = {
@@ -140,11 +150,10 @@ case class DerivedPropertyComputedTreeInfo( e: Element,
   override def update: Seq[ValidationAnnotation] =
     if ( null != values ) {
       Seq()
-    }
-    else {
+    } else {
       val previousTime = System.currentTimeMillis()
       try {
-        val message = computedDerivedTree.prettyPrint( "" ) + "\n"
+        val message = computedDerivedTree.prettyPrint( "" )+"\n"
         ClassLoaderHelper.createDynamicScriptClassLoader( computedDerivedTree ) match {
           case Failure( t ) =>
             ClassLoaderHelper.reportError( computedDerivedTree, message, t )
@@ -157,7 +166,7 @@ case class DerivedPropertyComputedTreeInfo( e: Element,
             try {
               ClassLoaderHelper.lookupClassAndMethod( scriptCL, computedDerivedTree,
                 classOf[Project], classOf[ActionEvent], classOf[ComputedDerivedTree],
-                classOf[MagicDrawElementKindDesignation], classOf[Element] ) match {
+                classOf[MagicDrawElementKindDesignation], derivedElementClassType ) match {
                   case Failure( t ) =>
                     ClassLoaderHelper.reportError( computedDerivedTree, message, t )
                     return Seq()
@@ -195,14 +204,12 @@ case class DerivedPropertyComputedTreeInfo( e: Element,
                         return Seq()
                     }
                 }
-            }
-            finally {
+            } finally {
               Thread.currentThread().setContextClassLoader( localClassLoader )
             }
           }
         }
-      }
-      finally {
+      } finally {
         val currentTime = System.currentTimeMillis()
       }
     }

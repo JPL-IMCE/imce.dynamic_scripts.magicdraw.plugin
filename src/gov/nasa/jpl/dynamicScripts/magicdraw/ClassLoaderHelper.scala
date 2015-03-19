@@ -378,8 +378,13 @@ object ClassLoaderHelper {
       case Success( list ) =>
 
         val scriptProjectPathname = getDynamicScriptsRootPath() + File.separator + projectName.jname + File.separator
-        val scriptProjectPath = Paths.get( new File( scriptProjectPathname ).toURI ).toRealPath()
-        val scriptProjectDir = scriptProjectPath.toFile
+        val ( scriptProjectPath, scriptProjectDir ) = try {
+          val path = Paths.get( new File( scriptProjectPathname ).toURI ).toRealPath()
+          val dir = path.toFile
+          ( path, dir )
+        } catch {
+          case t: Throwable => return Failure( t )
+        }
 
         if ( !isFolderAvailable( scriptProjectDir ) )
           return Failure( DynamicScriptsProjectNotFound( projectName.jname, scriptProjectDir ) )

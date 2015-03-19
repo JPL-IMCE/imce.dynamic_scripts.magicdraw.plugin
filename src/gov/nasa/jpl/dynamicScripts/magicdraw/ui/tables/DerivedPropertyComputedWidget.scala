@@ -59,10 +59,11 @@ import com.nomagic.utils.Utilities
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-case class DerivedPropertyComputedWidget( e: Element,
-                                            ek: MagicDrawElementKindDesignation,
-                                            computedDerivedWidget: ComputedDerivedWidget )
-  extends DerivedPropertyComputedInfo( e, ek, computedDerivedWidget) {
+case class DerivedPropertyComputedWidget(
+  cs: ComputedCharacterization, e: Element,
+  ek: MagicDrawElementKindDesignation,
+  computedDerivedWidget: ComputedDerivedWidget )
+  extends DerivedPropertyComputedInfo( e, ek, computedDerivedWidget ) {
 
   var value: Component = null
 
@@ -75,35 +76,34 @@ case class DerivedPropertyComputedWidget( e: Element,
 
   override def getLabel: String = label
 
-  override def getColumnClass( columnIndex: Int ): Class[_] = 
+  override def getColumnClass( columnIndex: Int ): Class[_] =
     classOf[Object]
 
   override def getColumnCount: Int = 1
 
-  override def getColumnName( columnIndex: Int ): String = 
+  override def getColumnName( columnIndex: Int ): String =
     defaultLabel
 
-  override def getRowCount: Int = 
-    if (null == value) 0
+  override def getRowCount: Int =
+    if ( null == value ) 0
     else 1
-    
+
   def getComponent: Component = value
-  
-  override def getValueAt( rowIndex: Int, columnIndex: Int): Object = {
-      require( columnIndex == 0 )
-      require( null != value )
-      require( rowIndex == 0 )
-      value
-    }
-  
+
+  override def getValueAt( rowIndex: Int, columnIndex: Int ): Object = {
+    require( columnIndex == 0 )
+    require( null != value )
+    require( rowIndex == 0 )
+    value
+  }
+
   override def update: Seq[ValidationAnnotation] =
     if ( null != value ) {
       Seq()
-    }
-    else {
+    } else {
       val previousTime = System.currentTimeMillis()
       try {
-        val message = computedDerivedWidget.prettyPrint( "" ) + "\n"
+        val message = computedDerivedWidget.prettyPrint( "" )+"\n"
         ClassLoaderHelper.createDynamicScriptClassLoader( computedDerivedWidget ) match {
           case Failure( t ) =>
             ClassLoaderHelper.reportError( computedDerivedWidget, message, t )
@@ -131,7 +131,7 @@ case class DerivedPropertyComputedWidget( e: Element,
                           case None =>
                             ClassLoaderHelper.reportError( computedDerivedWidget, message, new IllegalArgumentException( s"Unrecognized result -- expected: Seq[ValidationAnnotation], got: ${rs.getClass.getName}" ) )
                             return Seq()
-                          case Some( annotations ) =>             
+                          case Some( annotations ) =>
                             value = component
                             annotations
                         }
@@ -140,14 +140,12 @@ case class DerivedPropertyComputedWidget( e: Element,
                         return Seq()
                     }
                 }
-            }
-            finally {
+            } finally {
               Thread.currentThread().setContextClassLoader( localClassLoader )
             }
           }
         }
-      }
-      finally {
+      } finally {
         val currentTime = System.currentTimeMillis()
       }
     }
@@ -159,7 +157,7 @@ object DerivedPropertyComputedWidget {
   def asSeqOfValidationAnnotation( rs: Seq[_] ): Option[Seq[ValidationAnnotation]] =
     if ( rs.forall( _ match {
       case ( _: ValidationAnnotation ) => true
-      case _ => false
+      case _                           => false
     } ) )
       Some( rs.asInstanceOf[Seq[ValidationAnnotation]] )
     else None
