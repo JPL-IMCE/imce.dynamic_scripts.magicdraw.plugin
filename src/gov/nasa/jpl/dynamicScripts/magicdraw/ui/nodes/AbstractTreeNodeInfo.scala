@@ -1,3 +1,6 @@
+/*
+ * Replace this with your license text!
+ */
 package gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes
 
 import javax.swing.tree.DefaultMutableTreeNode

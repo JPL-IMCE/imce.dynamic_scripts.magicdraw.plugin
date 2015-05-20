@@ -1,3 +1,6 @@
+/*
+ * Replace this with your license text!
+ */
 package gov.nasa.jpl.dynamicScripts.magicdraw
 
 /** Wraps a [[MagicDrawValidationDataResults]] as a [[RuntimeException]]
@@ -10,4 +13,3 @@ package gov.nasa.jpl.dynamicScripts.magicdraw
  */
 case class MagicDrawValidationDataResultsException( validationDataResults: MagicDrawValidationDataResults ) 
 extends RuntimeException( validationDataResults.title )
-

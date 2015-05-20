@@ -1,3 +1,6 @@
+/*
+ * Replace this with your license text!
+ */
 package gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes
 
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
