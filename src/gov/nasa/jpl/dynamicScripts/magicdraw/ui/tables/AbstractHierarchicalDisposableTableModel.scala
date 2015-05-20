@@ -1,3 +1,6 @@
+/*
+ * Replace this with your license text!
+ */
 package gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables
 
 import com.jidesoft.grid.HierarchicalTableModel
