@@ -18,24 +18,26 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-case class DerivedPropertyComputedRowInfo( e: Element,
-                                           ek: MagicDrawElementKindDesignation,
-                                           computedDerivedProperty: ComputedDerivedProperty )
+case class DerivedPropertyComputedRowInfo(
+  cs: ComputedCharacterization,
+  e: Element,
+  ek: MagicDrawElementKindDesignation,
+  computedDerivedProperty: ComputedDerivedProperty )
   extends DerivedPropertyComputedInfo( e, ek, computedDerivedProperty ) {
 
   var values: Seq[AbstractTreeNodeInfo] = null
 
   override def dispose: Unit = values = null
-  
+
   val defaultLabel: String = computedDerivedProperty.valueType match {
-    case None => s"/${computedDerivedProperty.name.hname}"
+    case None       => s"/${computedDerivedProperty.name.hname}"
     case Some( vt ) => s"/${computedDerivedProperty.name.hname}: ${vt.typeName.hname}"
   }
-  
+
   var label: String = defaultLabel
-  
+
   override def getLabel: String = label
-      
+
   override def getColumnCount: Int = 1
 
   override def getColumnName( columnIndex: Int ): String = {
@@ -55,11 +57,10 @@ case class DerivedPropertyComputedRowInfo( e: Element,
   override def update: Seq[ValidationAnnotation] =
     if ( null != values ) {
       Seq()
-    }
-    else {
+    } else {
       val previousTime = System.currentTimeMillis()
       try {
-        val message = computedDerivedProperty.prettyPrint( "" ) + "\n"
+        val message = computedDerivedProperty.prettyPrint( "" )+"\n"
         ClassLoaderHelper.createDynamicScriptClassLoader( computedDerivedProperty ) match {
           case Failure( t ) =>
             ClassLoaderHelper.reportError( computedDerivedProperty, message, t )
@@ -95,14 +96,12 @@ case class DerivedPropertyComputedRowInfo( e: Element,
                         }
                     }
                 }
-            }
-            finally {
+            } finally {
               Thread.currentThread().setContextClassLoader( localClassLoader )
             }
           }
         }
-      }
-      finally {
+      } finally {
         val currentTime = System.currentTimeMillis()
       }
     }

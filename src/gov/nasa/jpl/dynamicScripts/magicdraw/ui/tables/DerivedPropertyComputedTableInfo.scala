@@ -18,9 +18,11 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-case class DerivedPropertyComputedTableInfo( e: Element,
-                                             ek: MagicDrawElementKindDesignation,
-                                             computedDerivedTable: ComputedDerivedTable )
+case class DerivedPropertyComputedTableInfo(
+  cs: ComputedCharacterization,
+  e: Element,
+  ek: MagicDrawElementKindDesignation,
+  computedDerivedTable: ComputedDerivedTable )
   extends DerivedPropertyComputedInfo( e, ek, computedDerivedTable ) {
 
   require( computedDerivedTable.columnValueTypes.isDefined, s"A DerivedPropertyComputedTable must have explicitly-specified column value types!" )
@@ -32,7 +34,7 @@ case class DerivedPropertyComputedTableInfo( e: Element,
 
   val defaultLabel: String = s"/${computedDerivedTable.name.hname}"
   var label: String = defaultLabel
-  
+
   override def dispose: Unit = values = null
 
   override def getLabel: String = label
@@ -49,7 +51,7 @@ case class DerivedPropertyComputedTableInfo( e: Element,
   /**
    * @todo Improve the display of empty cells.
    * Currently, a cell is empty if getValueAt(r,c) == null.
-   * Instead of returning null, consider defining a special AbstractTreeNodeInfo, e.g., EmptyTreeNodeInfo, 
+   * Instead of returning null, consider defining a special AbstractTreeNodeInfo, e.g., EmptyTreeNodeInfo,
    * that would be displayed as a grayed-out, crossed cell.
    */
   override def getValueAt( rowIndex: Int, columnIndex: Int ): Object = {
@@ -58,18 +60,17 @@ case class DerivedPropertyComputedTableInfo( e: Element,
     require( 0 <= rowIndex && rowIndex < values.size )
     val row = values( rowIndex )
     val column = columnValueTypes( columnIndex ).key.sname
-    if (row.contains( column )) row( column )
+    if ( row.contains( column ) ) row( column )
     else null
   }
 
   override def update: Seq[ValidationAnnotation] =
     if ( null != values ) {
       Seq()
-    }
-    else {
+    } else {
       val previousTime = System.currentTimeMillis()
       try {
-        val message = computedDerivedTable.prettyPrint( "" ) + "\n"
+        val message = computedDerivedTable.prettyPrint( "" )+"\n"
         ClassLoaderHelper.createDynamicScriptClassLoader( computedDerivedTable ) match {
           case Failure( t ) =>
             ClassLoaderHelper.reportError( computedDerivedTable, message, t )
@@ -108,14 +109,12 @@ case class DerivedPropertyComputedTableInfo( e: Element,
                         return Seq()
                     }
                 }
-            }
-            finally {
+            } finally {
               Thread.currentThread().setContextClassLoader( localClassLoader )
             }
           }
         }
-      }
-      finally {
+      } finally {
         val currentTime = System.currentTimeMillis()
       }
     }

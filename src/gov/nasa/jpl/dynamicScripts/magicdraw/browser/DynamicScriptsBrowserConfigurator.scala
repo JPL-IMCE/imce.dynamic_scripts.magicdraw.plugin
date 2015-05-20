@@ -113,7 +113,14 @@ class DynamicScriptsBrowserConfigurator extends EnhancedBrowserContextAMConfigur
     def dynamicScriptMenuFilter( das: DynamicActionScript ): Boolean = DynamicScriptsBrowserConfigurator.isDynamicContextMenuScriptActionAvailable( das )
 
     val mActions = p.getRelevantMetaclassActions( mName, dynamicScriptMenuFilter )
-    val sActions = StereotypesHelper.getStereotypesHierarchy( triggerElement ) flatMap ( s => p.getRelevantStereotypeActions( mName, s.getProfile().getQualifiedName(), s.getQualifiedName(), dynamicScriptMenuFilter ) )
+    val sActions = StereotypesHelper.getStereotypesHierarchy( triggerElement ) flatMap ( s => 
+      Option.apply(s.getProfile) match {
+        case Some( pf ) => 
+          p.getRelevantStereotypeActions(
+              mName, pf.getQualifiedName(), s.getQualifiedName(), dynamicScriptMenuFilter )
+        case None => 
+          Map[String, Seq[DynamicActionScript]]()
+      })
     val cActions = p.getRelevantClassifierActions( triggerElement, dynamicScriptMenuFilter )
 
     val allDynamicScriptActions: Map[String, Seq[DynamicActionScript]] = mActions ++ sActions ++ cActions
