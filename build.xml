@@ -71,14 +71,14 @@
 		<mkdir dir="lib.srcs" />
 
 		<copy todir="lib" verbose="true">
-			<fileset dir="${scripts.dir}/target/pack/lib">
+			<fileset dir="${plugin.dir}/target/pack/lib">
 				<exclude name="*-tests.jar"/>
 				<include name="*.jar" />
 			</fileset>
 		</copy>
 
 		<copy todir="lib.srcs" verbose="true">
-			<fileset dir="${scripts.dir}/target/pack/lib.srcs">
+			<fileset dir="${plugin.dir}/target/pack/lib.srcs">
 				<exclude name="*-tests-sources.jar"/>
 				<include name="*.jar" />
 			</fileset>
