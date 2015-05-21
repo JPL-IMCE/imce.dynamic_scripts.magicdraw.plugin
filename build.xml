@@ -98,7 +98,6 @@
             <fileset dir="." includes="plugin.xml"/>
             <replacefilter token="lib/gov.nasa.jpl.dynamicScripts.magicdraw.jar"
                            value="${plugin.jar.library}"/>
-            </fileset>
         </replace>
 
 	</target>
