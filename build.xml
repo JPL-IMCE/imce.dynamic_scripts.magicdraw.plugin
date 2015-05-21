@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<project xmlns:qvto="http://www.eclipse.org/qvt/1.0.0/Operational" name="gov.nasa.jpl.dynamicScripts.magicdraw" basedir=".">
+<project name="gov.nasa.jpl.dynamicScripts.magicdraw" basedir=".">
 
 	<property name="memorySize" 		value="-Xmx3076M"/>
 	<property name="maxPermGenSize"	value="-XX:MaxPermSize=1024M" />
 	
-	<import file="${md.install.dir}/data/eclipse/zip.xml"/>	
+	<import file="${md.install.dir}/data/eclipse/zip.xml"/>
+
 	<echoproperties prefix="md"/>
 	<echoproperties/>
 	
 	<property name="plugin.dir"	 		location="."/>
 	<property name="plugin.name" 		value="gov.nasa.jpl.dynamicScripts.magicdraw"/>
-	<property name="plugin.resource"		value="data/resourcemanager/MDR_Plugin_govnasajpldynamicScriptsmagicdraw_72516_descriptor.xml"/>
+	<property name="plugin.resource"	value="data/resourcemanager/MDR_Plugin_govnasajpldynamicScriptsmagicdraw_72516_descriptor.xml"/>
 	<property name="plugin.archive"		value="JPLDynamicScriptsMagicDrawPlugin"/>
 	<property name="plugin.jar"			value="lib/JPLDynamicScriptsMagicDrawPlugin.jar"/>
 
@@ -24,7 +25,7 @@
 		<fail/>
 	</target>
 		
-	<target name="all.ok" if="all.precondition.scala" depends="build,zip,install,bundle">
+	<target name="all.ok" if="all.precondition.scala" depends="publish,build.ok,zip,install,bundle">
 		<save.job.properties/>
 	</target>
 	
@@ -44,7 +45,47 @@
 	<fileset id="plugin.samples" dir="${plugin.dir}/samples">
 		<include name="**/*.mdzip"/>
 	</fileset>
-	
+
+	<target name="publish">
+		<echoproperties prefix="env"/>
+		<exec executable="${env.JENKINS_HOME}/tools/SBT/sbt"
+			  failifexecutionfails="true"
+			  failonerror="true"
+			  logerror="true"
+			  dir=".">
+			<arg value="-java-home"/>
+			<arg value="${env.JAVA8_HOME}"/>
+			<arg value="-DJPL_MBEE_LOCAL_REPOSITORY=${env.JPL_MBEE_LOCAL_REPOSITORY}"/>
+			<arg value="-DMD_INSTALL_DIR=${md.install.dir}"/>
+			<arg value="-batch"/>
+			<arg value="-no-colors"/>
+			<arg value="publish"/>
+		</exec>
+	</target>
+
+	<target name="build.ok">
+
+		<delete failonerror="false" dir="lib" />
+        <delete failonerror="false" dir="lib.srcs" />
+		<mkdir dir="lib" />
+		<mkdir dir="lib.srcs" />
+
+		<copy todir="lib" verbose="true">
+			<fileset dir="${scripts.dir}/target/pack/lib">
+				<exclude name="*-tests.jar"/>
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+
+		<copy todir="lib.srcs" verbose="true">
+			<fileset dir="${scripts.dir}/target/pack/lib.srcs">
+				<exclude name="*-tests-sources.jar"/>
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+
+	</target>
+
 	<target name="zip">
 		<md.plugin.clean.root
 			plugin.dir="${plugin.dir}" 
