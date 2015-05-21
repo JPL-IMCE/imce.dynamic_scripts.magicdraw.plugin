@@ -84,6 +84,23 @@
 			</fileset>
 		</copy>
 
+        <path id="plugin.jar.file">
+            <fileset dir=".">
+                <include name="lib/jpl-dynamicscripts-magicdraw-plugin_*.jar"/>
+            </fileset>
+        </path>
+        <pathconvert property="plugin.jar.library" refid="plugin.jar.file" pathsep="\:">
+            <map from="${basedir}/" to=""/>
+        </pathconvert>
+        <echoproperties prefix="plugin.jar"/>
+
+        <replace>
+            <fileset dir="." includes="plugin.xml"/>
+            <replacefilter token="lib/gov.nasa.jpl.dynamicScripts.magicdraw.jar"
+                           value="${plugin.jar.library}"/>
+            </fileset>
+        </replace>
+
 	</target>
 
 	<target name="zip">
