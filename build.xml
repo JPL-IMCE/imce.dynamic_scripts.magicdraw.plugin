@@ -71,16 +71,16 @@
 		<mkdir dir="lib.srcs" />
 
 		<copy todir="lib" verbose="true">
-			<fileset dir="${plugin.dir}/target/pack/lib">
-				<exclude name="*-tests.jar"/>
+			<fileset dir="${plugin.dir}/target/scala-2.11">
+				<exclude name="*-javadoc.jar"/>
+				<exclude name="*-sources.jar"/>
 				<include name="*.jar" />
 			</fileset>
 		</copy>
 
 		<copy todir="lib.srcs" verbose="true">
-			<fileset dir="${plugin.dir}/target/pack/lib.srcs">
-				<exclude name="*-tests-sources.jar"/>
-				<include name="*.jar" />
+			<fileset dir="${plugin.dir}/target/scala-2.11">
+				<exclude name="*-sources.jar"/>
 			</fileset>
 		</copy>
 
