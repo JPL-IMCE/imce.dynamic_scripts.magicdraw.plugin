@@ -368,9 +368,9 @@ object ClassLoaderHelper {
     jars.nonEmpty
   }
 
-  val classpathLibEntry = """(?s)<classpathentry.*?\s+?kind="lib".*?\s+?path="(.*?)".*?/>""".r
-  val classpathSrcEntry = """(?s)<classpathentry.*?\s+?kind="src".*?\s+?path="/(.*?)".*?/>""".r
-  val classpathBinEntry = """(?s)<classpathentry.*?\s+?kind="output".*?\s+?path="(.*?)".*?/>""".r
+  val classpathLibEntry = """(?m)<classpathentry.*?\s+?kind="lib".*?\s+?path="(.*?)".*?/>""".r
+  val classpathSrcEntry = """(?m)<classpathentry.*?\s+?kind="src".*?\s+?path="/(.*?)".*?/>""".r
+  val classpathBinEntry = """(?m)<classpathentry.*?\s+?kind="output".*?\s+?path="(.*?)".*?/>""".r
   
   def resolveProjectPaths( urls: Try[List[URL]], projectName: JName ): Try[List[URL]] =
 
@@ -391,43 +391,45 @@ object ClassLoaderHelper {
           return Failure( DynamicScriptsProjectNotFound( projectName.jname, scriptProjectDir ) )
 
         val classpathFilepath = scriptProjectPath.resolve( ".classpath" )
+        val classpathURLs =
         if ( Files.isReadable( classpathFilepath ) && Files.isRegularFile( classpathFilepath ) ) {
           val classpathContent = new String(Files.readAllBytes(classpathFilepath))
           val libs = classpathLibEntry.findAllMatchIn(classpathContent).map { m =>
-             val libpath = scriptProjectPath.resolve(m.group(1))
-             require(Files.isRegularFile(libpath), s"lib path: $libpath")
-             require(Files.isReadable(libpath), s"lib path: $libpath")
-             libpath.toUri.toURL
+            val libpath = scriptProjectPath.resolve(m.group(1))
+            require(Files.isRegularFile(libpath), s"lib path: $libpath")
+            require(Files.isReadable(libpath), s"lib path: $libpath")
+            libpath.toUri.toURL
           } toList
           val bins = classpathBinEntry.findAllMatchIn(classpathContent).flatMap { m =>
-             val binpath = scriptProjectPath.resolve(m.group(1))
-             if (Files.isDirectory(binpath) && Files.isReadable(binpath)) Some(binpath.toUri.toURL)
-             else None
+            val binpath = scriptProjectPath.resolve(m.group(1))
+            if (Files.isDirectory(binpath) && Files.isReadable(binpath)) Some(binpath.toUri.toURL)
+            else None
           } toList
-          val combinedList = ( list /: (bins ++ libs) ) { case ( urls, url ) =>
-            if (urls.contains(url)) urls else urls :+ url 
-          }
           val srcs = classpathSrcEntry.findAllMatchIn(classpathContent).map { m => JName(m.group(1)) }
-          val resolved0: Try[List[URL]] = Success( combinedList )
+          val resolved0: Try[List[URL]] = Success( bins ++ libs )
           val resolvedN = ( resolved0 /: srcs ) ( resolveProjectPaths )
           resolvedN
-        }
-        else {
-          val scriptProjectBin = scriptProjectPath.resolve( "bin" ).toFile
-          val binURL = if ( isFolderAvailable( scriptProjectBin ) ) Some( scriptProjectBin.toURI.toURL ) else None
+        } else Success(Nil)
 
-          val scriptProjectLib = scriptProjectPath.resolve( "lib" ).toFile
-          val jars =
-            if ( isFolderAvailable( scriptProjectLib ) )
-              TraversePath.listFilesRecursively(scriptProjectLib, jarFilenameFilter) map (_.toURI.toURL) toList
-            else
-              List[URL]()
+        classpathURLs match {
+          case Failure(t) => Failure(t)
+          case Success(resolvedURLs) =>
+            val scriptProjectBin = scriptProjectPath.resolve("bin").toFile
+            val binURL =
+              if (!isFolderAvailable(scriptProjectBin)) List()
+              else List(scriptProjectBin.toURI.toURL)
 
-          ( binURL, jars ) match {
-            case ( None, Nil )         => Failure( DynamicScriptsProjectNotFound( projectName.jname, scriptProjectDir ) )
-            case ( None, libs )        => Success( libs ::: list )
-            case ( Some( url ), libs ) => Success( url :: libs ::: list )
-          }
+            val scriptProjectLib = scriptProjectPath.resolve("lib").toFile
+            val jars =
+              if (!isFolderAvailable(scriptProjectLib)) List()
+              else TraversePath.listFilesRecursively(scriptProjectLib, jarFilenameFilter) map (_.toURI.toURL) toList
+
+            val combinedList = (list /: (resolvedURLs ::: binURL ::: jars)) { case (urls, url) =>
+              if (urls.contains(url)) urls else urls :+ url
+            }
+
+            if (combinedList.isEmpty) Failure(DynamicScriptsProjectNotFound(projectName.jname, scriptProjectDir))
+            else Success(combinedList)
         }
     }
 
