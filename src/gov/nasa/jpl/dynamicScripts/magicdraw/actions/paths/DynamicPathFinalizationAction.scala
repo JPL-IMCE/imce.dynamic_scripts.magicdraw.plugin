@@ -71,30 +71,30 @@ case class DynamicPathFinalizationAction(
 
   override def execute( pe: PresentationElement, point: Point ): Boolean = {
     val log = MDGUILogHelper.getMDPluginsLog
-    val e = pe.getElement()
+    val e = pe.getElement
 
     val previousTime = System.currentTimeMillis()
 
     val message = action.prettyPrint( "" )
-    val guiLog = Application.getInstance().getGUILog()
+    val guiLog = Application.getInstance().getGUILog
 
     UncaughtExceptionHandler( message )
     ClassLoaderHelper.createDynamicScriptClassLoader( action ) match {
       case Failure( ex ) =>
-        val error = "${message}: project not found '${menuAction.projectName.jname}'"
+        val error = s"$message: project not found '${action.context}'"
         log.error( error )
         guiLog.showError( error )
         return false
 
       case Success( scriptCL ) => {
-        val localClassLoader = Thread.currentThread().getContextClassLoader()
+        val localClassLoader = Thread.currentThread().getContextClassLoader
         try {
 
           Thread.currentThread().setContextClassLoader( scriptCL )
 
           val c = scriptCL.loadClass( action.className.jname )
           if ( c == null ) {
-            val error = "${message}: class '${menuAction.className.jname}' not found in project '${menuAction.projectName.jname}'"
+            val error = s"$message: class '${action.className.jname}' not found in project '${action.context}'"
             log.error( error )
             guiLog.showError( error )
             return false
@@ -102,7 +102,7 @@ case class DynamicPathFinalizationAction(
 
           val m = creatorHelper.lookupMethod( c, action ) match {
             case Failure( t ) =>
-              val error = s"${message}: ${t.getMessage()}"
+              val error = s"$message: ${t.getMessage}"
               log.error( error, t )
               guiLog.showError( error, t )
               return false
@@ -112,11 +112,11 @@ case class DynamicPathFinalizationAction(
           val r = creatorHelper.invokeMethod( m, action, pe, point, e )
 
           val currentTime = System.currentTimeMillis()
-          log.info( s"${message} took ${currentTime - previousTime} ms" )
+          log.info( s"$message took ${currentTime - previousTime} ms" )
 
           r match {
             case Failure( ex ) =>
-              val ex_message = message + s"\n${ex.getMessage()}"
+              val ex_message = message + s"\n${ex.getMessage}"
               log.error( ex_message, ex )
               guiLog.showError( ex_message, ex )
               false
@@ -125,13 +125,13 @@ case class DynamicPathFinalizationAction(
               true
 
             case Success( Some( MagicDrawValidationDataResults( title, runData, results, postSessionActions ) ) ) =>
-              if ( !results.isEmpty() )
+              if ( !results.isEmpty )
                 Utilities.invokeAndWaitOnDispatcher( new Runnable() {
                   override def run(): Unit = {
-                    ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString(), title, runData, results )
+                    ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString, title, runData, results )
                   }
                 } )
-              if ( !postSessionActions.isEmpty() )
+              if ( !postSessionActions.isEmpty )
                 guiLog.showError( s"There are ${postSessionActions.size()} post-session actions that will not be executed because session management is not accessible for MD shape finalization actions" )
               false
 
@@ -143,13 +143,13 @@ case class DynamicPathFinalizationAction(
         }
         catch {
           case ex: InvocationTargetException =>
-            val t = ex.getTargetException() match { case null => ex; case t => t }
-            val ex_message = message + s"\n${t.getMessage()}"
+            val t = ex.getTargetException match { case null => ex; case t => t }
+            val ex_message = message + s"\n${t.getMessage}"
             log.error( ex_message, t )
             guiLog.showError( ex_message, t )
             return false
           case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
-            val ex_message = message + s"\n${ex.getMessage()}"
+            val ex_message = message + s"\n${ex.getMessage}"
             log.error( ex_message, ex )
             guiLog.showError( ex_message, ex )
             return false

@@ -63,8 +63,7 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.HName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.JName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.PluginContext
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ProjectContext
-import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
-import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.{TraversePath, MDGUILogHelper, MDUML}
 import java.nio.file.Paths
 import java.nio.file.Files
 import java.nio.charset.spi.CharsetProvider
@@ -314,15 +313,15 @@ object ClassLoaderHelper {
   }
 
   val jarFilenameFilter = new FilenameFilter() {
-    override def accept( file: File, name: String ): Boolean = name.toLowerCase().endsWith( ".jar" )
+    override def accept( file: File, name: String ): Boolean = name.toLowerCase.endsWith( ".jar" )
   }
 
   def isFolderAvailable( f: File ): Boolean =
     if ( !f.exists() )
       false
-    else if ( !f.canRead() )
+    else if ( !f.canRead )
       false
-    else if ( !f.canExecute() )
+    else if ( !f.canExecute )
       false
     else
       true
@@ -333,10 +332,10 @@ object ClassLoaderHelper {
   }
 
   def getPluginIfLoadedAndEnabled( pluginID: String ): Option[Plugin] =
-    PluginUtils.getPlugins().toList find { p => p.getDescriptor().getID() == pluginID } match {
+    PluginUtils.getPlugins.toList find { p => p.getDescriptor.getID == pluginID } match {
       case None => None
       case Some( p ) =>
-        if ( p.getDescriptor().isEnabled() && p.getDescriptor().isLoaded() ) Some( p )
+        if ( p.getDescriptor.isEnabled && p.getDescriptor.isLoaded ) Some( p )
         else None
     }
 
@@ -362,8 +361,11 @@ object ClassLoaderHelper {
       return true
 
     val scriptProjectLib = new File( scriptProjectPath + "lib" )
-    val jars = if ( isFolderAvailable( scriptProjectLib ) ) scriptProjectLib.listFiles( jarFilenameFilter ) else Array[File]()
-    return jars.nonEmpty
+    val jars = if ( isFolderAvailable( scriptProjectLib ) )
+      TraversePath.listFilesRecursively(scriptProjectLib, jarFilenameFilter)
+    else
+      List()
+    jars.nonEmpty
   }
 
   val classpathLibEntry = """(?s)<classpathentry.*?\s+?kind="lib".*?\s+?path="(.*?)".*?/>""".r
@@ -393,32 +395,31 @@ object ClassLoaderHelper {
           val classpathContent = new String(Files.readAllBytes(classpathFilepath))
           val libs = classpathLibEntry.findAllMatchIn(classpathContent).map { m =>
              val libpath = scriptProjectPath.resolve(m.group(1))
-             require(Files.isRegularFile(libpath), s"lib path: ${libpath}")
-             require(Files.isReadable(libpath), s"lib path: ${libpath}")                
+             require(Files.isRegularFile(libpath), s"lib path: $libpath")
+             require(Files.isReadable(libpath), s"lib path: $libpath")
              libpath.toUri.toURL
-          } toList;
-          val bins = classpathBinEntry.findAllMatchIn(classpathContent).map { m =>
+          } toList
+          val bins = classpathBinEntry.findAllMatchIn(classpathContent).flatMap { m =>
              val binpath = scriptProjectPath.resolve(m.group(1))
-             require(Files.isDirectory(binpath), s"bin path: ${binpath}")
-             require(Files.isReadable(binpath), s"bin path: ${binpath}")             
-             binpath.toUri.toURL
-          } toList;
+             if (Files.isDirectory(binpath) && Files.isReadable(binpath)) Some(binpath.toUri.toURL)
+             else None
+          } toList
           val combinedList = ( list /: (bins ++ libs) ) { case ( urls, url ) =>
             if (urls.contains(url)) urls else urls :+ url 
           }
           val srcs = classpathSrcEntry.findAllMatchIn(classpathContent).map { m => JName(m.group(1)) }
           val resolved0: Try[List[URL]] = Success( combinedList )
-          val resolvedN = ( resolved0 /: srcs ) ( resolveProjectPaths _ )
+          val resolvedN = ( resolved0 /: srcs ) ( resolveProjectPaths )
           resolvedN
         }
         else {
           val scriptProjectBin = scriptProjectPath.resolve( "bin" ).toFile
-          val binURL = if ( isFolderAvailable( scriptProjectBin ) ) Some( scriptProjectBin.toURI().toURL() ) else None
+          val binURL = if ( isFolderAvailable( scriptProjectBin ) ) Some( scriptProjectBin.toURI.toURL ) else None
 
           val scriptProjectLib = scriptProjectPath.resolve( "lib" ).toFile
           val jars =
             if ( isFolderAvailable( scriptProjectLib ) )
-              scriptProjectLib.listFiles( jarFilenameFilter ).toList map ( _.toURI().toURL() ) toList
+              TraversePath.listFilesRecursively(scriptProjectLib, jarFilenameFilter) map (_.toURI.toURL) toList
             else
               List[URL]()
 
@@ -434,11 +435,11 @@ object ClassLoaderHelper {
     getPluginIfLoadedAndEnabled( pluginContext.pluginID.hname ) match {
       case None => Failure( DynamicScriptsPluginNotFound( pluginContext.pluginID.hname ) )
       case Some( p ) =>
-        p.getDescriptor() match {
+        p.getDescriptor match {
           case null                                      => Failure( DynamicScriptsPluginNotFound( pluginContext.pluginID.hname ) )
-          case pd if ( !pd.isEnabled() )                 => Failure( DynamicScriptsPluginNotEnabled( pluginContext.pluginID.hname ) )
-          case pd if ( !pd.isLoaded() )                  => Failure( DynamicScriptsPluginNotLoaded( pluginContext.pluginID.hname ) )
-          case pd if ( pd.isEnabled() && pd.isLoaded() ) => Success( new URLClassLoader( Array[URL](), p.getClass().getClassLoader() ) )
+          case pd if !pd.isEnabled                 => Failure( DynamicScriptsPluginNotEnabled( pluginContext.pluginID.hname ) )
+          case pd if !pd.isLoaded                 => Failure( DynamicScriptsPluginNotLoaded( pluginContext.pluginID.hname ) )
+          case pd if pd.isEnabled && pd.isLoaded => Success( new URLClassLoader( Array[URL](), p.getClass.getClassLoader ) )
         }
     }
 
@@ -446,13 +447,13 @@ object ClassLoaderHelper {
     val log = MDGUILogHelper.getMDPluginsLog
     val init: Try[List[URL]] = Success( Nil )
     val projectPaths = projectContext.project +: projectContext.dependencies
-    val last: Try[List[URL]] = ( init /: projectPaths )( resolveProjectPaths( _, _ ) )
+    val last: Try[List[URL]] = ( init /: projectPaths )( resolveProjectPaths )
 
     val parentClassLoader = projectContext.requiresPlugin match {
-      case None => classOf[DynamicScriptsPlugin].getClassLoader()
+      case None => classOf[DynamicScriptsPlugin].getClassLoader
       case Some( rp ) => getPluginIfLoadedAndEnabled( rp.hname ) match {
         case None              => return Failure( DynamicScriptsPluginNotFound( rp.hname ) )
-        case Some( p: Plugin ) => p.getClass().getClassLoader()
+        case Some( p: Plugin ) => p.getClass.getClassLoader
       }
     }
 
