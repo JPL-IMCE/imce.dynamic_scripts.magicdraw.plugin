@@ -425,7 +425,7 @@ object ClassLoaderHelper {
 
           ( binURL, jars ) match {
             case ( None, Nil )         => Failure( DynamicScriptsProjectNotFound( projectName.jname, scriptProjectDir ) )
-            case ( None, libs )        => Success( libs )
+            case ( None, libs )        => Success( libs ::: list )
             case ( Some( url ), libs ) => Success( url :: libs ::: list )
           }
         }
