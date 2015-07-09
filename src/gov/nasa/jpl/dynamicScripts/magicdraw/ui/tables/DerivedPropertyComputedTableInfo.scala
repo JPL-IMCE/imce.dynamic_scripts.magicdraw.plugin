@@ -73,7 +73,7 @@ case class DerivedPropertyComputedTableInfo(
   val defaultLabel: String = s"/${computedDerivedTable.name.hname}"
   var label: String = defaultLabel
 
-  override def dispose: Unit = values = null
+  override def dispose(): Unit = values = null
 
   override def getLabel: String = label
 
@@ -102,7 +102,7 @@ case class DerivedPropertyComputedTableInfo(
     else null
   }
 
-  override def update: Seq[ValidationAnnotation] =
+  override def update(): Seq[ValidationAnnotation] =
     if ( null != values ) {
       Seq()
     } else {

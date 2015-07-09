@@ -60,9 +60,9 @@ trait AbstractDisposableTableModel
 extends Comparable[AbstractDisposableTableModel] 
 with StyleModel {
 
-  def dispose: Unit
+  def dispose(): Unit
 
-  def update: Seq[ValidationAnnotation]
+  def update(): Seq[ValidationAnnotation]
 
   def getLabel: String
 

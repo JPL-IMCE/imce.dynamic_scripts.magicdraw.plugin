@@ -69,7 +69,7 @@ case class DerivedPropertyComputedWidget(
   val defaultLabel: String = s"/${computedDerivedWidget.name.hname}"
   var label: String = defaultLabel
 
-  override def dispose: Unit = {
+  override def dispose(): Unit = {
     value = null
   }
 
@@ -96,7 +96,7 @@ case class DerivedPropertyComputedWidget(
     value
   }
 
-  override def update: Seq[ValidationAnnotation] =
+  override def update(): Seq[ValidationAnnotation] =
     if ( null != value ) {
       Seq()
     } else {

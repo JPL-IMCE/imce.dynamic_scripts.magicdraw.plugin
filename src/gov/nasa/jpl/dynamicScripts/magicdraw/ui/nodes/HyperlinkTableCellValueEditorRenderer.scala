@@ -76,7 +76,7 @@ case class HyperlinkTableCellValueEditorRenderer[T]( callback: PartialFunction[(
   setActionListener( new ActionListener() {
 
     def actionPerformed( ev: ActionEvent ): Unit = rendererValue match {
-      case Some( n ) => callback.lift( n, ev )
+      case Some( n ) => callback.lift( Tuple2( n, ev ) )
       case None      => ()
     }
 

@@ -554,10 +554,10 @@ object SpecificationComputedComponent {
     }
 
     // remove MouseWheelListener as there is no need for it in FitScrollPane.
-    def removeMouseWheelListeners: Unit =
+    def removeMouseWheelListeners(): Unit =
       getMouseWheelListeners() foreach ( removeMouseWheelListener( _ ) )
 
-    override def updateUI: Unit = {
+    override def updateUI(): Unit = {
       super.updateUI
       removeMouseWheelListeners
     }
@@ -583,7 +583,7 @@ object SpecificationComputedComponent {
 
     initScrollPane
 
-    def initScrollPane = {
+    def initScrollPane() = {
       setBorder( BorderFactory.createLineBorder( Color.GRAY ) )
       setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED )
       setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED )
@@ -717,7 +717,7 @@ object SpecificationComputedComponent {
     var uniqueElements: Option[Int] = None
     var uniqueAnnotations: Option[Int] = None
     var uniqueTableSummary: String = ""
-    def updateTableLabels: Unit = {
+    def updateTableLabels(): Unit = {
       val totalExtent = uniqueRows match {
         case Some( extent ) => extent
         case None =>

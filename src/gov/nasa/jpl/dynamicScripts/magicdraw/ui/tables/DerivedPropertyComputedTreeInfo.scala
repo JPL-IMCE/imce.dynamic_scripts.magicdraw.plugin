@@ -85,7 +85,7 @@ case class DerivedPropertyComputedTreeInfo(
   val defaultLabel: String = s"/${computedDerivedTree.name.hname}"
   var label: String = defaultLabel
 
-  override def dispose: Unit = {
+  override def dispose(): Unit = {
     values = null
     treeRows.clear
   }
@@ -146,7 +146,7 @@ case class DerivedPropertyComputedTreeInfo(
       addRow( nodeRow )
   }
 
-  override def update: Seq[ValidationAnnotation] =
+  override def update(): Seq[ValidationAnnotation] =
     if ( null != values ) {
       Seq()
     } else {

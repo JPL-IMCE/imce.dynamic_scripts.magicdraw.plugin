@@ -80,7 +80,7 @@ case class DynamicShapeFinalizationAction(
     UncaughtExceptionHandler( message )
     ClassLoaderHelper.createDynamicScriptClassLoader( action ) match {
       case Failure( ex ) =>
-        val error = "${message}: project not found '${menuAction.projectName.jname}'"
+        val error = s"${message}: project context not found '${action.context.prettyPrint("")}'"
         log.error( error )
         guiLog.showError( error )
         return false
@@ -93,7 +93,7 @@ case class DynamicShapeFinalizationAction(
 
           val c = scriptCL.loadClass( action.className.jname )
           if ( c == null ) {
-            val error = "${message}: class '${menuAction.className.jname}' not found in project '${menuAction.projectName.jname}'"
+            val error = s"${message}: class '${action.className.jname}' not found in project '${action.context.prettyPrint("")}'"
             log.error( error )
             guiLog.showError( error )
             return false

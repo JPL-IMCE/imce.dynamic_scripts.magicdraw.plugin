@@ -292,7 +292,7 @@ object GroupTableNodeUI {
 
     initScrollPane
 
-    def initScrollPane = {
+    def initScrollPane() = {
       setBorder( BorderFactory.createLineBorder( Color.GRAY ) )
       setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED )
       setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED )
