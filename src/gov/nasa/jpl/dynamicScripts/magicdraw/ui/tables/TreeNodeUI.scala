@@ -157,7 +157,7 @@ object TreeNodeUI {
     var uniqueElements: Option[Int] = None
     var uniqueAnnotations: Option[Int] = None
     var uniqueTableSummary: String = ""
-    def updateTableLabels: Unit = {
+    def updateTableLabels(): Unit = {
       val totalExtent = uniqueRows match {
         case Some( extent ) => extent
         case None =>
@@ -664,7 +664,7 @@ object TreeNodeUI {
 
     initScrollPane
 
-    def initScrollPane = {
+    def initScrollPane() = {
       setBorder( BorderFactory.createLineBorder( Color.GRAY ) )
       setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED )
       setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED )

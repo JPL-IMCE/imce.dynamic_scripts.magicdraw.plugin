@@ -51,9 +51,9 @@ case class DerivedPropertiesHierarchicalTableModel[T <: AbstractDisposableTableM
       override val columns: java.util.Vector[String] = new java.util.Vector[String](DerivedPropertiesHierarchicalTableModel.COLUMNS) )
     extends AbstractHierarchicalDisposableTableModel(AbstractHierarchicalDisposableTableModel.toTable( computedProperties ), columns) {
 
-  override def dispose = ()
+  override def dispose() = ()
   
-  override def update = Seq()
+  override def update() = Seq()
   
   override def getLabel = ""
   

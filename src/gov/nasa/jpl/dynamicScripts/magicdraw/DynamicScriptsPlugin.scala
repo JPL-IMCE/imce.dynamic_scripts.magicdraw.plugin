@@ -126,7 +126,7 @@ class DynamicScriptsPlugin extends Plugin with ResourceDependentPlugin with Envi
       case ( r: DynamicScriptsRegistry, errors: List[String] ) =>
         registry = r
         val log = MDGUILogHelper.getMDPluginsLog
-        log.info( s"${this.getPluginName()} -- updateRegistryForConfigurationFiles: current dynamic scripts registry:\n${registry}" )
+        log.debug( s"${this.getPluginName()} -- updateRegistryForConfigurationFiles: current dynamic scripts registry:\n${registry}" )
         if ( errors.isEmpty )
           None
         else {

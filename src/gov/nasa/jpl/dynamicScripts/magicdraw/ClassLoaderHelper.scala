@@ -219,12 +219,12 @@ object ClassLoaderHelper {
     if ( p != null )
       sm.createSession( p, message )
 
-    def closeSessionIfNeeded =
+    def closeSessionIfNeeded(): Unit =
       if ( p != null && sm.isSessionCreated( p ) ) {
         sm.closeSession( p )
       }
 
-    def cancelSessionIfNeeded =
+    def cancelSessionIfNeeded(): Unit =
       if ( p != null && sm.isSessionCreated( p ) ) {
         sm.cancelSession( p )
       }

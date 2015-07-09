@@ -49,7 +49,7 @@ abstract class AbstractTreeNodeInfo( val identifier: String )
   extends DefaultMutableTreeNode( identifier )
   with Comparable[AbstractTreeNodeInfo] {
 
-  def dispose: Unit = {}
+  def dispose(): Unit = {}
 
   val compareKey: String
   

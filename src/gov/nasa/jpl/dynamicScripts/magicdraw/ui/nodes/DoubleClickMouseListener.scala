@@ -69,7 +69,7 @@ case class DoubleClickMouseListener[T](
       val row = _table.rowAtPoint( ev.getPoint() )
       val col = _table.columnAtPoint( ev.getPoint() )
       _table.getModel.getValueAt( row, col ) match {
-        case t: T => callback.lift( t, ev, row, col )
+        case t: T => callback.lift( Tuple4(t, ev, row, col ) )
         case _    => ()
       }
     }

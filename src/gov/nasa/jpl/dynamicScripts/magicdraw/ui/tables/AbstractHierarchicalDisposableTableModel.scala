@@ -49,7 +49,7 @@ abstract class AbstractHierarchicalDisposableTableModel(
   extends AbstractDefaultDisposableTableModel( table, columns )
   with HierarchicalTableModel {
 
-  override def dispose: Unit
+  override def dispose(): Unit
    
   override def isCellEditable(row: Int, column: Int): Boolean = false
   

@@ -65,7 +65,7 @@ case class DerivedPropertyComputedRowInfo(
 
   var values: Seq[AbstractTreeNodeInfo] = null
 
-  override def dispose: Unit = values = null
+  override def dispose(): Unit = values = null
 
   val defaultLabel: String = computedDerivedProperty.valueType match {
     case None       => s"/${computedDerivedProperty.name.hname}"
@@ -92,7 +92,7 @@ case class DerivedPropertyComputedRowInfo(
     values( rowIndex )
   }
 
-  override def update: Seq[ValidationAnnotation] =
+  override def update(): Seq[ValidationAnnotation] =
     if ( null != values ) {
       Seq()
     } else {
