@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="gov.nasa.jpl.dynamicScripts.magicdraw" 
+	name="JPL DynamicScripts MagicDraw Plugin" 
+	version="17050.1.0" 
+	internalVersion="17050100" 
+	provider-name="JPL" 
+	class="gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin">
+  <requires>
+    <api version="1.0"></api>
+  </requires>
+  <runtime>
+    <library name="lib/gov.nasa.jpl.dynamicScripts.magicdraw.jar"></library>
+  </runtime>
+</plugin>

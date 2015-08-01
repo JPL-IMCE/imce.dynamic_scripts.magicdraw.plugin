@@ -1,0 +1,89 @@
+/*
+ *
+ * License Terms
+ *
+ * Copyright (c) 2014-2015, California Institute of Technology ("Caltech").
+ * U.S. Government sponsorship acknowledged.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ * *   Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *   Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * *   Neither the name of Caltech nor its operating division, the Jet
+ *    Propulsion Laboratory, nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package gov.nasa.jpl.dynamicScripts.magicdraw.utils
+
+import java.io.File
+import java.io.FilenameFilter
+import java.nio.file._
+import java.nio.file.attribute.BasicFileAttributes
+import scala.collection.Traversable
+import scala.collection.JavaConversions._
+
+/**
+ * @see ttp://stackoverflow.com/a/8927040/1009693
+ *
+ * @param path The starting path of the traversal
+ * @param options @see java.nio.file.FileVisitOption
+ * @param maxDepth The maximum depth of the traversal from the starting path
+ */
+class TraversePath(path: Path, options: Set[FileVisitOption], maxDepth: Int) extends Traversable[(Path, BasicFileAttributes)] {
+
+  override def foreach[U](f: ((Path, BasicFileAttributes)) => U): Unit = {
+
+    class Visitor extends SimpleFileVisitor[Path] {
+      override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = try {
+        f(file -> attrs)
+        FileVisitResult.CONTINUE
+      } catch {
+        case _: Throwable => FileVisitResult.TERMINATE
+      }
+    }
+
+    Files.walkFileTree(path, options, maxDepth, new Visitor)
+  }
+
+}
+
+object TraversePath {
+
+  def listFilesRecursively(dir: File,
+                           filter: FilenameFilter,
+                           options: Set[FileVisitOption] = Set(FileVisitOption.FOLLOW_LINKS),
+                           maxDepth: Int = 5): List[File] = {
+    val traversal = new TraversePath(dir.toPath, options, maxDepth)
+    val matchingFiles = new scala.collection.mutable.ListBuffer[File]()
+    traversal.foreach {
+      case (p, _) =>
+        val f = p.toFile
+        if (filter.accept(f.getParentFile, f.getName)) matchingFiles.add(f)
+    }
+    matchingFiles.toList
+  }
+
+}
