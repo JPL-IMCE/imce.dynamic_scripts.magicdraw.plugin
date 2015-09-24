@@ -13,6 +13,7 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("jpl-dynamicScripts-magic
   settings(
     MBEEKeys.mbeeLicenseYearOrRange := "2014-2015",
     MBEEKeys.mbeeOrganizationInfo := MBEEPlugin.MBEEOrganizations.imce,
+    MBEEKeys.targetJDK := MBEEKeys.jdk17.value,
     scalacOptions += "-g:vars",
 
     javacOptions += "-g:vars",
