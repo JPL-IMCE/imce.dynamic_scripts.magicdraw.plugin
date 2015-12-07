@@ -60,21 +60,24 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
-case class DynamicDiagramContextMenuActionForDiagram(
-  project: Project, diagram: DiagramPresentationElement,
+case class DynamicDiagramContextMenuActionForDiagram
+( project: Project,
+  diagram: DiagramPresentationElement,
   menuAction: DiagramContextMenuAction,
   key: KeyStroke,
-  group: String ) extends DefaultDiagramAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
+  group: String )
+  extends DefaultDiagramAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
 
-  override def toString(): String =
+  override def toString: String =
     s"${menuAction.name.hname}"
 
-  override def getDescription(): String =
+  override def getDescription: String =
     menuAction.prettyPrint("  ")
     
   override def updateState(): Unit = {
     super.updateState()
-    setEnabled( ClassLoaderHelper.isDynamicActionScriptAvailable( menuAction ) && MDUML.isAccessCompatibleWithElements( menuAction.access, diagram ))
+    setEnabled( ClassLoaderHelper.isDynamicActionScriptAvailable( menuAction ) &&
+      MDUML.isAccessCompatibleWithElements( menuAction.access, diagram ))
   }
 
   override def actionPerformed( ev: ActionEvent ): Unit = {
@@ -84,18 +87,19 @@ case class DynamicDiagramContextMenuActionForDiagram(
     ClassLoaderHelper.createDynamicScriptClassLoader( menuAction ) match {
       case Failure( t ) =>
         ClassLoaderHelper.reportError( menuAction, message, t )
-        return
 
       case Success( scriptCL: URLClassLoader ) => {
-        val localClassLoader = Thread.currentThread().getContextClassLoader()
+        val localClassLoader = Thread.currentThread().getContextClassLoader
         Thread.currentThread().setContextClassLoader( scriptCL )
 
         try {
-          ClassLoaderHelper.lookupClassAndMethod( scriptCL, menuAction, 
-              classOf[Project], classOf[ActionEvent], classOf[DiagramContextMenuAction], classOf[DiagramPresentationElement] ) match {
+          ClassLoaderHelper.lookupClassAndMethod(
+            scriptCL, menuAction,
+            classOf[Project], classOf[ActionEvent],
+            classOf[DiagramContextMenuAction],
+            classOf[DiagramPresentationElement] ) match {
             case Failure( t ) =>
               ClassLoaderHelper.reportError( menuAction, message, t )
-              return
 
             case Success( cm: ResolvedClassAndMethod ) =>
               ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm, diagram )

@@ -59,18 +59,18 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.UncaughtExceptionHandler
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
-case class DynamicPathFinalizationAction(
-  val action: ToplevelPathInstanceCreator,
-  val creatorHelper: DynamicPathCreatorHelper )
+case class DynamicPathFinalizationAction
+( action: ToplevelPathInstanceCreator,
+  creatorHelper: DynamicPathCreatorHelper )
   extends AdditionalDrawAction {
 
-  def getSortKey(): String = action.sortKey()
+  def getSortKey: String = action.sortKey()
 
-  def isEnabled(): Boolean =
+  def isEnabled: Boolean =
     ClassLoaderHelper.isDynamicActionScriptAvailable( action ) && creatorHelper.isResolved
 
   override def execute( pe: PresentationElement, point: Point ): Boolean = {
-    val log = MDGUILogHelper.getMDPluginsLog
+    val log = MDGUILogHelper.getMDPluginsLog()
     val e = pe.getElement
 
     val previousTime = System.currentTimeMillis()
@@ -84,7 +84,7 @@ case class DynamicPathFinalizationAction(
         val error = s"$message: project not found '${action.context}'"
         log.error( error )
         guiLog.showError( error )
-        return false
+        false
 
       case Success( scriptCL ) => {
         val localClassLoader = Thread.currentThread().getContextClassLoader
@@ -106,7 +106,8 @@ case class DynamicPathFinalizationAction(
               log.error( error, t )
               guiLog.showError( error, t )
               return false
-            case Success( m ) => m
+            case Success( m ) =>
+              m
           }
 
           val r = creatorHelper.invokeMethod( m, action, pe, point, e )
@@ -128,11 +129,14 @@ case class DynamicPathFinalizationAction(
               if ( !results.isEmpty )
                 Utilities.invokeAndWaitOnDispatcher( new Runnable() {
                   override def run(): Unit = {
-                    ValidationResultsWindowManager.updateValidationResultsWindow( currentTime.toString, title, runData, results )
+                    ValidationResultsWindowManager.updateValidationResultsWindow(
+                      currentTime.toString, title, runData, results )
                   }
                 } )
               if ( !postSessionActions.isEmpty )
-                guiLog.showError( s"There are ${postSessionActions.size()} post-session actions that will not be executed because session management is not accessible for MD shape finalization actions" )
+                guiLog.showError(
+                  s"There are ${postSessionActions.size()} post-session actions that will not be executed "+
+                  "because session management is not accessible for MD shape finalization actions" )
               false
 
             case b: java.lang.Boolean => b.booleanValue()
@@ -147,12 +151,13 @@ case class DynamicPathFinalizationAction(
             val ex_message = message + s"\n${t.getMessage}"
             log.error( ex_message, t )
             guiLog.showError( ex_message, t )
-            return false
+            false
+
           case ex @ ( _: ClassNotFoundException | _: SecurityException | _: NoSuchMethodException | _: IllegalArgumentException | _: IllegalAccessException | _: MalformedURLException | _: NoSuchMethodException ) =>
             val ex_message = message + s"\n${ex.getMessage}"
             log.error( ex_message, ex )
             guiLog.showError( ex_message, ex )
-            return false
+            false
         }
         finally {
           Thread.currentThread().setContextClassLoader( localClassLoader )

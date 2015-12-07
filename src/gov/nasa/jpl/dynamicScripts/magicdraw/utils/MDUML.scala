@@ -64,6 +64,7 @@ import com.nomagic.magicdraw.core.ApplicationEnvironment
  */
 object MDUML {
 
+
   def getInstallRoot() = ApplicationEnvironment.getInstallRoot
   
   def getProjectLocationURI( p: Project ) = p.getPrimaryProject.getLocationURI

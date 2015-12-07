@@ -3,7 +3,8 @@
 // resolvers += MavenRepository("JPL MBEE", url("http://github.jpl.nasa.gov/mbee.sbt.repository"))
 
 // TODO: Replace with the JPL MBEE SBT Maven Repository resolver when it is available...
-(Option.apply(System.getProperty("JPL_MBEE_LOCAL_REPOSITORY")), Option.apply(System.getProperty("JPL_MBEE_REMOTE_REPOSITORY"))) match {
+( Option.apply(System.getProperty("JPL_MBEE_LOCAL_REPOSITORY")),
+  Option.apply(System.getProperty("JPL_MBEE_REMOTE_REPOSITORY"))) match {
   case (Some(dir), _) =>
     if (new File(dir) / "settings.xml" exists) {
       val cache = new MavenCache("JPL MBEE", new File(dir))

@@ -80,7 +80,9 @@
 
 		<copy todir="lib.srcs" verbose="true">
 			<fileset dir="${plugin.dir}/target/scala-2.11">
-				<exclude name="*-sources.jar"/>
+				<exclude name="*.jar" />
+				<include name="*-sources.jar"/>
+				<include name="*-javadoc.jar"/>
 			</fileset>
 		</copy>
 

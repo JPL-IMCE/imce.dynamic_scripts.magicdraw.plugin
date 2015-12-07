@@ -63,23 +63,27 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
-case class DynamicDiagramContextMenuActionForTriggerAndSelection(
-  project: Project, 
+case class DynamicDiagramContextMenuActionForTriggerAndSelection
+( project: Project,
   diagram: DiagramPresentationElement,
-  trigger: PresentationElement, element: Element, selected: java.util.Collection[PresentationElement],
+  trigger: PresentationElement,
+  element: Element,
+  selected: java.util.Collection[PresentationElement],
   menuAction: DiagramContextMenuAction,
   key: KeyStroke,
-  group: String ) extends DefaultDiagramAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
+  group: String )
+  extends DefaultDiagramAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
 
-  override def toString(): String =
+  override def toString: String =
     s"${menuAction.name.hname}"
 
-  override def getDescription(): String =
+  override def getDescription: String =
     menuAction.prettyPrint("  ")
     
   override def updateState(): Unit = {
     super.updateState()
-    setEnabled( ClassLoaderHelper.isDynamicActionScriptAvailable( menuAction ) && MDUML.isAccessCompatibleWithElements( menuAction.access, ( diagram :: trigger :: element :: selected.toList) : _*))
+    setEnabled( ClassLoaderHelper.isDynamicActionScriptAvailable( menuAction ) &&
+      MDUML.isAccessCompatibleWithElements(menuAction.access, diagram :: trigger :: element :: selected.toList : _*))
   }
   
   override def actionPerformed( ev: ActionEvent ): Unit = {
@@ -89,34 +93,40 @@ case class DynamicDiagramContextMenuActionForTriggerAndSelection(
     ClassLoaderHelper.createDynamicScriptClassLoader( menuAction ) match {
       case Failure( t ) =>
         ClassLoaderHelper.reportError( menuAction, message, t )
-        return
 
       case Success( scriptCL: URLClassLoader ) => {
-        val localClassLoader = Thread.currentThread().getContextClassLoader()
+        val localClassLoader = Thread.currentThread().getContextClassLoader
         Thread.currentThread().setContextClassLoader( scriptCL )
 
         try {
           ClassLoaderHelper.lookupClassAndMethod( 
-              scriptCL, menuAction, 
-              classOf[Project], classOf[ActionEvent], 
-              classOf[DiagramContextMenuAction], classOf[DiagramPresentationElement], 
-              classOf[PresentationElement], classOf[Element], 
-              classOf[java.util.Collection[PresentationElement]] ) match {
+            scriptCL, menuAction,
+            classOf[Project],
+            classOf[ActionEvent],
+            classOf[DiagramContextMenuAction],
+            classOf[DiagramPresentationElement],
+            classOf[PresentationElement], classOf[Element],
+            classOf[java.util.Collection[PresentationElement]] ) match {
             case Failure( t1 ) =>
               ClassLoaderHelper.lookupClassAndMethod( 
                 scriptCL, menuAction, 
-                classOf[Project], classOf[ActionEvent], 
-                classOf[DiagramContextMenuAction], classOf[DiagramPresentationElement], 
-                trigger.getClassType(), element.getClassType(), 
+                classOf[Project],
+                classOf[ActionEvent],
+                classOf[DiagramContextMenuAction],
+                classOf[DiagramPresentationElement],
+                trigger.getClassType,
+                element.getClassType,
                 classOf[java.util.Collection[PresentationElement]] ) match {
                 case Failure( t2 ) =>
                   ClassLoaderHelper.reportError( menuAction, message, t1 )
-                  return
+
                 case Success( cm2: ResolvedClassAndMethod ) =>
-                 ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm2, diagram, trigger, element, selected )
+                 ClassLoaderHelper.invokeAndReport(
+                   previousTime, project, ev, cm2, diagram, trigger, element, selected )
               }
             case Success( cm1: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm1, diagram, trigger, element, selected )
+              ClassLoaderHelper.invokeAndReport(
+                previousTime, project, ev, cm1, diagram, trigger, element, selected )
           }
         }
         finally {

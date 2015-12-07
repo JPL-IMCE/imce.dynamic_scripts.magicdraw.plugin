@@ -52,35 +52,49 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
-case class DynamicPathDiagramContextToolbarAction(
-    diagram: DiagramPresentationElement,
-    firstSelected: PresentationElement,
-    finalizationAction: DynamicPathFinalizationAction) 
-    extends DiagramContextToolbarAction(
-        finalizationAction.action.name.hname, 
-        finalizationAction.action.name.hname, 
-        DynamicScriptsPlugin.getInstance().getDynamicScriptIcon(finalizationAction.action)) { 
+case class DynamicPathDiagramContextToolbarAction
+( diagram: DiagramPresentationElement,
+  firstSelected: PresentationElement,
+  finalizationAction: DynamicPathFinalizationAction)
+  extends DiagramContextToolbarAction(
+    finalizationAction.action.name.hname,
+    finalizationAction.action.name.hname,
+    DynamicScriptsPlugin.getInstance().getDynamicScriptIcon(finalizationAction.action)) {
   
   setFakeMouseEvents(true)
   
   override def updateState(): Unit = {
     super.updateState()
-    setEnabled(finalizationAction.isEnabled() && MDUML.isAccessCompatibleWithElements( finalizationAction.action.access, diagram, firstSelected ))
+    setEnabled(
+      finalizationAction.isEnabled &&
+      MDUML.isAccessCompatibleWithElements( finalizationAction.action.access, diagram, firstSelected ))
   }
   
-  override def getDescription(): String =
+  override def getDescription: String =
     finalizationAction.action.prettyPrint("  ")
     
-  override def actionPerformed(ev: ActionEvent): Unit = {
-    val drawRelatinshipPathAction = DrawDynamicPathAction(finalizationAction, getDiagram(), getID() + ".DrawPathAction", getName(), null, getLargeIcon())
+  override def actionPerformed
+  (ev: ActionEvent)
+  : Unit = {
+    val drawRelatinshipPathAction =
+      DrawDynamicPathAction(
+        finalizationAction,
+        getDiagram,
+        getID + ".DrawPathAction",
+        getName,
+        null,
+        getLargeIcon)
     drawRelatinshipPathAction.actionPerformed(ev)
     super.actionPerformed(ev)
   }
   
-  override def getSmallIcon(): Icon = getLargeIcon()
+  override def getSmallIcon: Icon =
+    getLargeIcon
   
-  override def getFirstSelected(): PresentationElement = firstSelected
+  override def getFirstSelected: PresentationElement =
+    firstSelected
   
-  override def clone(): Object = copy()
+  override def clone(): Object =
+    copy()
   
 }

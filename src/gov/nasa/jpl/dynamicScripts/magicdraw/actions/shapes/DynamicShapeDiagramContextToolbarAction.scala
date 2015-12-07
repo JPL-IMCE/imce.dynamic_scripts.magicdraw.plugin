@@ -51,31 +51,42 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
-case class DynamicShapeDiagramContextToolbarAction(
-    diagram: DiagramPresentationElement,
-    finalizationAction: DynamicShapeFinalizationAction) 
-    extends DiagramContextToolbarAction(
-        finalizationAction.action.name.hname, 
-        finalizationAction.action.name.hname, 
-        DynamicScriptsPlugin.getInstance().getDynamicScriptIcon(finalizationAction.action)) { 
+case class DynamicShapeDiagramContextToolbarAction
+( diagram: DiagramPresentationElement,
+  finalizationAction: DynamicShapeFinalizationAction)
+  extends DiagramContextToolbarAction(
+    finalizationAction.action.name.hname,
+    finalizationAction.action.name.hname,
+    DynamicScriptsPlugin.getInstance().getDynamicScriptIcon(finalizationAction.action)) {
   
   override def updateState(): Unit = {
     super.updateState()
-    setEnabled(finalizationAction.isEnabled() && MDUML.isAccessCompatibleWithElements( finalizationAction.action.access, diagram ))
+    setEnabled(finalizationAction.isEnabled() &&
+    MDUML.isAccessCompatibleWithElements( finalizationAction.action.access, diagram ))
   }
   
-  override def getDescription(): String =
+  override def getDescription: String =
     finalizationAction.action.prettyPrint("  ")
     
   override def actionPerformed(ev: ActionEvent): Unit = {
-    val drawRelatinshipPathAction = DrawDynamicShapeAction(finalizationAction, getDiagram(), getID() + ".DrawShapeAction", getName(), null, getLargeIcon())
+    val drawRelatinshipPathAction =
+      DrawDynamicShapeAction(
+        finalizationAction,
+        getDiagram(),
+        getID + ".DrawShapeAction",
+        getName,
+        null,
+        getLargeIcon)
     drawRelatinshipPathAction.actionPerformed(ev)
   }
   
-  override def getSmallIcon(): Icon = getLargeIcon()
+  override def getSmallIcon: Icon =
+    getLargeIcon
   
-  override def getDiagram(): DiagramPresentationElement = diagram
+  override def getDiagram: DiagramPresentationElement =
+    diagram
   
-  override def clone(): Object = copy()
+  override def clone(): Object =
+    copy()
   
 }

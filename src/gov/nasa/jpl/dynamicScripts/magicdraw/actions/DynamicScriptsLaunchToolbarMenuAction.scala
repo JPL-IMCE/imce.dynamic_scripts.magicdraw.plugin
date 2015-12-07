@@ -62,7 +62,7 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper.ResolvedClassAndM
 case class DynamicScriptsLaunchToolbarMenuAction( action: MainToolbarMenuAction, id: String )
   extends NMAction( id, action.name.hname, null.asInstanceOf[KeyStroke] ) {
 
-  override def getDescription(): String =
+  override def getDescription: String =
     action.prettyPrint("  ")
     
   override def actionPerformed( ev: ActionEvent ): Unit = {
@@ -72,10 +72,9 @@ case class DynamicScriptsLaunchToolbarMenuAction( action: MainToolbarMenuAction,
     ClassLoaderHelper.createDynamicScriptClassLoader( action ) match {
       case Failure( t ) =>
         ClassLoaderHelper.reportError( action, message, t )
-        return
 
       case Success( scriptCL: URLClassLoader ) => {
-        val localClassLoader = Thread.currentThread().getContextClassLoader()
+        val localClassLoader = Thread.currentThread().getContextClassLoader
         Thread.currentThread().setContextClassLoader( scriptCL )
 
         try {
@@ -83,10 +82,9 @@ case class DynamicScriptsLaunchToolbarMenuAction( action: MainToolbarMenuAction,
             classOf[Project], classOf[ActionEvent], classOf[MainToolbarMenuAction] ) match {
               case Failure( t ) =>
                 ClassLoaderHelper.reportError( action, message, t )
-                return
 
               case Success( cm: ResolvedClassAndMethod ) =>
-                ClassLoaderHelper.invokeAndReport( previousTime, Application.getInstance().getProject(), ev, cm )
+                ClassLoaderHelper.invokeAndReport( previousTime, Application.getInstance().getProject, ev, cm )
             }
         }
         finally {

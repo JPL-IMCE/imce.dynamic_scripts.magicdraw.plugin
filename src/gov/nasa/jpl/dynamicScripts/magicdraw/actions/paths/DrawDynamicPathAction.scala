@@ -59,25 +59,31 @@ import scala.util.Failure
  * @see gov.nasa.jpl.magicdraw.enhanced.actions.paths.EnhancedDrawPathAction
  * @see gov.nasa.jpl.magicdraw.advice.actions.paths.EnhancedDrawDynamicPathActionCreateState
  */
-case class DrawDynamicPathAction(
-    finalizationAction: DynamicPathFinalizationAction,
-    diagram: DiagramPresentationElement,
-    ID: String, name: String, key: KeyStroke, largeIcon: Icon)
-    extends EnhancedDrawPathAction(finalizationAction, diagram, ID, name, key, largeIcon) {
+case class DrawDynamicPathAction
+( finalizationAction: DynamicPathFinalizationAction,
+  diagram: DiagramPresentationElement,
+  ID: String, name: String, key: KeyStroke, largeIcon: Icon)
+  extends EnhancedDrawPathAction(finalizationAction, diagram, ID, name, key, largeIcon) {
   
   override def createElement(): Element = 
     finalizationAction.creatorHelper.createElement(Project.getProject(diagram)) match {
-    case Success(e) => e
-    case Failure(e) => throw e
+    case Success(e) =>
+      e
+    case Failure(e) =>
+      throw e
   }
   
   override def createPathElement(): PathElement = 
     createElement() match {
-    case null => null
-    case e: Element => finalizationAction.creatorHelper.createPathElement(e)
+    case null =>
+      null
+    case e: Element =>
+      finalizationAction.creatorHelper.createPathElement(e)
   }
   
-  override def createAdditionalDrawAction(): AdditionalDrawAction = finalizationAction
+  override def createAdditionalDrawAction(): AdditionalDrawAction =
+    finalizationAction
   
-  override def clone(): Object = copy()
+  override def clone(): Object =
+    copy()
 }

@@ -61,32 +61,55 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.MagicDrawValidationDataResultsExcep
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
 trait DynamicShapeCreatorHelper {
-  def isResolved: Boolean
-  def createElement( project: Project ): Try[Element]
-  def lookupMethod( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator ): Try[Method]
-  def invokeMethod( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object
+  def isResolved
+  : Boolean
+
+  def createElement
+  ( project: Project )
+  : Try[Element]
+
+  def lookupMethod
+  ( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator )
+  : Try[Method]
+
+  def invokeMethod
+  ( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element )
+  : Object
 }
 
-case class DynamicShapeCreatorForMetaclassDesignation( project: Project, d: MetaclassDesignation ) extends DynamicShapeCreatorHelper {
-  val md: MagicDrawMetaclassDesignation = MagicDrawElementKindDesignation.resolveMagicDrawMetaclassDesignation( project, d )
+case class DynamicShapeCreatorForMetaclassDesignation( project: Project, d: MetaclassDesignation )
+  extends DynamicShapeCreatorHelper {
+  val md: MagicDrawMetaclassDesignation =
+    MagicDrawElementKindDesignation.resolveMagicDrawMetaclassDesignation( project, d )
 
-  override def isResolved: Boolean = md match {
-    case _: UnresolvedMagicDrawMetaclassDesignation => false
-    case _: ResolvedMagicDrawMetaclassDesignation   => true
+  override def isResolved
+  : Boolean = md match {
+    case _: UnresolvedMagicDrawMetaclassDesignation =>
+      false
+    case _: ResolvedMagicDrawMetaclassDesignation   =>
+      true
   }
 
-  def createElement( project: Project ): Try[Element] = md match {
-    case u: UnresolvedMagicDrawMetaclassDesignation => Failure( u.error )
-    case r: ResolvedMagicDrawMetaclassDesignation   => r.createElement( project )
+  def createElement
+  ( project: Project )
+  : Try[Element] = md match {
+    case u: UnresolvedMagicDrawMetaclassDesignation =>
+      Failure( u.error )
+    case r: ResolvedMagicDrawMetaclassDesignation   =>
+      r.createElement( project )
   }
 
-  def lookupMethod( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator ): Try[Method] =
+  def lookupMethod
+  ( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator )
+  : Try[Method] =
     ClassLoaderHelper.lookupMethod( clazz, action,
       classOf[Project], classOf[ToplevelShapeInstanceCreator],
       classOf[ResolvedMagicDrawMetaclassDesignation],
       classOf[PresentationElement], classOf[Point], classOf[Element] )
 
-  def invokeMethod( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object = md match {
+  def invokeMethod
+  ( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element )
+  : Object = md match {
     case u: UnresolvedMagicDrawMetaclassDesignation => 
       Failure( u.error )
     case r: ResolvedMagicDrawMetaclassDesignation   =>
@@ -102,22 +125,31 @@ case class DynamicShapeCreatorForMetaclassDesignation( project: Project, d: Meta
 
 case class DynamicShapeCreatorForStereotypedMetaclassDesignation( project: Project, d: StereotypedMetaclassDesignation ) extends DynamicShapeCreatorHelper {
   val md: MagicDrawStereotypeDesignation = MagicDrawElementKindDesignation.resolveMagicDrawStereotypeDesignation( project, d )
-  override def isResolved: Boolean = md match {
+
+  override def isResolved
+  : Boolean = md match {
     case _: UnresolvedMagicDrawStereotypeDesignation => false
     case _: ResolvedMagicDrawStereotypeDesignation   => true
   }
-  def createElement( project: Project ): Try[Element] = md match {
+
+  def createElement
+  ( project: Project )
+  : Try[Element] = md match {
     case u: UnresolvedMagicDrawStereotypeDesignation => Failure( u.error )
     case r: ResolvedMagicDrawStereotypeDesignation   => r.createElement( project )
   }
 
-  def lookupMethod( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator ): Try[Method] =
+  def lookupMethod
+  ( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator )
+  : Try[Method] =
     ClassLoaderHelper.lookupMethod( clazz, action,
       classOf[Project], classOf[ToplevelShapeInstanceCreator],
       classOf[ResolvedMagicDrawStereotypeDesignation],
       classOf[PresentationElement], classOf[Point], classOf[Element] )
 
-  def invokeMethod( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object = md match {
+  def invokeMethod
+  ( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element )
+  : Object = md match {
     case u: UnresolvedMagicDrawMetaclassDesignation => 
       Failure( u.error )
     case r: ResolvedMagicDrawMetaclassDesignation   => 
@@ -131,23 +163,38 @@ case class DynamicShapeCreatorForStereotypedMetaclassDesignation( project: Proje
   }
 }
 
-case class DynamicShapeCreatorForClassifiedInstanceDesignation( project: Project, d: ClassifiedInstanceDesignation ) extends DynamicShapeCreatorHelper {
-  val md: MagicDrawClassifiedInstanceDesignation = MagicDrawElementKindDesignation.resolveMagicDrawClassifierDesignation( project, d )
-  override def isResolved: Boolean = md match {
-    case _: UnresolvedMagicDrawClassifiedInstanceDesignation => false
-    case _: ResolvedMagicDrawClassifiedInstanceDesignation   => true
+case class DynamicShapeCreatorForClassifiedInstanceDesignation( project: Project, d: ClassifiedInstanceDesignation )
+  extends DynamicShapeCreatorHelper {
+  val md: MagicDrawClassifiedInstanceDesignation =
+    MagicDrawElementKindDesignation.resolveMagicDrawClassifierDesignation( project, d )
+
+  override def isResolved
+  : Boolean = md match {
+    case _: UnresolvedMagicDrawClassifiedInstanceDesignation =>
+      false
+    case _: ResolvedMagicDrawClassifiedInstanceDesignation   =>
+      true
   }
-  def createElement( project: Project ): Try[Element] = md match {
-    case u: UnresolvedMagicDrawClassifiedInstanceDesignation => Failure( u.error )
-    case r: ResolvedMagicDrawClassifiedInstanceDesignation   => r.createElement( project )
+
+  def createElement
+  ( project: Project )
+  : Try[Element] = md match {
+    case u: UnresolvedMagicDrawClassifiedInstanceDesignation =>
+      Failure( u.error )
+    case r: ResolvedMagicDrawClassifiedInstanceDesignation   =>
+      r.createElement( project )
   }
-  def lookupMethod( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator ): Try[Method] =
+  def lookupMethod
+  ( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator )
+  : Try[Method] =
     ClassLoaderHelper.lookupMethod( clazz, action,
       classOf[Project], classOf[ToplevelShapeInstanceCreator],
       classOf[ResolvedMagicDrawClassifiedInstanceDesignation],
       classOf[PresentationElement], classOf[Point], classOf[Element] )
 
-  def invokeMethod( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object = md match {
+  def invokeMethod
+  ( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element )
+  : Object = md match {
     case u: UnresolvedMagicDrawClassifiedInstanceDesignation => 
       Failure( u.error )
     case r: ResolvedMagicDrawClassifiedInstanceDesignation   => 
@@ -161,24 +208,40 @@ case class DynamicShapeCreatorForClassifiedInstanceDesignation( project: Project
   }
 }
 
-case class DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation( project: Project, d: StereotypedClassifiedInstanceDesignation ) extends DynamicShapeCreatorHelper {
-  val md: MagicDrawStereotypedClassifiedInstanceDesignation = MagicDrawElementKindDesignation.resolveMagicDrawStereotypedClassifier( project, d )
-  override def isResolved: Boolean = md match {
-    case _: UnresolvedMagicDrawStereotypedClassifiedInstanceDesignation => false
-    case _: ResolvedMagicDrawStereotypedClassifiedInstanceDesignation   => true
-  }
-  def createElement( project: Project ): Try[Element] = md match {
-    case u: UnresolvedMagicDrawStereotypedClassifiedInstanceDesignation => Failure( u.error )
-    case r: ResolvedMagicDrawStereotypedClassifiedInstanceDesignation   => r.createElement( project )
+case class DynamicShapeCreatorForStereotypedClassifiedInstanceDesignation
+( project: Project, d: StereotypedClassifiedInstanceDesignation )
+  extends DynamicShapeCreatorHelper {
+  val md: MagicDrawStereotypedClassifiedInstanceDesignation =
+    MagicDrawElementKindDesignation.resolveMagicDrawStereotypedClassifier( project, d )
+
+  override def isResolved
+  : Boolean = md match {
+    case _: UnresolvedMagicDrawStereotypedClassifiedInstanceDesignation =>
+      false
+    case _: ResolvedMagicDrawStereotypedClassifiedInstanceDesignation   =>
+      true
   }
 
-  def lookupMethod( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator ): Try[Method] =
+  def createElement
+  ( project: Project )
+  : Try[Element] = md match {
+    case u: UnresolvedMagicDrawStereotypedClassifiedInstanceDesignation =>
+      Failure( u.error )
+    case r: ResolvedMagicDrawStereotypedClassifiedInstanceDesignation   =>
+      r.createElement( project )
+  }
+
+  def lookupMethod
+  ( clazz: java.lang.Class[_], action: ToplevelShapeInstanceCreator )
+  : Try[Method] =
     ClassLoaderHelper.lookupMethod( clazz, action,
       classOf[Project], classOf[ToplevelShapeInstanceCreator],
       classOf[ResolvedMagicDrawStereotypedClassifiedInstanceDesignation],
       classOf[PresentationElement], classOf[Point], classOf[Element] )
 
-  def invokeMethod( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element ): Object = md match {
+  def invokeMethod
+  ( method: Method, das: ToplevelShapeInstanceCreator, pe: PresentationElement, point: Point, e: Element )
+  : Object = md match {
     case u: UnresolvedMagicDrawMetaclassDesignation =>
       Failure( u.error )
     case r: ResolvedMagicDrawMetaclassDesignation =>

@@ -63,26 +63,32 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
-case class DynamicBrowserContextMenuActionForTriggerAndSelection(
-  project: Project, tree: Tree, triggerNode: Node, triggerElement: Element, selected: java.util.Collection[Element],
+case class DynamicBrowserContextMenuActionForTriggerAndSelection
+( project: Project,
+  tree: Tree,
+  triggerNode: Node,
+  triggerElement: Element,
+  selected: java.util.Collection[Element],
   menuAction: BrowserContextMenuAction,
   key: KeyStroke,
-  group: String ) extends DefaultBrowserAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
+  group: String )
+  extends DefaultBrowserAction( menuAction.name.hname, menuAction.name.hname, key, group ) {
 
-  override def getTree(): Tree = tree
-  override def getFirstElement(): BaseElement = triggerElement
-  override def getSelectedObject(): Object = triggerElement
-  override def getSelectedObjects(): java.util.Collection[_] = selected
+  override def getTree: Tree = tree
+  override def getFirstElement: BaseElement = triggerElement
+  override def getSelectedObject: Object = triggerElement
+  override def getSelectedObjects: java.util.Collection[_] = selected
 
-  override def toString(): String =
+  override def toString: String =
     s"${menuAction.name.hname}"
 
-  override def getDescription(): String =
+  override def getDescription: String =
     menuAction.prettyPrint("  ")
     
   override def updateState(): Unit = {
     super.updateState()
-    setEnabled( ClassLoaderHelper.isDynamicActionScriptAvailable( menuAction ) && MDUML.isAccessCompatibleWithElements( menuAction.access, ( triggerElement :: selected.toList) : _*))
+    setEnabled( ClassLoaderHelper.isDynamicActionScriptAvailable( menuAction ) &&
+    MDUML.isAccessCompatibleWithElements( menuAction.access, triggerElement :: selected.toList : _*))
   }
   
   override def actionPerformed( ev: ActionEvent ): Unit = {
@@ -92,10 +98,9 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
     ClassLoaderHelper.createDynamicScriptClassLoader( menuAction ) match {
       case Failure( t ) =>
         ClassLoaderHelper.reportError( menuAction, message, t )
-        return
 
       case Success( scriptCL: URLClassLoader ) => {
-        val localClassLoader = Thread.currentThread().getContextClassLoader()
+        val localClassLoader = Thread.currentThread().getContextClassLoader
         Thread.currentThread().setContextClassLoader( scriptCL )
 
         try {
@@ -112,18 +117,19 @@ case class DynamicBrowserContextMenuActionForTriggerAndSelection(
                   classOf[Project], classOf[ActionEvent],
                   classOf[BrowserContextMenuAction], 
                   classOf[Tree], classOf[Node], 
-                  triggerElement.getClassType(), 
+                  triggerElement.getClassType,
                   classOf[java.util.Collection[Element]] ) match {
                 case Failure( t2 ) =>
                   ClassLoaderHelper.reportError( menuAction, message, t1 )
-                  return
 
                 case Success( cm2: ResolvedClassAndMethod ) =>
-                  ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm2, tree, triggerNode, triggerElement, selected )
+                  ClassLoaderHelper.invokeAndReport(
+                    previousTime, project, ev, cm2, tree, triggerNode, triggerElement, selected )
               }
 
             case Success( cm1: ResolvedClassAndMethod ) =>
-              ClassLoaderHelper.invokeAndReport( previousTime, project, ev, cm1, tree, triggerNode, triggerElement, selected )
+              ClassLoaderHelper.invokeAndReport(
+                previousTime, project, ev, cm1, tree, triggerNode, triggerElement, selected )
           }
         }
         finally {

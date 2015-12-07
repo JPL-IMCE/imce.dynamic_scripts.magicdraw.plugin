@@ -55,9 +55,11 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
-case class DynamicScriptsMainMenuActionsCategory() extends ActionsCategory(
-  DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_ID,
-  DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_NAME ) with RefreshableActionsCategory {
+case class DynamicScriptsMainMenuActionsCategory()
+  extends ActionsCategory(
+    DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_ID,
+    DynamicScriptsMainMenuActionsCategory.DYNAMIC_SCRIPTS_MENU_NAME )
+  with RefreshableActionsCategory {
 
   val refreshAction = new NMAction(
     DynamicScriptsMainMenuActionsCategory.RELOAD_ID,
@@ -75,10 +77,10 @@ case class DynamicScriptsMainMenuActionsCategory() extends ActionsCategory(
   override def updateState(): Unit = {}
 
   override def doRefresh(): Unit = {
-    val log = MDGUILogHelper.getMDPluginsLog
+    val log = MDGUILogHelper.getMDPluginsLog()
     log.info( s"*** DynamicScriptsMainMenuActionsCategory.doRefresh()" )
-    var it = getActions().iterator()
-    while ( it.hasNext() ) {
+    val it = getActions.iterator()
+    while ( it.hasNext ) {
       val action = it.next()
       if ( refreshAction != action ) {
         removeAction( action )
@@ -88,37 +90,41 @@ case class DynamicScriptsMainMenuActionsCategory() extends ActionsCategory(
     val reg: DynamicScriptsRegistry = DynamicScriptsPlugin.getInstance().getDynamicScriptsRegistry()
     reg.toolbarMenuPathActions foreach {
       case ( ( _: String, menus: scala.collection.immutable.SortedSet[DynamicScriptsForMainToolbarMenus] ) ) =>
-        menus foreach ( addMainToolbarMenuActions( _ ) )
+        menus foreach addMainToolbarMenuActions
     }
 
     log.info( s"*** DynamicScriptsMainMenuActionsCategory.doRefresh() - done" )
   }
 
-  def addMainToolbarMenuActions( menu: DynamicScriptsForMainToolbarMenus ): Unit = menu.scripts foreach ( addMainToolbarMenuScript( menu.name, _ ) )
+  def addMainToolbarMenuActions( menu: DynamicScriptsForMainToolbarMenus ): Unit =
+    menu.scripts foreach ( addMainToolbarMenuScript( menu.name, _ ) )
 
   def addMainToolbarMenuScript( menuName: HName, script: MainToolbarMenuAction ): Unit = {
     val menuCategory = getOrCreateSubMenuFor( script.toolbarMenuPath )
-    menuCategory.addAction( DynamicScriptsLaunchToolbarMenuAction( script, s"${menuCategory.getID()}_=>_${script.name.hname}" ) )
+    menuCategory.addAction( DynamicScriptsLaunchToolbarMenuAction(
+      script, s"${menuCategory.getID}_=>_${script.name.hname}" ) )
   }
 
   def getOrCreateSubMenuFor( path: Seq[HName] ): ActionsCategory = {
-    val r: ActionsCategory = ( this.asInstanceOf[ActionsCategory] /: path )( getOrCreateSubMenuForPathSegment( _, _ ) )
+    val r: ActionsCategory = ( this.asInstanceOf[ActionsCategory] /: path )( getOrCreateSubMenuForPathSegment )
     r
   }
 
   def getOrCreateSubMenuForPathSegment( category: ActionsCategory, segment: HName ): ActionsCategory = {
-    val segmentID = s"${category.getID()}_|_${segment.hname}"
-    category.getAction( segmentID ) match {
-      case null => {
-        val subCategory = new MDActionsCategory( segmentID, segment.hname )
-        subCategory.setNested( true )
-        category.addAction( subCategory )
-        subCategory
-      }
+    val segmentID = s"${category.getID}_|_${segment.hname}"
+    Option.apply(category.getAction( segmentID ))
+    .fold[ActionsCategory]({
+      val subCategory = new MDActionsCategory(segmentID, segment.hname)
+      subCategory.setNested(true)
+      category.addAction(subCategory)
+      subCategory
+    }){
       case subCategory: ActionsCategory =>
         subCategory
       case _ =>
-        throw new IllegalArgumentException( s"DynamicScriptsMainMenuActionsCategory.getOrCreateSubMenuForPathSegment - category: ${category.getID()} / ${category.getName()}; segment=${segment}" )
+        throw new IllegalArgumentException(
+          "DynamicScriptsMainMenuActionsCategory.getOrCreateSubMenuForPathSegment - category: "+
+          s"${category.getID} / ${category.getName}; segment=$segment" )
     }
   }
 }

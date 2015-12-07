@@ -52,7 +52,7 @@ import scala.util.Success
 import scala.util.Failure
 
 /**
- * @BUG 
+ * BUG
  * 
  * Report to NoMagic a problem with the fact that the icon of a DrawShapeDiagramAction does not always show. 
  * This affects MD's diagram toolbar buttons as well (e.g., Class, Package, etc...)
@@ -72,8 +72,10 @@ case class DrawDynamicShapeAction(
   
   override def createElement(): Element = 
     finalizationAction.creatorHelper.createElement(Project.getProject(diagram)) match {
-    case Success(e) => e
-    case Failure(e) => throw e
+    case Success(e) =>
+      e
+    case Failure(e) =>
+      throw e
   } 
   
   override def createPresentationElement(): PresentationElement = {
@@ -81,7 +83,7 @@ case class DrawDynamicShapeAction(
     pe
   }
   
-  override def getCustomAdditionalDrawAction(): AdditionalDrawAction = {
+  override def getCustomAdditionalDrawAction: AdditionalDrawAction = {
     finalizationAction
   }
   
