@@ -351,7 +351,7 @@ lazy val root = Project("dynamic-scripts-package", file("."))
     IMCEKeys.targetJDK := IMCEKeys.jdk18.value,
     git.baseVersion := Versions.version,
     
-    organization := "gov.nasa.jpl.cae.magicdraw.packages",
+    organization := "gov.nasa.jpl.imce.magicdraw.packages",
     name := "imce_md18_0_sp5_dynamic-scripts",
     homepage := Some(url("https://github.jpl.nasa.gov/imce/jpl-dynamicscripts-magicdraw-plugin")),
 
