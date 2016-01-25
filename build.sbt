@@ -66,6 +66,9 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
     IMCEKeys.targetJDK := IMCEKeys.jdk18.value,
     git.baseVersion := Versions.version,
 
+    name := "imce_md18_0_sp5_dynamic-scripts",
+    organization := "gov.nasa.jpl.imce.magicdraw.plugins",
+
     projectID := {
       val previous = projectID.value
       previous.extra("build.date.utc" -> buildUTCDate.value)
