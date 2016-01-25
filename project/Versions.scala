@@ -1,7 +1,7 @@
 object Versions {
   
   // this project
-  val version = "1.2"
+  val version = "1.3"
 
   // https://github.jpl.nasa.gov/imce/jpl-dynamicscripts-generic-dsl/tree/cae_md18_0_sp5
   val dynamic_scripts_generic_dsl = "1.1"
