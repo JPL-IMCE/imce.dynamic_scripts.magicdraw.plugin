@@ -56,7 +56,6 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
   .enablePlugins(IMCEGitPlugin)
   .enablePlugins(IMCEReleasePlugin)
   .settings(IMCEReleasePlugin.libraryReleaseProcessSettings)
-  .settings(addArtifact(Artifact("imce_md18_0_sp5_dynamic-scripts_resource", "zip", "zip"), artifactZipFile).settings: _*)
   .settings(IMCEPlugin.aspectJSettings)
   .settings(
     IMCEKeys.licenseYearOrRange := "2014-2016",
@@ -79,7 +78,9 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
       baseDirectory.value / "target" / "imce_md18_0_sp5_dynamic-scripts_resource.zip"
     },
 
-    addArtifact(Artifact("imce_md18_0_sp5_dynamic-scripts_resource", "zip", "zip"), artifactZipFile),
+    addArtifact(
+      Artifact("imce_md18_0_sp5_dynamic-scripts_resource", "zip", "zip"),
+      artifactZipFile),
 
     resourceDirectory in Compile := baseDirectory.value / "resources",
 
