@@ -38,6 +38,11 @@
  */
 package gov.nasa.jpl.dynamicScripts.magicdraw.utils
 
+import java.io.File
+import java.lang.Runnable
+import javax.swing.filechooser.FileFilter
+import javax.swing.{JFileChooser, SwingUtilities}
+
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.ui.browser.Browser
@@ -46,6 +51,7 @@ import com.nomagic.magicdraw.ui.browser.Node
 import com.nomagic.magicdraw.uml.BaseElement
 import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
+import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.uml2.ext.jmi.helpers.ModelHelper
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Classifier
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
@@ -53,6 +59,8 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.PackageImport
 import com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup
 import com.nomagic.magicdraw.core.ApplicationEnvironment
+
+import org.apache.log4j.Logger
 
 import org.eclipse.emf.common.util.URI
 
@@ -64,8 +72,9 @@ import scala.collection.Iterator
 import scala.collection.immutable._
 import scala.language.implicitConversions
 import scala.language.postfixOps
-import scala.{AnyVal, Array, Boolean, Option, None, Some, StringContext}
-import scala.Predef.{classOf, refArrayOps, String}
+import scala.util.{Failure,Success,Try}
+import scala.{AnyVal, Array, Boolean, Int, Option, None, Some, StringContext, Unit}
+import scala.Predef.{classOf, refArrayOps, require, String}
 
 case class BrowserNodeElementInfo
 ( n: Node, e: Element )
@@ -78,11 +87,17 @@ case class BrowserTreeSelectionInfo
 @scala.deprecated("", "")
 class MDUML(val p: Project) extends AnyVal {
 
-  def getInstallRoot =
-    ApplicationEnvironment.getInstallRoot
+  def getPrimaryProjectID: String =
+    p.getPrimaryProject.getProjectID
 
   def getProjectLocationURI: URI =
     p.getPrimaryProject.getLocationURI
+
+  def getProjectActiveBrowserTabTree: Option[BrowserTabTree] =
+    for {
+      b <- Option(p.getBrowser)
+      tab <- Option(b.getActiveTree)
+    } yield tab
 
   /**
     * Retrieves the list of selected element nodes in MagicDraw's active browser tab tree, if any.
@@ -95,48 +110,151 @@ class MDUML(val p: Project) extends AnyVal {
     * @see com.nomagic.magicdraw.ui.browser.BrowserTabTree
     * @see com.nomagic.magicdraw.ui.browser.Node
     */
-  def getBrowserTreeSelection(): Option[BrowserTreeSelectionInfo] =
-    p match {
-      case null =>
-        None
-      case _p: Project =>
-        _p.getBrowser() match {
-        case null =>
-          None
-        case b: Browser =>
-          b.getActiveTree() match {
-          case null =>
-            None
-          case tab: BrowserTabTree =>
-            tab.getSelectedNodes() match {
-            case null =>
+  def getBrowserTreeSelection: Option[BrowserTreeSelectionInfo] =
+    for {
+      tab <- getProjectActiveBrowserTabTree
+      nodes <- Option(tab.getSelectedNodes)
+      nodesWithElements = nodes
+        .flatMap { n =>
+          n.getUserObject match {
+            case e: Element =>
+              Some(BrowserNodeElementInfo(n, e))
+            case _ =>
               None
-            case nodes: Array[Node] =>
-              val nodesWithElements =
-                nodes
-                .flatMap { n =>
-                  n.getUserObject() match {
-                    case e: Element =>
-                      Some(BrowserNodeElementInfo(n, e))
-                    case _ =>
-                      None
-                  }
-                }
-                .toList
-              Some(BrowserTreeSelectionInfo(p, tab, nodesWithElements))
           }
         }
-      }
-    }
+        .toList
+    } yield BrowserTreeSelectionInfo(p, tab, nodesWithElements)
+
 }
 
 object MDUML {
 
-  implicit def MDUMLHelper(p: Project): MDUML = new MDUML(p)
+  implicit def MDUMLHelper(p: Project): MDUML = {
+    require(
+      null != p,
+      "The MDUML helper must be initialized with a valid MagicDraw project")
+    new MDUML(p)
+  }
 
-  def getInstallRoot: String =
-    new MDUML(null).getInstallRoot
-  
+  def getMDPluginsLog: Logger =
+    MDLog.getPluginsLog
+
+  def getInstallRoot =
+    ApplicationEnvironment.getInstallRoot
+
+  def getApplicationInstallDir: File =
+    new File(getInstallRoot)
+
+  /**
+    *
+    */
+  def chooseFile
+  ( title: String,
+    description: String,
+    fileNameSuffix: String,
+    dir: File = getApplicationInstallDir )
+  : Try[Option[File]] =
+
+    Try {
+      var result: Option[File] = None
+
+      def chooser = new Runnable {
+        override def run(): Unit = {
+
+          val ff = new FileFilter() {
+
+            def getDescription: String = description
+
+            def accept(f: File): Boolean =
+              f.isDirectory ||
+                (f.isFile && f.getName.endsWith(fileNameSuffix))
+
+          }
+
+          val fc = new JFileChooser(dir) {
+
+            override def getFileSelectionMode: Int = JFileChooser.FILES_ONLY
+
+            override def getDialogTitle = title
+          }
+
+          fc.setFileFilter(ff)
+          fc.setFileHidingEnabled(true)
+          fc.setAcceptAllFileFilterUsed(false)
+
+          fc.showOpenDialog(Application.getInstance().getMainFrame) match {
+            case JFileChooser.APPROVE_OPTION =>
+              val openFile = fc.getSelectedFile
+              result = Some(openFile)
+            case _ =>
+              result = None
+          }
+        }
+      }
+
+      if (SwingUtilities.isEventDispatchThread)
+        chooser.run()
+      else
+        SwingUtilities.invokeAndWait(chooser)
+
+      result
+    }
+
+  /**
+    *
+    */
+  def saveFile
+  (title: String,
+   description: String,
+   fileNameSuffix: String,
+   dir: File = getApplicationInstallDir)
+  : Try[Option[File]] =
+    Try {
+      var result: Option[File] = None
+
+      def chooser = new Runnable {
+        override def run(): Unit = {
+
+          val ff = new FileFilter() {
+
+            def getDescription: String = description
+
+            def accept(f: File): Boolean =
+              f.isDirectory ||
+                (f.isFile && f.getName.endsWith(fileNameSuffix))
+
+          }
+
+          val fc = new JFileChooser(dir) {
+
+            override def getFileSelectionMode: Int = JFileChooser.FILES_ONLY
+
+            override def getDialogTitle = title
+          }
+
+          fc.setFileFilter(ff)
+          fc.setFileHidingEnabled(true)
+          fc.setAcceptAllFileFilterUsed(false)
+
+          fc.showSaveDialog(Application.getInstance().getMainFrame) match {
+            case JFileChooser.APPROVE_OPTION =>
+              val saveFile = fc.getSelectedFile
+              result = Some(saveFile)
+            case _ =>
+              result = None
+          }
+        }
+      }
+
+      if (SwingUtilities.isEventDispatchThread)
+        chooser.run()
+      else
+        SwingUtilities.invokeAndWait(chooser)
+
+      result
+    }
+
   def getProjectLocationURI( p: Project ): URI =
     p.getProjectLocationURI
   
@@ -151,20 +269,18 @@ object MDUML {
   /**
    * Retrieves the list of selected symbols (shapes, paths) of any kind in MagicDraw's active diagram, if any.
    */
-  def getActiveDiagramSelection(): Option[ActiveDiagramSelectionInfo] =
-    Application.getInstance().getProject() match {
+  def getActiveDiagramSelection: Option[ActiveDiagramSelectionInfo] =
+    Application.getInstance().getProject match {
       case null =>
         None
       case p: Project =>
-        p.getActiveDiagram() match {
+        p.getActiveDiagram match {
           case null =>
             None
           case d: DiagramPresentationElement =>
-            Some(ActiveDiagramSelectionInfo(p, d, d.getSelected()))
+            Some(ActiveDiagramSelectionInfo(p, d, d.getSelected))
         }
     }
-
-
 
   def elementPackageContainmentIterator( e: Element ): Iterator[Package] = new Iterator[Package] {
     private var p = ModelHelper.findParentOfType( e, classOf[Package] )
@@ -210,7 +326,7 @@ object MDUML {
       case ScopeAccess.READ_ONLY  => false
       case ScopeAccess.READ_WRITE => true
     }
-    val compatibleAccess = elements.forall { e => !mustBeEditable || e.isEditable() }
+    val compatibleAccess = elements.forall { e => !mustBeEditable || e.isEditable }
     compatibleAccess
   }
 }
