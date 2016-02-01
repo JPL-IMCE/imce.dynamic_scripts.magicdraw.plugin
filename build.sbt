@@ -27,13 +27,11 @@ developers := List(
 
 shellPrompt in ThisBuild := { state => Project.extract(state).currentRef.project + "> " }
 
-cleanFiles <+=
-  baseDirectory { base => base / "imce.md.package" }
-
 lazy val mdInstallDirectory = SettingKey[File]("md-install-directory", "MagicDraw Installation Directory")
 
-mdInstallDirectory in Global :=
-  baseDirectory.value / "imce.md.package" / ("imce.md18_0sp5.dynamic-scripts-" + Versions.version)
+mdInstallDirectory in Global := baseDirectory.value / "imce.md.package"
+
+cleanFiles <+= baseDirectory { base => base / "imce.md.package" }
 
 lazy val artifactZipFile = taskKey[File]("Location of the zip artifact file")
 
@@ -54,7 +52,7 @@ buildUTCDate in Global := {
   formatter.format(new Date)
 }
 
-lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin", file("dynamic-scripts"))
+lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin", file("."))
   .enablePlugins(IMCEGitPlugin)
   .enablePlugins(IMCEReleasePlugin)
   .settings(IMCEReleasePlugin.libraryReleaseProcessSettings)
@@ -65,6 +63,9 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
     IMCEKeys.organizationInfo := IMCEPlugin.Organizations.cae,
     IMCEKeys.targetJDK := IMCEKeys.jdk18.value,
     git.baseVersion := Versions.version,
+
+    buildInfoPackage := "gov.nasa.jpl.imce.dynamic_scripts.plugin",
+    buildInfoKeys ++= Seq[BuildInfoKey](BuildInfoKey.action("buildDateUTC") { buildUTCDate.value }),
 
     name := "imce_md18_0_sp5_dynamic-scripts",
     organization := "gov.nasa.jpl.imce.magicdraw.plugins",
@@ -84,17 +85,29 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
 
     scalaSource in Compile := baseDirectory.value / "src",
 
-    classDirectory in Compile := baseDirectory.value / "bin",
-    cleanFiles += (classDirectory in Compile).value,
-
     unmanagedClasspath in Compile <++= unmanagedJars in Compile,
     libraryDependencies ++= Seq(
 
-      "gov.nasa.jpl.cae.magicdraw.packages" %% "cae_md18_0_sp5_aspectj_scala" % Versions.aspectj_scala_package %
-        "compile" artifacts Artifact("cae_md18_0_sp5_aspectj_scala", "zip", "zip"),
+      "gov.nasa.jpl.cae.magicdraw.packages" % "cae_md18_0_sp5_mdk" % Versions.mdk_package %
+        "compile" artifacts Artifact("cae_md18_0_sp5_mdk", "zip", "zip"),
+
+      "gov.nasa.jpl.imce.magicdraw.libraries" %% "imce-magicdraw-library-enhanced_api" % Versions.enhanced_api %
+        "compile" withSources(),
 
       "gov.nasa.jpl.imce.secae" %% "jpl-dynamic-scripts-generic-dsl" % Versions.dynamic_scripts_generic_dsl %
-      "compile" withSources() withJavadoc()
+        "compile" withSources() withJavadoc(),
+
+      "gov.nasa.jpl.imce.thirdParty" %% "all-graph-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
+        Artifact("all-graph-libraries", "zip", "zip"),
+
+      "gov.nasa.jpl.imce.thirdParty" %% "all-jena-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
+        Artifact("all-jena-libraries", "zip", "zip"),
+
+      "gov.nasa.jpl.imce.thirdParty" %% "all-owlapi-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
+        Artifact("all-owlapi-libraries", "zip", "zip"),
+
+      "gov.nasa.jpl.imce.thirdParty" %% "other-scala-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
+        Artifact("other-scala-libraries", "zip", "zip")
 
     ),
 
@@ -106,11 +119,7 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
 
           val zfilter: DependencyFilter = new DependencyFilter {
             def apply(c: String, m: ModuleID, a: Artifact): Boolean = {
-              val ok1 = a.`type` == "zip" && a.extension == "zip"
-              val ok2 = libs.find { dep: ModuleID =>
-                ok1 && dep.organization == m.organization && m.name == dep.name + "_" + sbV
-              }
-              ok2.isDefined
+              a.`type` == "zip" && a.extension == "zip" && a.name == "cae_md18_0_sp5_mdk"
             }
           }
           val zs: Seq[File] = up.matching(zfilter)
@@ -120,18 +129,6 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
               s"=> created md.install.dir=$mdInstallDir with ${files.size} " +
                 s"files extracted from zip: ${zip.getName}")
           }
-          val mdRootFolder = mdInstallDir / s"cae.md18_0sp5.aspectj_scala-${Versions.aspectj_scala_package}"
-          require(
-            mdRootFolder.exists && mdRootFolder.canWrite,
-            s"mdRootFolder: $mdRootFolder")
-          IO.listFiles(mdRootFolder).foreach { f =>
-            val fp = f.toPath
-            Files.move(
-              fp,
-              mdInstallDir.toPath.resolve(fp.getFileName),
-              java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-          }
-          IO.delete(mdRootFolder)
 
           val mdBinFolder = mdInstallDir / "bin"
           require(mdBinFolder.exists, "md bin: $mdBinFolder")
@@ -139,19 +136,6 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
             override def accept(dir: File, name: String): Boolean =
               name.endsWith(".properties")
           })
-
-          mdPropertiesFiles.foreach { mdPropertyFile: File =>
-
-            val mdPropertyName = mdPropertyFile.name
-            val unpatchedContents: String = IO.read(mdPropertyFile)
-
-            // Remove "-Dlocal.config.dir.ext\=<value>" or "-Dlocal.config.dir.ext=<value>" regardless of what <value> is.
-            val patchedContents1 = unpatchedContents.replaceAll(
-              "-Dlocal.config.dir.ext\\\\?=[a-zA-Z0-9_.\\\\-]*",
-              "-Dlocal.config.dir.ext\\\\=-dynamic-scripts-" + Versions.version)
-
-            IO.write(file = mdPropertyFile, content = patchedContents1, append = false)
-          }
 
         } else {
           s.log.info(
@@ -189,63 +173,140 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
         (base, up, s, mdInstallDir, zip, libJar, libSrc, libDoc, pom, d, sbV) =>
 
           import com.typesafe.sbt.packager.universal._
+          import java.nio.file.attribute.PosixFilePermission
 
           val root = base / "target" / "imce_md18_0_sp5_dynamic-scripts"
           s.log.info(s"\n*** top: $root")
 
-          IO.copyDirectory(base / "profiles", root / "profiles/", overwrite=true, preserveLastModified=true)
+          val fileArtifacts = for {
+            cReport <- up.configurations
+            if Configurations.Compile.name == cReport.configuration
+            oReport <- cReport.details
+            mReport <- oReport.modules
+            (artifact, file) <- mReport.artifacts
+            if "jar" == artifact.extension
+          } yield (oReport.organization, oReport.name, file, artifact)
+
+          val fileArtifactsByType = fileArtifacts.groupBy { case (_, _, _, a) =>
+            a.`classifier`.getOrElse(a.`type`)
+          }
+          val jarArtifacts = fileArtifactsByType("jar")
+          val srcArtifacts = fileArtifactsByType("sources")
+          val docArtifacts = fileArtifactsByType("javadoc")
+
+          val jars = {
+            val libs = jarArtifacts.map { case (o, _, jar, _) =>
+              s.log.info(s"* copying jar: $o/${jar.name}")
+              IO.copyFile(jar, root / "lib" / o / jar.name)
+              "lib/" + o + "/" + jar.name
+            }
+            libs
+          }
+
+          val weaverJar: String = {
+            val weaverJars = jarArtifacts.flatMap {
+              case ("org.aspectj", "aspectjweaver", jar, _) =>
+                Some("lib/org.aspectj/" + jar.name)
+              case _ =>
+                None
+            }
+            require(1 == weaverJars.size)
+            weaverJars.head
+          }
+
+          val bootJars = jarArtifacts.flatMap {
+            case ("org.scala-lang", "scala-library", jar, _) =>
+              Some("lib/org.scala-lang/" + jar.name)
+            case ("org.aspectj", "aspectjrt", jar, _) =>
+              Some("lib/org.aspectj/" + jar.name)
+            case ("org.aspectj", "aspectjweaver", jar, _) =>
+              Some("lib/org.aspectj/" + jar.name)
+            case _ =>
+              None
+          }
+
+          val bootClasspathPrefix = bootJars.mkString("", "\\\\:", "\\\\:")
+
+          srcArtifacts.foreach { case (o, _, jar, _) =>
+            s.log.info(s"* copying source: $o/${jar.name}")
+            IO.copyFile(jar, root / "lib.sources" / o / jar.name)
+            "lib.sources/" + o + "/" + jar.name
+          }
+
+          docArtifacts.foreach { case (o, _, jar, _) =>
+            s.log.info(s"* copying javadoc: $o/${jar.name}")
+            IO.copyFile(jar, root / "lib.javadoc" / o / jar.name)
+            "lib.javadoc/" + o + "/" + jar.name
+          }
+
+          val md_imce_script = root / "bin" / "magicdraw.imce"
+          IO.copyFile(
+            mdInstallDir / "bin" / "magicdraw",
+            md_imce_script)
+          md_imce_script.toScala.addPermission(PosixFilePermission.OWNER_EXECUTE)
+          md_imce_script.toScala.addPermission(PosixFilePermission.GROUP_EXECUTE)
+          md_imce_script.toScala.addPermission(PosixFilePermission.OTHERS_EXECUTE)
+
+          val md_imce_exe = root / "bin" / "magicdraw.imce.exe"
+          IO.copyFile(
+            mdInstallDir / "bin" / "magicdraw.exe",
+            md_imce_exe)
+          md_imce_exe.toScala.addPermission(PosixFilePermission.OWNER_EXECUTE)
+          md_imce_exe.toScala.addPermission(PosixFilePermission.GROUP_EXECUTE)
+          md_imce_exe.toScala.addPermission(PosixFilePermission.OTHERS_EXECUTE)
+
+          IO.copyFile(
+            mdInstallDir / "bin" / "magicdraw.properties",
+            root / "bin" / "magicdraw.imce.properties")
+
+          val mdBinFolder = root / "bin"
+          val mdPropertiesFiles: Seq[File] = mdBinFolder.listFiles(new java.io.FilenameFilter() {
+            override def accept(dir: File, name: String): Boolean =
+              name.endsWith(".properties")
+          })
+
+          mdPropertiesFiles.foreach { mdPropertyFile: File =>
+
+            val mdPropertyName = mdPropertyFile.name
+            val unpatchedContents: String = IO.read(mdPropertyFile)
+
+            // Remove "-Dlocal.config.dir.ext\=<value>" or "-Dlocal.config.dir.ext=<value>" regardless of what <value> is.
+            val patchedContents1 = unpatchedContents.replaceAll(
+              "-Dlocal.config.dir.ext\\\\?=[a-zA-Z0-9_.\\\\-]*",
+              "-Dlocal.config.dir.ext\\\\=-imce-" + Versions.version)
+
+            // Add AspectJ weaver agent & settings
+            val patchedContents2 = patchedContents1.replaceFirst(
+              "JAVA_ARGS=",
+              s"JAVA_ARGS=-javaagent:$weaverJar " +
+                "-Daj.weaving.verbose\\\\=true " +
+                "-Dorg.aspectj.weaver.showWeaveInfo\\\\=true ")
+
+            val patchedContents3 = patchedContents2.replaceFirst(
+              "BOOT_CLASSPATH=",
+              "BOOT_CLASSPATH=" + bootClasspathPrefix)
+
+            val patchedContents4 = patchedContents3.replaceFirst(
+              "([^_])CLASSPATH=(.*)",
+              jars.mkString("$1CLASSPATH=", "\\\\:", "\\\\:$2"))
+
+            val patchedContents5 = patchedContents4.replaceFirst(
+              "JAVA_HOME=\\S*",
+              "JAVA_HOME=")
+
+            IO.write(file = mdPropertyFile, content = patchedContents5, append = false)
+          }
+
+          IO.copyDirectory(base / "profiles", root / "profiles", overwrite=true, preserveLastModified=true)
 
           val pluginDir = root / "plugins" / "gov.nasa.jpl.magicdraw.dynamicScripts"
           IO.createDirectory(pluginDir)
 
+          IO.copyDirectory(base / "icons", pluginDir / "icons", overwrite=true, preserveLastModified=true)
+
           IO.copyFile(libJar, pluginDir / "lib" / libJar.getName)
           IO.copyFile(libSrc, pluginDir / "lib" / libSrc.getName)
           IO.copyFile(libDoc, pluginDir / "lib" / libDoc.getName)
-
-          val lfilter: DependencyFilter = new DependencyFilter {
-            def apply(c: String, m: ModuleID, a: Artifact): Boolean = {
-              val ok1 = "compile" == c
-              val ok2 = a.`type` == "jar" && a.extension == "jar"
-              val ok3 =
-                "gov.nasa.jpl.imce.secae" == m.organization &&
-                  "jpl-dynamic-scripts-generic-dsl_" + sbV == m.name
-              ok1 && ok2 && ok3
-            }
-          }
-          val ls: Seq[File] = up.matching(lfilter)
-          ls.foreach { libJar: File =>
-            IO.copyFile(libJar, pluginDir / "lib" / libJar.getName)
-          }
-
-          val dfilter: DependencyFilter = new DependencyFilter {
-            def apply(c: String, m: ModuleID, a: Artifact): Boolean = {
-              val ok1 = "compile" == c
-              val ok2 = a.`type` == "doc" && a.extension == "jar"
-              val ok3 =
-                "gov.nasa.jpl.imce.secae" == m.organization &&
-                  "jpl-dynamic-scripts-generic-dsl_" + sbV == m.name
-              ok1 && ok2 && ok3
-            }
-          }
-          val ds: Seq[File] = up.matching(dfilter)
-          ds.foreach { libDoc: File =>
-            IO.copyFile(libDoc, pluginDir / "lib" / libDoc.getName)
-          }
-
-          val sfilter: DependencyFilter = new DependencyFilter {
-            def apply(c: String, m: ModuleID, a: Artifact): Boolean = {
-              val ok1 = "compile" == c
-              val ok2 = a.`type` == "src" && a.extension == "jar"
-              val ok3 =
-                "gov.nasa.jpl.imce.secae" == m.organization &&
-                  "jpl-dynamic-scripts-generic-dsl_" + sbV == m.name
-              ok1 && ok2 && ok3
-            }
-          }
-          val ss: Seq[File] = up.matching(sfilter)
-          ss.foreach { libSrc: File =>
-            IO.copyFile(libSrc, pluginDir / "lib" / libSrc.getName)
-          }
 
           val pluginInfo =
             <plugin id="gov.nasa.jpl.magicdraw.dynamicScripts"
@@ -258,7 +319,6 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
               </requires>
               <runtime>
                 <library name={"lib/" + libJar.getName}/>
-                {ls.map { l => <library name={"lib/"+l.getName}/> }}
               </runtime>
             </plugin>
 
@@ -266,6 +326,11 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
             filename=(pluginDir / "plugin.xml").getAbsolutePath,
             node=pluginInfo,
             enc="UTF-8")
+
+          val resourceFiles =
+            ((root.*** --- root) pair relativeTo(root))
+              .filter(! _._1.isDirectory)
+              .sortBy(_._2)
 
           val resourceManager = root / "data" / "resourcemanager"
           IO.createDirectory(resourceManager)
@@ -301,27 +366,13 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
                 <minVersion human="17.0" internal="169010"/>
               </requiredResource>
               <installation>
-                <file from="plugins/gov.nasa.jpl.magicdraw.dynamicScripts/plugin.xml"
-                      to="plugins/gov.nasa.jpl.magicdraw.dynamicScripts/plugin.xml"/>
-
-                <file from={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+libJar.getName}
-                      to={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+libJar.getName}/>
-                <file from={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+libDoc.getName}
-                      to={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+libDoc.getName}/>
-                <file from={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+libSrc.getName}
-                      to={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+libSrc.getName}/>
-                {ls.map { l =>
-                  <file from={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+l.getName}
-                        to={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+l.getName}/> }
-                }
-                {ds.map { l =>
-                  <file from={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+l.getName}
-                        to={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+l.getName}/> }
-                }
-                {ss.map { l =>
-                  <file from={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+l.getName}
-                        to={"plugins/gov.nasa.jpl.magicdraw.dynamicScripts/lib/"+l.getName}/> }
-                }
+                {
+                  resourceFiles.map { case (_, path) =>
+                    <file
+                       from={path}
+                       to={path}>
+                    </file>
+                }}
               </installation>
             </resourceDescriptor>
 
@@ -331,239 +382,10 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
             enc="UTF-8")
 
           val fileMappings = (root.*** --- root) pair relativeTo(root)
-          ZipHelper.zipNIO(fileMappings, zip)
+          ZipHelper.zip(fileMappings, zip)
 
           s.log.info(s"\n*** Created the zip: $zip")
           zip
       }
   )
   .settings(IMCEPlugin.strictScalacFatalWarningsSettings)
-
-lazy val root = Project("dynamic-scripts-package", file("."))
-  .enablePlugins(IMCEGitPlugin)
-  .enablePlugins(IMCEReleasePlugin)
-  .aggregate(jpl_dynamicScripts_magicDraw_plugin)
-  .dependsOn(jpl_dynamicScripts_magicDraw_plugin)
-  .settings(addArtifact(Artifact("imce_md18_0_sp5_dynamic-scripts", "zip", "zip"), artifactZipFile).settings: _*)
-  .settings(
-    IMCEKeys.licenseYearOrRange := "2013-2016",
-    IMCEKeys.organizationInfo := IMCEPlugin.Organizations.cae,
-    IMCEKeys.targetJDK := IMCEKeys.jdk18.value,
-    git.baseVersion := Versions.version,
-    
-    organization := "gov.nasa.jpl.imce.magicdraw.packages",
-    name := "imce_md18_0_sp5_dynamic-scripts",
-    homepage := Some(url("https://github.jpl.nasa.gov/imce/jpl-dynamicscripts-magicdraw-plugin")),
-
-    git.baseVersion := Versions.version,
-
-    projectID := {
-      val previous = projectID.value
-      previous.extra("build.date.utc" -> buildUTCDate.value)
-    },
-
-    pomPostProcess <<= (pomPostProcess, mdInstallDirectory in Global) {
-      (previousPostProcess, mdInstallDir) => { (node: XNode) =>
-        val processedNode: XNode = previousPostProcess(node)
-        val mdUpdateDir = UpdateProperties(mdInstallDir)
-        val resultNode: XNode = new RuleTransformer(mdUpdateDir)(processedNode)
-        resultNode
-      }
-    },
-
-    artifactZipFile := {
-      baseDirectory.value / "target" / "imce_md18_0_sp5_dynamic-scripts.zip"
-    },
-
-    addArtifact(Artifact("imce_md18_0_sp5_dynamic-scripts", "zip", "zip"), artifactZipFile),
-
-    // disable publishing the main jar produced by `package`
-    publishArtifact in(Compile, packageBin) := false,
-
-    // disable publishing the main API jar
-    publishArtifact in(Compile, packageDoc) := false,
-
-    // disable publishing the main sources jar
-    publishArtifact in(Compile, packageSrc) := false,
-
-    // disable publishing the jar produced by `test:package`
-    publishArtifact in(Test, packageBin) := false,
-
-    // disable publishing the test API jar
-    publishArtifact in(Test, packageDoc) := false,
-
-    // disable publishing the test sources jar
-    publishArtifact in(Test, packageSrc) := false,
-
-    publish <<= publish dependsOn zipInstall,
-    PgpKeys.publishSigned <<= PgpKeys.publishSigned dependsOn zipInstall,
-
-    publish <<= publish dependsOn (publish in jpl_dynamicScripts_magicDraw_plugin),
-    PgpKeys.publishSigned <<= PgpKeys.publishSigned dependsOn (PgpKeys.publishSigned in jpl_dynamicScripts_magicDraw_plugin),
-
-    publishLocal <<= publishLocal dependsOn zipInstall,
-    PgpKeys.publishLocalSigned <<= PgpKeys.publishLocalSigned dependsOn zipInstall,
-
-    publishLocal <<= publishLocal dependsOn (publishLocal in jpl_dynamicScripts_magicDraw_plugin),
-    PgpKeys.publishLocalSigned <<= PgpKeys.publishLocalSigned dependsOn (PgpKeys.publishLocalSigned in jpl_dynamicScripts_magicDraw_plugin),
-
-    makePom <<= makePom dependsOn md5Install,
-
-    md5Install <<=
-      ((baseDirectory, update, streams,
-        mdInstallDirectory in Global,
-        version
-        ) map {
-        (base, up, s, mdInstallDir, buildVersion) =>
-
-          s.log.info(s"***(2) MD5 of md.install.dir=$mdInstallDir")
-
-      }) dependsOn updateInstall,
-
-    updateInstall <<=
-      (baseDirectory, update, streams,
-        mdInstallDirectory in Global,
-        artifactZipFile in jpl_dynamicScripts_magicDraw_plugin) map {
-        (base, up, s, mdInstallDir, dynamicScriptsResource) =>
-
-          s.log.info(s"***(1) Updating md.install.dir=$mdInstallDir")
-          s.log.info(s"***    Installling resource=$dynamicScriptsResource")
-
-          val files = IO.unzip(dynamicScriptsResource, mdInstallDir)
-          s.log.info(
-            s"=> installed resource in md.install.dir=$mdInstallDir with ${files.size} " +
-              s"files extracted from zip: ${dynamicScriptsResource.getName}")
-      },
-
-    zipInstall <<=
-      (baseDirectory, update, streams,
-        mdInstallDirectory in Global,
-        artifactZipFile,
-        makePom, scalaBinaryVersion
-        ) map {
-        (base, up, s, mdInstallDir, zip, pom, sbV) =>
-
-          import java.nio.file.attribute.PosixFilePermission
-          import com.typesafe.sbt.packager.universal._
-
-          s.log.info(s"\n*** Creating the zip: $zip")
-
-          val parentDir = mdInstallDir.getParentFile
-          val top: BFile = mdInstallDir.toScala
-
-          val macosExecutables: Iterator[BFile] = top.glob("**/*.app/Content/MacOS/*")
-          macosExecutables.foreach { f: BFile =>
-            s.log.info(s"* +X $f")
-            f.addPermission(PosixFilePermission.OWNER_EXECUTE)
-          }
-
-          val windowsExecutables: Iterator[BFile] = top.glob("**/*.exe")
-          windowsExecutables.foreach { f: BFile =>
-            s.log.info(s"* +X $f")
-            f.addPermission(PosixFilePermission.OWNER_EXECUTE)
-          }
-
-          val javaExecutables: Iterator[BFile] = top.glob("jre*/**/bin/*")
-          javaExecutables.foreach { f: BFile =>
-            s.log.info(s"* +X $f")
-            f.addPermission(PosixFilePermission.OWNER_EXECUTE)
-          }
-
-          val unixExecutables: Iterator[BFile] = top.glob("bin/{magicdraw,submit_issue}")
-          unixExecutables.foreach { f: BFile =>
-            s.log.info(s"* +X $f")
-            f.addPermission(PosixFilePermission.OWNER_EXECUTE)
-          }
-
-          val zipDir = zip.getParentFile.toScala
-          Cmds.mkdirs(zipDir)
-
-          val fileMappings = mdInstallDir.*** pair relativeTo(parentDir)
-          ZipHelper.zipNative(fileMappings, zip)
-
-          s.log.info(s"\n*** Created the zip: $zip")
-
-          zip
-      }
-  )
-  .settings(IMCEReleasePlugin.packageReleaseProcessSettings)
-
-def UpdateProperties(mdInstall: File): RewriteRule = {
-
-  println(s"update properties for md.install=$mdInstall")
-  val binDir = mdInstall / "bin"
-  require(binDir.exists, binDir)
-  val binSub = MD5SubDirectory(
-    name = "bin",
-    files = IO
-      .listFiles(binDir, GlobFilter("*.properties"))
-      .sorted.map(MD5.md5File(binDir)))
-
-  val docGenScriptsDir = mdInstall / "DocGenUserScripts"
-  require(docGenScriptsDir.exists, docGenScriptsDir)
-  val scriptsSub = MD5SubDirectory(
-    name = "DocGenUserScripts",
-    dirs = IO
-      .listFiles(docGenScriptsDir, DirectoryFilter)
-      .sorted.map(MD5.md5Directory(docGenScriptsDir)))
-
-  val libDir = mdInstall / "lib"
-  require(libDir.exists, libDir)
-  val libSub = MD5SubDirectory(
-    name = "lib",
-    files = IO
-      .listFiles(libDir, GlobFilter("*.jar"))
-      .sorted.map(MD5.md5File(libDir)))
-
-  val pluginsDir = mdInstall / "plugins"
-  require(pluginsDir.exists)
-  val pluginsSub = MD5SubDirectory(
-    name = "plugins",
-    dirs = IO
-      .listFiles(pluginsDir, DirectoryFilter)
-      .sorted.map(MD5.md5Directory(pluginsDir)))
-
-  val modelsDir = mdInstall / "modelLibraries"
-  require(modelsDir.exists, libDir)
-  val modelsSub = MD5SubDirectory(
-    name = "modelLibraries",
-    files = IO
-      .listFiles(modelsDir, GlobFilter("*.mdzip") || GlobFilter("*.mdxml"))
-      .sorted.map(MD5.md5File(modelsDir)))
-
-  val profilesDir = mdInstall / "profiles"
-  require(profilesDir.exists, libDir)
-  val profilesSub = MD5SubDirectory(
-    name = "profiles",
-    files = IO
-      .listFiles(profilesDir, GlobFilter("*.mdzip") || GlobFilter("*.mdxml"))
-      .sorted.map(MD5.md5File(profilesDir)))
-
-  val samplesDir = mdInstall / "samples"
-  require(samplesDir.exists, libDir)
-  val samplesSub = MD5SubDirectory(
-    name = "samples",
-    files = IO
-      .listFiles(samplesDir, GlobFilter("*.mdzip") || GlobFilter("*.mdxml"))
-      .sorted.map(MD5.md5File(samplesDir)))
-
-  val all = MD5SubDirectory(
-    name = ".",
-    sub = Seq(binSub, libSub, pluginsSub, modelsSub, profilesSub, scriptsSub, samplesSub))
-
-  new RewriteRule {
-
-    import spray.json._
-    import MD5JsonProtocol._
-
-    override def transform(n: XNode): Seq[XNode] = n match {
-      case <md5></md5> =>
-        <md5>
-          {all.toJson}
-        </md5>
-      case _ =>
-        n
-    }
-  }
-}
-
