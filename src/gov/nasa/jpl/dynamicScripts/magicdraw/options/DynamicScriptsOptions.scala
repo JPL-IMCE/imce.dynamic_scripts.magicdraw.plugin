@@ -56,22 +56,25 @@ import scala.Predef.String
  */
 class DynamicScriptsOptions extends AbstractPropertyOptionsGroup( DynamicScriptsOptions.ID ) {
 
-  override def getName(): String = DynamicScriptsResources.getString( DynamicScriptsOptions.NAME )
+  override def getName: String =
+    DynamicScriptsResources.getString( DynamicScriptsOptions.NAME )
 
   override def setDefaultValues(): Unit = {
-    val p = new DynamicScriptsConfigurationProperty( DynamicScriptsOptions.DYNAMIC_SCRIPT_CONFIGURATION_FILES_ID, null, true )
+    val p = new DynamicScriptsConfigurationProperty(
+      DynamicScriptsOptions.DYNAMIC_SCRIPT_CONFIGURATION_FILES_ID, null, true )
     p.setResourceProvider( DynamicScriptsOptions.PROPERTY_RESOURCE_PROVIDER )
     addProperty( p )
   }
 
-  def getDynamicScriptConfigurationFiles(): List[String] =
+  def getDynamicScriptConfigurationFiles: List[String] =
     MDUML.getPropertyOfOptionsGroup( this, DynamicScriptsOptions.DYNAMIC_SCRIPT_CONFIGURATION_FILES_ID ) match {
       case null              => List()
       case p: StringProperty => DynamicScriptsConfigurationProperty.getDynamicScriptConfigurationFiles( p )
       case _                 => List()
     }
 
-  override def getIcon(): SwingImageIcon = super.getIcon()
+  override def getIcon: SwingImageIcon =
+    super.getIcon
 
 }
 
@@ -88,7 +91,7 @@ object DynamicScriptsOptions {
   val DYNAMIC_SCRIPT_CONFIGURATION_FILES_DESC = "DYNAMIC_SCRIPT_CONFIGURATION_FILES_DESCRIPTION"
 
   def configureEnvironmentOptions(): DynamicScriptsOptions = {
-    val envOptions = Application.getInstance().getEnvironmentOptions()
+    val envOptions = Application.getInstance().getEnvironmentOptions
     val options = new DynamicScriptsOptions()
     envOptions.addGroup( options )
     envOptions.addEnvironmentChangeListener( DynamicScriptsPlugin.getInstance() )
@@ -97,7 +100,8 @@ object DynamicScriptsOptions {
 
   val PROPERTY_RESOURCE_PROVIDER = new PropertyResourceProvider() {
 
-    override def getString( key: String, property: Property ): String = DynamicScriptsResources.getString( key )
+    override def getString( key: String, property: Property ): String =
+      DynamicScriptsResources.getString( key )
 
   }
 }

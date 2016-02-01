@@ -79,7 +79,7 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
     },
 
     addArtifact(
-      Artifact("imce_md18_0_sp5_dynamic-scripts_resource", "zip", "zip"),
+      Artifact("imce_md18_0_sp5_dynamic-scripts", "zip", "zip", Some("resource"), Seq(), None, Map()),
       artifactZipFile),
 
     resourceDirectory in Compile := baseDirectory.value / "resources",
