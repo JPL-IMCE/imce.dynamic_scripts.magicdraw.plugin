@@ -38,19 +38,24 @@
  */
 package gov.nasa.jpl.dynamicScripts.magicdraw.commands
 
+import java.io.File
+import java.io.FilenameFilter
 import java.lang.Throwable
 import java.nio.file.Paths
 
 import com.nomagic.task.RunnableWithProgress
 import com.nomagic.task.ProgressStatus
-import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
-import com.nomagic.magicdraw.core.Application
-import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
-
 import com.nomagic.magicdraw.utils.MDLog
-import scala.util.Try
-import scala.util.Success
+import com.nomagic.magicdraw.core.Application
+
+import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.{MDUML, TraversePath}
+
+import scala.collection.immutable._
+import scala.util.{Success,Try}
 import scala.{Boolean, None, Some, StringContext, Unit}
+import scala.Predef.String
+
 /**
  * @author Nicolas F. Rouquette (JPL)
  */
@@ -58,15 +63,33 @@ class LoadDynamicScriptFilesCommand( refresh: () => Unit ) extends RunnableWithP
 
   override def run( progressStatus: ProgressStatus ): Unit = {
     val p = DynamicScriptsPlugin.getInstance()
-    val files = p.getDynamicScriptsOptions.getDynamicScriptConfigurationFiles()
-    val guiLog = Application.getInstance().getGUILog()
+    val files = p.getDynamicScriptsOptions.getDynamicScriptConfigurationFiles
+    val guiLog = Application.getInstance().getGUILog
     try {
       val installRoot = Paths.get( MDUML.getInstallRoot )
-      val paths = ( for {
+      val configPaths: List[String] = for {
         file <- files
         path = Paths.get( file )
         dsPath = if ( path.isAbsolute ) path else installRoot.resolve( path )
-      } yield dsPath.toFile.getAbsolutePath ).toList
+      } yield dsPath.toFile.getAbsolutePath
+
+      val dsPath = installRoot.resolve("dynamicScripts")
+      val dsRoot = dsPath.toFile
+      val dsFilenameFilter = new FilenameFilter() {
+        override def accept( file: File, name: String ): Boolean =
+          file.isFile && name.toLowerCase.endsWith(".dynamicscripts")
+      }
+
+      val dsPaths: List[String] =
+        if ( dsRoot.exists() && dsRoot.canRead )
+          TraversePath.listFilesRecursively( dsRoot, dsFilenameFilter ).map { file =>
+            dsPath.relativize(file.toPath).toString
+          }
+        else
+          List()
+
+      val paths = (configPaths ::: dsPaths).sorted
+
       val message = p.updateRegistryForConfigurationFiles( paths ) match {
         case None =>
           refresh()

@@ -343,7 +343,7 @@ object ClassLoaderHelper {
         }
 
         case any =>
-          closeSessionIfNeeded
+          closeSessionIfNeeded()
           Success( any )
       }
     }
