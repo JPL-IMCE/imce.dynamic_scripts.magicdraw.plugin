@@ -89,9 +89,6 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
     unmanagedClasspath in Compile <++= unmanagedJars in Compile,
     libraryDependencies ++= Seq(
 
-      "gov.nasa.jpl.cae.magicdraw.packages" % "cae_md18_0_sp5_mdk" % Versions.mdk_package %
-        "compile" artifacts Artifact("cae_md18_0_sp5_mdk", "zip", "zip"),
-
       "gov.nasa.jpl.imce.magicdraw.libraries" %% "imce-magicdraw-library-enhanced_api" % Versions.enhanced_api %
         "compile" withSources(),
 
@@ -99,16 +96,13 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
         "compile" withSources() withJavadoc(),
 
       "gov.nasa.jpl.imce.thirdParty" %% "all-graph-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
-        Artifact("all-graph-libraries", "zip", "zip"),
+        Artifact("all-graph-libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
 
       "gov.nasa.jpl.imce.thirdParty" %% "all-jena-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
-        Artifact("all-jena-libraries", "zip", "zip"),
+        Artifact("all-jena-libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
 
       "gov.nasa.jpl.imce.thirdParty" %% "all-owlapi-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
-        Artifact("all-owlapi-libraries", "zip", "zip"),
-
-      "gov.nasa.jpl.imce.thirdParty" %% "other-scala-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
-        Artifact("other-scala-libraries", "zip", "zip")
+        Artifact("all-owlapi-libraries", "zip", "zip", Some("resource"), Seq(), None, Map())
 
     ),
 

@@ -39,8 +39,11 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.options.resources
 
 import com.nomagic.magicdraw.resources.ResourceManager
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 
-import scala.Predef.String
+import scala.StringContext
+import scala.Predef.{classOf,identity,String}
+import scala.util.control.Exception._
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -49,6 +52,14 @@ object DynamicScriptsResources {
 
   val BUNDLE_NAME = "gov.nasa.jpl.dynamicScripts.magicdraw.options.resources.DynamicScriptsResources"
   
-  def getString(key: String): String = 
-    ResourceManager.getStringFor(key, BUNDLE_NAME, DynamicScriptsResources.getClass().getClassLoader())
+  def getString(key: String): String =
+    catching(classOf[java.util.MissingResourceException])
+    .either( ResourceManager.getStringFor(key, BUNDLE_NAME, DynamicScriptsResources.getClass.getClassLoader) )
+    .fold(
+      (t: java.lang.Throwable) => {
+        MDUML.getMDPluginsLog.error(s"DynamicScriptsResources.getString(key='$key') failed: ${t.getMessage}", t)
+        ""
+      },
+      identity)
+
 }
