@@ -37,10 +37,6 @@ lazy val artifactZipFile = taskKey[File]("Location of the zip artifact file")
 
 lazy val extractArchives = TaskKey[Seq[Attributed[File]]]("extract-archives", "Extracts ZIP files")
 
-lazy val updateInstall = TaskKey[Unit]("update-install", "Update the MD Installation directory")
-
-lazy val md5Install = TaskKey[Unit]("md5-install", "Produce an MD5 report of the MD Installation directory")
-
 lazy val zipInstall = TaskKey[File]("zip-install", "Zip the MD Installation directory")
 
 lazy val buildUTCDate = SettingKey[String]("build-utc-date", "The UDC Date of the build")
@@ -52,7 +48,7 @@ buildUTCDate in Global := {
   formatter.format(new Date)
 }
 
-lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin", file("."))
+lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-magicdraw-plugin", file("."))
   .enablePlugins(IMCEGitPlugin)
   .enablePlugins(IMCEReleasePlugin)
   .settings(IMCEReleasePlugin.libraryReleaseProcessSettings)
@@ -92,17 +88,17 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
       "gov.nasa.jpl.imce.magicdraw.libraries" %% "imce-magicdraw-library-enhanced_api" % Versions.enhanced_api %
         "compile" withSources(),
 
-      "gov.nasa.jpl.imce.secae" %% "jpl-dynamic-scripts-generic-dsl" % Versions.dynamic_scripts_generic_dsl %
+      "gov.nasa.jpl.imce.dynamic_scripts" %% "imce-dynamic_scripts-generic_dsl" % Versions.dynamic_scripts_generic_dsl %
         "compile" withSources() withJavadoc(),
 
-      "gov.nasa.jpl.imce.thirdParty" %% "all-graph-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
-        Artifact("all-graph-libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
+      "gov.nasa.jpl.imce.thirdParty" %% "scala-graph-libraries" % Versions.scala_graph_libraries artifacts
+        Artifact("scala-graph-libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
 
-      "gov.nasa.jpl.imce.thirdParty" %% "all-jena-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
-        Artifact("all-jena-libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
+      "gov.nasa.jpl.imce.thirdParty" %% "jena-libraries" % Versions.jena_libraries artifacts
+        Artifact("jena-libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
 
-      "gov.nasa.jpl.imce.thirdParty" %% "all-owlapi-libraries" % Versions.jpl_mbee_common_scala_libraries artifacts
-        Artifact("all-owlapi-libraries", "zip", "zip", Some("resource"), Seq(), None, Map())
+      "gov.nasa.jpl.imce.thirdParty" %% "owlapi-libraries" % Versions.owlapi_libraries artifacts
+        Artifact("owlapi-libraries", "zip", "zip", Some("resource"), Seq(), None, Map())
 
     ),
 
@@ -123,6 +119,19 @@ lazy val jpl_dynamicScripts_magicDraw_plugin = Project("dynamic-scripts-plugin",
             s.log.info(
               s"=> created md.install.dir=$mdInstallDir with ${files.size} " +
                 s"files extracted from zip: ${zip.getName}")
+          }
+
+          val lfilter: DependencyFilter = new DependencyFilter {
+            def apply(c: String, m: ModuleID, a: Artifact): Boolean = {
+              a.`type` == "zip" && a.extension == "zip" && a.name != "cae_md18_0_sp5_mdk"
+            }
+          }
+          val ls: Seq[File] = up.matching(lfilter)
+          ls.foreach {
+            case zip if !zs.contains(zip) =>
+              s.log.info(s"=> zip library: ${zip.getName}")
+            case _ =>
+              ()
           }
 
           val mdBinFolder = mdInstallDir / "bin"
