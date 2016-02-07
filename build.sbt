@@ -410,7 +410,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
                |IMCE_CLASSPATH_PREFIX="$classpathPrefix"
                |
                |cat $$MD_ORIG_PROPERTIES \\
-               | | sed -e "s|$configPattern|$configReplace|" \\
+               | | sed -e "s!$configPattern!$configReplace!" \\
                | | sed -e "s|^JAVA_ARGS=|JAVA_ARGS=$${IMCE_JAVA_ARGS_PREFIX} |" \\
                | | sed -e "s|BOOT_CLASSPATH=|BOOT_CLASSPATH=$${IMCE_BOOT_CLASSPATH_PREFIX}|" \\
                | | sed -e "s|^CLASSPATH=|CLASSPATH=$${IMCE_CLASSPATH_PREFIX}|" \\

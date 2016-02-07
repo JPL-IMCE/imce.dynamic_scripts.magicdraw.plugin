@@ -14,28 +14,31 @@ The IMCE Dynamic Scripts plugin is compatible with any edition of MagicDraw 18, 
 
 4) In the "Resource/Plugin Manager" dialog:
 
-   4.1) For an update, select the previously installed version and click "Remove"
+   4.1) Click the "Import" button at the bottom
 
-   4.2) For an installation or an update, click the "Import" button at the bottom
+   4.2) In the file chooser dialog, select the IMCE Dynamic Scripts resource zip downloaded from (1)
 
-   4.3) In the file chooser dialog, select the IMCE Dynamic Scripts resource zip downloaded from (1)
+5) MagicDraw will show a dialog indicating the actions that will be performed after restart:
 
-5) Upon successful installation, MagicDraw will show a dialog that the Dynamic Scripts plugin
-   will be enabled after restarting MagicDraw
+  - Uninstall the previous version (if applicable)
 
-6) Setup MagicDraw.imce
+  - Install the downloaded version
 
-  6.1) For Linux, MacOSX & Windows with [cygwin](http://cygwin.com)
+6) Restart MagicDraw & Quit
 
-   6.1.1) Open a linux, mac or cygwin terminal shell in MagicDraw's installation folder
+7) Setup MagicDraw.imce
 
-   6.1.2) Execute `chmod 755 bin/magicdraw.imce`
+  7.1) For Linux, MacOSX & Windows with [cygwin](http://cygwin.com)
 
-   6.1.3) For Windows/cygwin, execute `chmod 755 bin/magicdraw.imce.exe`
+   7.1.1) Open a linux, mac or cygwin terminal shell in MagicDraw's installation folder
 
-   6.1.4) Execute `chmod 755 bin/magicdraw.imce.setup.sh`
+   7.1.2) Execute `chmod 755 bin/magicdraw.imce`
 
-   6.1.5) Execute `bin/magicdraw.imce.setup.sh`
+   7.1.3) For Windows/cygwin, execute `chmod 755 bin/magicdraw.imce.exe`
+
+   7.1.4) Execute `chmod 755 bin/magicdraw.imce.setup.sh`
+
+   7.1.5) Execute `bin/magicdraw.imce.setup.sh`
 
    This setup script uses the current contents of `bin/magicdraw.properties` to
    overwrite the file `bin/magicdraw.imce.properties` such that:
@@ -48,25 +51,25 @@ The IMCE Dynamic Scripts plugin is compatible with any edition of MagicDraw 18, 
    - On MacOSX, `MagicDraw.app` starts MagicDraw the configuration specified in `bin/magicdraw.properties`
      (Note: There is no `MagicDraw.imce.app` per se.)
 
-  6.2) For Windows systems without [cygwin](http://cygwin.com)
+  7.2) For Windows systems without [cygwin](http://cygwin.com)
 
-   6.2.1) Manually copy `bin/magicdraw.properties` from MagicDraw's installation folder to `bin/magicdraw.imce.properties`
+   7.2.1) Manually copy `bin/magicdraw.properties` from MagicDraw's installation folder to `bin/magicdraw.imce.properties`
 
-   6.2.2) Manually edit `bin/magicdraw.imce.properties` according to the `bin/magicdraw.imce.setup.sh` script:
+   7.2.2) Manually edit `bin/magicdraw.imce.properties` according to the `bin/magicdraw.imce.setup.sh` script:
 
-   6.2.3) Replace `-D.local.config.dir.ext\=...` with `-Dlocal.config.dir.ext\=$IMCE_CONFIG_DIR`
+   7.2.3) Replace `-D.local.config.dir.ext\=...` with `-Dlocal.config.dir.ext\=$IMCE_CONFIG_DIR`
         (see the setup script for the value of `$IMCE_CONFIG_DIR`)
 
-   6.2.4) Prepend `$IMCE_JAVA_ARGS_PREFIX` to the `JAVA_ARGS` variable
+   7.2.4) Prepend `$IMCE_JAVA_ARGS_PREFIX` to the `JAVA_ARGS` variable
         (see the setup script for the value of `$IMCE_JAVA_ARGS_PREFIX`)
 
-   6.2.5) Prepend `$IMCE_BOOT_CLASSPATH_PREFIX` to the `BOOT_CLASSPATH` variable
+   7.2.5) Prepend `$IMCE_BOOT_CLASSPATH_PREFIX` to the `BOOT_CLASSPATH` variable
         (see the setup script for the value of `$IMCE_BOOT_CLASSPATH_PREFIX`)
 
-   6.2.6) Prepend `$IMCE_CLASSPATH_PREFIX` to the `CLASSPATH` variable
+   7.2.6) Prepend `$IMCE_CLASSPATH_PREFIX` to the `CLASSPATH` variable
         (see the setup script for the value of `$IMCE_CLASSPATH_PREFIX`)
 
-   6.2.7) Manually add the executable permission flags to `bin/magicdraw.imce.exe`
+   7.2.7) Manually add the executable permission flags to `bin/magicdraw.imce.exe`
 
 ### 1.2) Removing IMCE Dynamic Scripts
 
