@@ -380,7 +380,9 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           val magicdraw_imce_setup =
             s"""#!/usr/bin/env bash
                |
-               |MD_INSTALL_BIN=$$(pwd -P $$(dirname $$0))
+               |pushd `dirname $$0` > /dev/null
+               |MD_INSTALL_BIN=`pwd -P`
+               |popd > /dev/null
                |MD_INSTALL_DIR=$$(dirname $$MD_INSTALL_BIN)
                |
                |# The original 'bin/magicdraw.properties' file.
