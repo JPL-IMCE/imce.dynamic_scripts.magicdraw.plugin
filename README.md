@@ -1,6 +1,10 @@
 # IMCE Dynamic Scripts plugin for MagicDraw 18
 
-## Installation
+The IMCE Dynamic Scripts plugin is compatible with any edition of MagicDraw 18, including all CAE MagicDraw 18 packages.
+
+## 1) Installation, Update & Removal
+
+### 1.1) Installing or Updating IMCE Dynamic Scripts
 
 1) Download the MagicDraw installable resource zip file
 
@@ -8,44 +12,127 @@
 
 3) Invoke the toolbar menu action: Help | Resource/Plugin Manager
 
-4) In the "Resource/Plugin Manager" dialog, click the "Import" button at the bottom
+4) In the "Resource/Plugin Manager" dialog:
 
-5) In the file chooser dialog, select the IMCE Dynamic Scripts resource zip from (1)
+   4.1) For an update, select the previously installed version and click "Remove"
 
-6) Upon successful installation, MagicDraw will show a dialog that the Dynamic Scripts plugin
+   4.2) For an installation or an update, click the "Import" button at the bottom
+
+   4.3) In the file chooser dialog, select the IMCE Dynamic Scripts resource zip downloaded from (1)
+
+5) Upon successful installation, MagicDraw will show a dialog that the Dynamic Scripts plugin
    will be enabled after restarting MagicDraw
 
-## Starting MagicDraw (CAE configuration without dynamic scripts plugin)
+6) Setup MagicDraw.imce
 
-Start MagicDraw as instructed by CAE.
-The Dynamic Scripts plugin will not be enabled in this configuration.
+  6.1) For Linux, MacOSX & Windows with [cygwin](http://cygwin.com)
 
-## Starting MagicDraw (IMCE configuration with dynamic scripts plugin)
+   6.1.1) Open a linux, mac or cygwin terminal shell in MagicDraw's installation folder
 
-1) Add the executable flags to `bin/magicdraw.imce` and `bin/magicdraw.imce.exe`
+   6.1.2) Execute `chmod 755 bin/magicdraw.imce`
 
-2) Make sure the environment has a `JAVA_HOME` environment variable set for Java8
+   6.1.3) For Windows/cygwin, execute `chmod 755 bin/magicdraw.imce.exe`
 
-3) Execute `bin/magicdraw.imce` (linux, mac) or `bin/magicdraw.imce.exe` (windows)
+   6.1.4) Execute `chmod 755 bin/magicdraw.imce.setup.sh`
 
-The Dynamic Scripts plugin will be enabled in this configuration.
+   6.1.5) Execute `bin/magicdraw.imce.setup.sh`
 
-## Configuring Dynamic Scripts
+   This setup script uses the current contents of `bin/magicdraw.properties` to
+   overwrite the file `bin/magicdraw.imce.properties` such that:
 
-- Start MagicDraw (IMCE configuration)
+   - `bin/magicdraw.imce` starts MagicDraw the configuration specified in `bin/magicdraw.imce.properties`
+   - `bin/magicdraw.imce.exe` starts MagicDraw the configuration specified in `bin/magicdraw.imce.properties`
 
-- Invoke the toolbar menu action: Options | Environment
+   - `bin/magicdraw` starts MagicDraw the configuration specified in `bin/magicdraw.properties`
+   - `bin/magicdraw.exe` starts MagicDraw the configuration specified in `bin/magicdraw.properties`
+   - On MacOSX, `MagicDraw.app` starts MagicDraw the configuration specified in `bin/magicdraw.properties`
+     (Note: There is no `MagicDraw.imce.app` per se.)
 
-- In the "Environment Options" dialog, select the "Dynamic Scripts Options" category in the left pane.
+  6.2) For Windows systems without [cygwin](http://cygwin.com)
 
-- In the "Environment Options" dialog, select the "Dynamic Scripts Configuration Files" entry in the right pane.
+   6.2.1) Manually copy `bin/magicdraw.properties` from MagicDraw's installation folder to `bin/magicdraw.imce.properties`
 
-  Click the "..." button to the right of the entry to open a text editor dialog.
+   6.2.2) Manually edit `bin/magicdraw.imce.properties` according to the `bin/magicdraw.imce.setup.sh` script:
 
-- In the "List of Dynamic Scripts Configuration Files", enter relative paths to "*.dynamicScripts" files
+   6.2.3) Replace `-D.local.config.dir.ext\=...` with `-Dlocal.config.dir.ext\=$IMCE_CONFIG_DIR`
+        (see the setup script for the value of `$IMCE_CONFIG_DIR`)
 
-  The paths must be relative to MagicDraw's installation folder.
-  If necessary, add symbolic links in the MagicDraw installation folder
-  to refer to files/folders outside of it.
+   6.2.4) Prepend `$IMCE_JAVA_ARGS_PREFIX` to the `JAVA_ARGS` variable
+        (see the setup script for the value of `$IMCE_JAVA_ARGS_PREFIX`)
+
+   6.2.5) Prepend `$IMCE_BOOT_CLASSPATH_PREFIX` to the `BOOT_CLASSPATH` variable
+        (see the setup script for the value of `$IMCE_BOOT_CLASSPATH_PREFIX`)
+
+   6.2.6) Prepend `$IMCE_CLASSPATH_PREFIX` to the `CLASSPATH` variable
+        (see the setup script for the value of `$IMCE_CLASSPATH_PREFIX`)
+
+   6.2.7) Manually add the executable permission flags to `bin/magicdraw.imce.exe`
+
+### 1.2) Removing IMCE Dynamic Scripts
+
+1) Start MagicDraw (not the MagicDraw.imce configuration!)
+
+2) Invoke the toolbar menu action: Help | Resource/Plugin Manager
+
+3) In the "Resource/Plugin Manager" dialog, select the "IMCE Dynamic Scripts Plugin"
+
+4) Click Remove
+
+5) Quit and Restart MagicDraw (not the MagicDraw.imce configuration!)
+
+## 2) MagicDraw.imce vs. MagicDraw
+
+Differences are:
+
+2.1) local configuration directory
+
+  `-Dlocal.config.dir.ext` in `bin/magicdraw.imce.properties` vs. `bin/magicdraw.properties`
+
+  Note that MagicDraw uses the local configuration directory for several purposes, including but not limited to:
+
+  - environment options
+
+  - local plugins (in addition to the plugins in the installation folder)
+
+  - local templates (in addition to the templates in the installation folder)
+
+  - local reports (in addition to the reports in the installation folder)
+
+2.2) Boot Classpath
+
+  MagicDraw.imce adds the AspectJ weaver, AspectJ runtime and Scala runtime libraries to enable the so-called
+  [load-time weaving](https://eclipse.org/aspectj/doc/released/devguide/ltw.html) strategy for Aspects specified
+  in Java or Scala.
+
+2.3) Application Classpath
+
+  MagicDraw.imce adds several third-party libraries for AspectJ, Scala, Jena and the OWL API & implementation.
+  Although this adds a minimal overhead to the MagicDraw application startup, the significant advantage is
+  in minimizing the startup of dynamic scripts since these libraries do not have to be loaded at each invocation.
+
+## 3) Configuring Dynamic Scripts
+
+By default, the IMCE Dynamic Script plugin scans the `dynamicScripts` folder in MagicDraw's installation for
+files with the '.dynamicScript' or '.dynamicscript' extension. Such files are interpreted as specifications
+of MagicDraw Dynamic Scripts.
+
+MagicDraw Dynamic Script files outside the `dynamicScripts` folder must be explicitly registered as follows:
+
+3.1) Start MagicDraw (IMCE configuration)
+
+3.2) Invoke the toolbar menu action: Options | Environment
+
+3.3) In the "Environment Options" dialog, select the "Dynamic Scripts Options" category in the left pane.
+
+3.4) In the "Environment Options" dialog, select the "Dynamic Scripts Configuration Files" entry in the right pane.
+
+3.5)  Click the "..." button to the right of the entry to open a text editor dialog.
+
+3.6) In the "List of Dynamic Scripts Configuration Files", enter fully-qualified path
+   to one or more '.dynamicScript' or '.dynamicscript' files.
+
+## 4) MagicDraw Dynamic Scripts Specifications
+
+See [DynamicScripts Generic DSL](https://github.jpl.nasa.gov/imce/imce.dynamic_scripts.generic_dsl/tree/cae_md18_0_sp5)
 
 
