@@ -1,6 +1,6 @@
 object Versions_dynamic_scripts_generic_dsl {
 
   // https://github.jpl.nasa.gov/imce/imce.dynamic_scripts.generic_dsl
-  val version="1.5"
+  val version="1.6"
 
 }
