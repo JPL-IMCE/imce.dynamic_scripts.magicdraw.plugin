@@ -62,12 +62,14 @@ class TraversePath(path: Path, options: Set[FileVisitOption], maxDepth: Int) ext
   override def foreach[U](f: ((Path, BasicFileAttributes)) => U): Unit = {
 
     class Visitor extends SimpleFileVisitor[Path] {
-      override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = try {
-        f(file -> attrs)
-        FileVisitResult.CONTINUE
-      } catch {
-        case _: Throwable => FileVisitResult.TERMINATE
-      }
+      override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult =
+        try {
+          f(file -> attrs)
+          FileVisitResult.CONTINUE
+        } catch {
+          case _: Throwable =>
+            FileVisitResult.TERMINATE
+        }
     }
 
     Files.walkFileTree(path, options, maxDepth, new Visitor)
@@ -87,7 +89,8 @@ object TraversePath {
     traversal.foreach {
       case (p, _) =>
         val f = p.toFile
-        if (filter.accept(f.getParentFile, f.getName)) matchingFiles.add(f)
+        if (filter.accept(f.getParentFile, f.getName))
+          matchingFiles.add(f)
     }
     matchingFiles.toList
   }

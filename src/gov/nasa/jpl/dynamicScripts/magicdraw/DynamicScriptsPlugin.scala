@@ -555,7 +555,7 @@ class DynamicScriptsPlugin
     }
   }
 
-  override def isSupported(): Boolean = true
+  override def isSupported: Boolean = true
 }
 
 object DynamicScriptsPlugin {

@@ -76,6 +76,7 @@ import scala.language.existentials
 import scala.language.implicitConversions
 import scala.language.postfixOps
 import scala.{Any, Array, Boolean, Long, None, Option, Some, StringContext, Unit}
+import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 import scala.Predef.{augmentString, classOf, refArrayOps, require, String}
 
@@ -455,14 +456,17 @@ object ClassLoaderHelper {
   }
 
   val classpathLibEntry = """(?m)<classpathentry.*?\s+?kind="lib".*?\s+?path="(.*?)".*?/>""".r
+  val classpathConEntry = """(?m)<classpathentry.*?\s+?kind="con".*?\s+?path="gov\.nasa\.jpl\.magicdraw\.CLASSPATH_LIB_CONTAINER/(.*?)".*?/>""".r
   val classpathSrcEntry = """(?m)<classpathentry.*?\s+?kind="src".*?\s+?path="/(.*?)".*?/>""".r
   val classpathBinEntry = """(?m)<classpathentry.*?\s+?kind="output".*?\s+?path="(.*?)".*?/>""".r
-  
+
   def resolveProjectPaths( urls: Try[List[URL]], projectName: JName ): Try[List[URL]] =
 
     urls match {
       case Failure( t ) => Failure( t )
       case Success( list ) =>
+
+        val root = MDUML.getApplicationInstallDir
 
         val scriptProjectPathname = getDynamicScriptsRootPath + File.separator + projectName.jname + File.separator
         val ( scriptProjectPath, scriptProjectDir ) = try {
@@ -479,29 +483,43 @@ object ClassLoaderHelper {
 
         val classpathFilepath = scriptProjectPath.resolve( ".classpath" )
         val classpathURLs =
-        if ( Files.isReadable( classpathFilepath ) && Files.isRegularFile( classpathFilepath ) ) {
-          val classpathContent = new String(Files.readAllBytes(classpathFilepath))
-          val libs = classpathLibEntry.findAllMatchIn(classpathContent).map { m =>
-            val libpath = scriptProjectPath.resolve(m.group(1))
-            require(Files.isRegularFile(libpath), s"lib path: $libpath")
-            require(Files.isReadable(libpath), s"lib path: $libpath")
-            libpath.toUri.toURL
-          } toList
-          val bins = classpathBinEntry.findAllMatchIn(classpathContent).flatMap { m =>
-            val binpath = scriptProjectPath.resolve(m.group(1))
-            if (Files.isDirectory(binpath) && Files.isReadable(binpath))
-              Some(binpath.toUri.toURL)
-            else
-              None
-          } toList
-          val srcs = classpathSrcEntry.findAllMatchIn(classpathContent).map { m => JName(m.group(1)) }
-          val resolved0: Try[List[URL]] = Success( bins ++ libs )
-          val resolvedN = ( resolved0 /: srcs ) ( resolveProjectPaths )
-          resolvedN
-        } else Success(Nil)
+        if ( Files.isReadable( classpathFilepath ) && Files.isRegularFile( classpathFilepath ) )
+          nonFatalCatch[Try[List[URL]]]
+            .withApply { (t: java.lang.Throwable) => Failure(t) }
+            .apply({
+              val classpathContent = new String(Files.readAllBytes(classpathFilepath))
+              val cons = classpathConEntry.findAllMatchIn(classpathContent).flatMap { m =>
+                for {
+                  relPath <- m.group(1).split(",")
+                  absPath = root.toPath.resolve(relPath)
+                  absDir = absPath.toFile
+                  if absDir.exists && absDir.isDirectory
+                } yield absDir.toURI.toURL
+              } toList
+              val libs = classpathLibEntry.findAllMatchIn(classpathContent).map { m =>
+                val libpath = scriptProjectPath.resolve(m.group(1))
+                require(Files.isRegularFile(libpath), s"lib path: $libpath")
+                require(Files.isReadable(libpath), s"lib path: $libpath")
+                libpath.toUri.toURL
+              } toList
+              val bins = classpathBinEntry.findAllMatchIn(classpathContent).flatMap { m =>
+                val binpath = scriptProjectPath.resolve(m.group(1))
+                if (Files.isDirectory(binpath) && Files.isReadable(binpath))
+                  Some(binpath.toUri.toURL)
+                else
+                  None
+              } toList
+              val srcs = classpathSrcEntry.findAllMatchIn(classpathContent).map { m => JName(m.group(1)) }
+              val resolved0: Try[List[URL]] = Success(bins ++ libs ++ cons)
+              val resolvedN = (resolved0 /: srcs) (resolveProjectPaths)
+              resolvedN
+            })
+        else
+          Success(Nil)
 
         classpathURLs match {
-          case Failure(t) => Failure(t)
+          case Failure(t) =>
+            Failure(t)
           case Success(resolvedURLs) =>
             val scriptProjectBin = scriptProjectPath.resolve("bin").toFile
             val binURL =
@@ -530,7 +548,8 @@ object ClassLoaderHelper {
 
   def createDynamicScriptClassLoader( s: DynamicScriptInfo, pluginContext: PluginContext ): Try[URLClassLoader] =
     getPluginIfLoadedAndEnabled( pluginContext.pluginID.hname ) match {
-      case None => Failure( DynamicScriptsPluginNotFound( pluginContext.pluginID.hname ) )
+      case None =>
+        Failure( DynamicScriptsPluginNotFound( pluginContext.pluginID.hname ) )
       case Some( p ) =>
         p.getDescriptor match {
           case null                              =>

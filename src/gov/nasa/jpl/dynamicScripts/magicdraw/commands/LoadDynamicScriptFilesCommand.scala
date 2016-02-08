@@ -77,13 +77,14 @@ class LoadDynamicScriptFilesCommand( refresh: () => Unit ) extends RunnableWithP
       val dsRoot = dsPath.toFile
       val dsFilenameFilter = new FilenameFilter() {
         override def accept( file: File, name: String ): Boolean =
-          file.isFile && name.toLowerCase.endsWith(".dynamicscripts")
+          file.isDirectory &&
+            name.toLowerCase.endsWith(".dynamicscripts")
       }
 
       val dsPaths: List[String] =
         if ( dsRoot.exists() && dsRoot.canRead )
           TraversePath.listFilesRecursively( dsRoot, dsFilenameFilter ).map { file =>
-            dsPath.relativize(file.toPath).toString
+            dsPath.resolve(file.toPath).toString
           }
         else
           List()

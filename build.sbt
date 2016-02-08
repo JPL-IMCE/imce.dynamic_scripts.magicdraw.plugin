@@ -331,12 +331,23 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
             } yield relJar).to[Seq]
           }
 
+          val otherJars: Seq[File] = {
+            val oJars = (( root / "lib" / "other-scala" ) * "*.jar").get
+            require(1 < oJars.size)
+            (for {
+              jar <- oJars
+              relJar <- jar.relativeTo(root)
+            } yield relJar).to[Seq]
+          }
 
           val bootJars = Seq(weaverJar, rtJar, scalaLib)
 
           val bootClasspathPrefix = bootJars.mkString("", "\\\\\\\\:", "\\\\\\\\:")
 
-          val classpathPrefix = (aspectjJars ++ scalaJars ++ jars).mkString("", "\\\\\\\\:", "\\\\\\\\:")
+          val classpathPrefix = (aspectjJars.sorted ++
+            scalaJars.sorted ++
+            otherJars.sorted ++
+            jars.sorted).mkString("", "\\\\\\\\:", "\\\\\\\\:")
 
           srcArtifacts.foreach { case (o, _, jar, _) =>
             s.log.info(s"* copying source: $o/${jar.name}")
@@ -403,7 +414,8 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
                |IMCE_JAVA_ARGS_PREFIX="\\
                |-javaagent:$weaverJar \\
                |-Daj.weaving.verbose\\\\\\\\=true \\
-               |-Dorg.aspectj.weaver.showWeaveInfo\\\\\\\\=true"
+               |-Dorg.aspectj.weaver.showWeaveInfo\\\\\\\\=true \\
+               |-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
                |
                |IMCE_BOOT_CLASSPATH_PREFIX="$bootClasspathPrefix"
                |

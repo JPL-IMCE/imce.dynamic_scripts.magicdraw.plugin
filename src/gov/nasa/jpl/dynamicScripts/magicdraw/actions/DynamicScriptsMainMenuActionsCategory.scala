@@ -74,7 +74,12 @@ case class DynamicScriptsMainMenuActionsCategory()
 
   }
 
+  val showAction = ShowDynamicScripts()
+
+  val dsActions = Set( showAction, refreshAction )
+
   setNested( true )
+  addAction( showAction )
   addAction( refreshAction )
 
   override def updateState(): Unit = {}
@@ -88,7 +93,7 @@ case class DynamicScriptsMainMenuActionsCategory()
     val it = getActions.iterator()
     while ( it.hasNext ) {
       val action = it.next()
-      if ( refreshAction != action ) {
+      if ( !dsActions.contains(action) ) {
         removeAction( action )
       }
     }
