@@ -132,10 +132,19 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
     }
   }
 
+  def getRuleRawMessage
+  ( c: Constraint )
+  : Option[String] =
+    getValidationSuiteHelper.getRuleRawMessage(c) match {
+      case null => None
+      case "" => None
+      case s => Some(s)
+    }
+
   def getRuleSeverityLevel
   ( c: Constraint )
-  : EnumerationLiteral =
-    getValidationSuiteHelper.getRuleSeverityLevel(c)
+  : Option[EnumerationLiteral] =
+    Option(getValidationSuiteHelper.getRuleSeverityLevel(c))
 
   def updateValidationResultsWindow
   (title: String,
@@ -370,21 +379,23 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
           s"Failed to find MD's Validation Profile "+
             s"'$validationSuiteQName' & Constraint '$validationConstraintQName'" )
       case Some( ( vSuite, c ) ) =>
-        val runData = new ValidationRunData(
-          vSuite,
-          false,
-          elementMessages.keys,
-          getRuleSeverityLevel( c ) )
-        val results = elementMessages map {
-          case ( element, ( message, actions ) ) =>
-            new RuleViolationResult( new Annotation( element, c, message, actions ), c )
+        getRuleSeverityLevel( c ).fold[MagicDrawValidationDataResultsException](
+          throw new IllegalArgumentException(
+            s"Failed to find MD's Validation Security Level "+
+              s"'$validationSuiteQName' & Constraint '$validationConstraintQName'" )
+        ) { level =>
+          val runData = new ValidationRunData(vSuite, false, elementMessages.keys, level)
+          val results = elementMessages map {
+            case (element, (message, actions)) =>
+              new RuleViolationResult(new Annotation(element, c, message, actions), c)
+          }
+          MagicDrawValidationDataResultsException(
+            MagicDrawValidationDataResults(
+              validationMessage,
+              runData,
+              results,
+              List[RunnableWithProgress]()))
         }
-        MagicDrawValidationDataResultsException(
-          MagicDrawValidationDataResults(
-            validationMessage,
-            runData,
-            results,
-            List[RunnableWithProgress]() ) )
     }
 }
 
