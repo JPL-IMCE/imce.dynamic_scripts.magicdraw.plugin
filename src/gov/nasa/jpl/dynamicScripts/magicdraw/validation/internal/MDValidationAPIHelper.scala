@@ -104,6 +104,9 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
   : EnumerationLiteral =
     getValidationSuiteHelper.getSeverityLevel(severityLevel)
 
+  def isValidationSeverityHigherOrEqual( level1: EnumerationLiteral, level2: EnumerationLiteral ): Boolean =
+    ValidationSuiteHelper.isSeverityHigherOrEqual( level1, level2 )
+
   def lookupValidationSuite
   (suiteQualifiedName: String)
   : Option[Package] =
@@ -409,6 +412,7 @@ object MDValidationAPIHelper {
 
   val mdValidationConstraintQName =
     "UML Standard Profile::Validation Profile::Composition Integrity::Illegal Reference"
+
 
   val SEVERITY_LEVEL_ORDERING = new Ordering[EnumerationLiteral]() {
 

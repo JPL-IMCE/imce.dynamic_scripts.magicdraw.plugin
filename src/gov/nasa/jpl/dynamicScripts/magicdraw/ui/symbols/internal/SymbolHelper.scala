@@ -36,37 +36,25 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.nasa.jpl.dynamicScripts.magicdraw.actions
+package gov.nasa.jpl.dynamicScripts.magicdraw.ui.symbols.internal
 
-import java.awt.event.ActionEvent
-import javax.swing.KeyStroke
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Association
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 
-import com.nomagic.actions.NMAction
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsRegistry
-import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
-import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
+import com.nomagic.magicdraw.uml.symbols.paths.AssociationView
+import com.nomagic.magicdraw.uml.symbols.shapes.PackageView
 
-import scala.Predef.String
-import scala.Unit
+import scala.{deprecated,Option}
 
-case class ShowDynamicScripts()
-  extends NMAction(ShowDynamicScripts.SHOW_ID, ShowDynamicScripts.SHOW_NAME, null.asInstanceOf[KeyStroke] ) {
+@deprecated("", "")
+class SymbolHelper {}
 
-  override def actionPerformed( ev: ActionEvent ): Unit = {
-    val reg: DynamicScriptsRegistry = DynamicScriptsPlugin.getInstance().getDynamicScriptsRegistry
+object SymbolHelper {
 
-    import MDGUILogHelper._
-    val guiLog = getGUILog
-    guiLog.openLog()
-    guiLog.log("See the MD Log for the dump of the Dynamic Scripts registry")
-    guiLog.getMDPluginsLog.info(reg.toString)
+  def getAssociationOfView(av: AssociationView): Option[Association] =
+    Option(av.getAssociation)
 
-  }
-}
-
-object ShowDynamicScripts {
-
-  val SHOW_ID: String = "SHOW_DYNAMIC_SCRIPTS"
-  val SHOW_NAME: String = "Show DynamicScripts..."
+  def getPackageOfView(pv: PackageView): Option[Package] =
+    Option(pv.getPackage)
 
 }

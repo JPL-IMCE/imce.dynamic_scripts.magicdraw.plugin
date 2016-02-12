@@ -151,7 +151,7 @@ class DynamicScriptsPlugin
         registry = r
         import MDGUILogHelper._
         val guiLog = getGUILog
-        val log = guiLog.getMDPluginsLog()
+        val log = guiLog.getMDPluginsLog
 
         log.debug(
           s"${this.getPluginName()} -- updateRegistryForConfigurationFiles: "+
@@ -454,7 +454,7 @@ class DynamicScriptsPlugin
 
     import MDGUILogHelper._
     val guiLog = getGUILog
-    val log = guiLog.getMDPluginsLog()
+    val log = guiLog.getMDPluginsLog
 
     log.info( s"INIT: >> ${this.getClass.getName}" )
     try {
@@ -541,7 +541,7 @@ class DynamicScriptsPlugin
   override def close(): Boolean = {
     import MDGUILogHelper._
     val guiLog = getGUILog
-    val log = guiLog.getMDPluginsLog()
+    val log = guiLog.getMDPluginsLog
 
     log.info( s"CLOSE: >> ${this.getClass.getName}" )
     try {

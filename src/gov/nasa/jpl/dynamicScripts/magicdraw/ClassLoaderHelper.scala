@@ -90,7 +90,7 @@ object ClassLoaderHelper {
   : Unit = {
     import MDGUILogHelper._
     val guiLog = getGUILog
-    val log = guiLog.getMDPluginsLog()
+    val log = guiLog.getMDPluginsLog
 
     log.error( message + t.getMessage, t )
     guiLog.showError( message + t.getMessage, t )
@@ -285,7 +285,7 @@ object ClassLoaderHelper {
   : Try[Any] = {
     import MDGUILogHelper._
     val guiLog = getGUILog
-    val log = guiLog.getMDPluginsLog()
+    val log = guiLog.getMDPluginsLog
 
     val message = cm.s.prettyPrint( "" ) + "\n"
 
@@ -568,7 +568,7 @@ object ClassLoaderHelper {
   : Try[URLClassLoader] = {
     import MDGUILogHelper._
     val guiLog = getGUILog
-    val log = guiLog.getMDPluginsLog()
+    val log = guiLog.getMDPluginsLog
 
     val init: Try[List[URL]] = Success( Nil )
     val projectPaths = projectContext.project +: projectContext.dependencies

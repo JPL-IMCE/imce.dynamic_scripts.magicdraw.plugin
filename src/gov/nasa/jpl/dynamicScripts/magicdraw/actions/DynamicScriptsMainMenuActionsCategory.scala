@@ -87,7 +87,7 @@ case class DynamicScriptsMainMenuActionsCategory()
   override def doRefresh(): Unit = {
     import MDGUILogHelper._
     val guiLog = getGUILog
-    val log = guiLog.getMDPluginsLog()
+    val log = guiLog.getMDPluginsLog
 
     log.info( s"*** DynamicScriptsMainMenuActionsCategory.doRefresh()" )
     val it = getActions.iterator()

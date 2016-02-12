@@ -127,7 +127,7 @@ object DrawPathDiagramActionHelper {
     override def execute( pe: PresentationElement, point: Point ): Boolean = {
       import MDGUILogHelper._
       val guiLog = getGUILog
-      val log = guiLog.getMDPluginsLog()
+      val log = guiLog.getMDPluginsLog
 
       val e = pe.getElement
 

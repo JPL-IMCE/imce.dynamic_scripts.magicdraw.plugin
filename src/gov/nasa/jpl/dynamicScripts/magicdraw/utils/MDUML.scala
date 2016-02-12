@@ -39,12 +39,16 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.utils
 
 import java.io.File
-import java.lang.Runnable
+import java.lang.{Runnable,System}
+import java.nio.file.{Paths, Path}
 import javax.swing.filechooser.FileFilter
 import javax.swing.{JFileChooser, SwingUtilities}
 
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.Project
+import com.nomagic.magicdraw.core.modules.ModulesServiceInternal
+import com.nomagic.magicdraw.core.project.ProjectsManager
+import com.nomagic.magicdraw.core.utils.ChangeElementID
 import com.nomagic.magicdraw.ui.browser.Browser
 import com.nomagic.magicdraw.ui.browser.BrowserTabTree
 import com.nomagic.magicdraw.ui.browser.Node
@@ -52,6 +56,7 @@ import com.nomagic.magicdraw.uml.BaseElement
 import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.magicdraw.utils.MDLog
+import com.nomagic.task.ProgressStatus
 import com.nomagic.uml2.ext.jmi.helpers.ModelHelper
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Classifier
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
@@ -66,7 +71,7 @@ import org.eclipse.emf.common.util.URI
 
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ScopeAccess
 
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.{asScalaBuffer, mapAsJavaMap, asJavaCollection}
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.Iterator
 import scala.collection.immutable._
@@ -87,11 +92,53 @@ case class BrowserTreeSelectionInfo
 @scala.deprecated("", "")
 class MDUML(val p: Project) extends AnyVal {
 
+  def enableResettingIDs(): Boolean = {
+    val mdCounter = p.getCounter
+    val flag = mdCounter.canResetIDForObject
+    mdCounter.setCanResetIDForObject( true )
+    flag
+  }
+
+  def changeElementIDs
+  ( elements: Set[Element],
+    old2newIDMap: Map[String, String],
+    progressStatus: ProgressStatus )
+  : Unit = {
+    ChangeElementID.resetIDS( p, elements, old2newIDMap, progressStatus )
+  }
+
+  def restoreResettingIDs(flag: Boolean): Unit = {
+    val mdCounter = p.getCounter
+    mdCounter.setCanResetIDForObject( flag )
+  }
+
+  def getProjectDirectory: Option[File] =
+    p.getDirectory match {
+      case null =>
+        None
+      case "" =>
+        None
+      case d =>
+        Some(new File(d))
+    }
+
   def getPrimaryProjectID: String =
     p.getPrimaryProject.getProjectID
 
   def getProjectLocationURI: URI =
     p.getPrimaryProject.getLocationURI
+
+  /**
+    * Open the MagicDraw Module wizard prompting the user to mount a local module to the project.
+    *
+    * This internal API facilitates a one-time migration of a local module according to an ID mapping table.
+    * Note that this one-time migration does not involve MagicDraw's "alias.properties" ID-mapping mechanism,
+    * which imposes an overhead for all projects/modules that are opened or saved.
+    *
+    * @return True if the user performed an operation & closed the wizard; false if the user cancelled the wizard
+    */
+  def promptUseLocalModuleWithWizard: Boolean =
+    ModulesServiceInternal.useLocalModuleWithWizard( p.getPrimaryProject )
 
   def getProjectActiveBrowserTabTree: Option[BrowserTabTree] =
     for {
@@ -135,6 +182,20 @@ object MDUML {
       null != p,
       "The MDUML helper must be initialized with a valid MagicDraw project")
     new MDUML(p)
+  }
+
+  def getRecentFilePathOrUserDirectory: Path = {
+    ProjectsManager.getRecentFilePath match {
+      case _@ ( null | "" ) =>
+        System.getProperty( "user.dir" ) match {
+          case _@ ( null | "" ) =>
+            Paths.get(".").toAbsolutePath
+          case d                =>
+            new File(d).toPath
+        }
+      case d =>
+        new File(d).toPath
+    }
   }
 
   def getMDPluginsLog: Logger =

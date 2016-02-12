@@ -75,7 +75,7 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
   override def configure( node: IConfigurableNode, e: Element ): Unit = {
     val guiLog = Application.getInstance.getGUILog
     import MDGUILogHelper._
-    val log = guiLog.getMDPluginsLog()
+    val log = guiLog.getMDPluginsLog
 
     val previousTime = System.currentTimeMillis()
     try {
@@ -183,7 +183,7 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
       case t: Throwable =>
         import MDGUILogHelper._
         val guiLog = getGUILog
-        val log = guiLog.getMDPluginsLog()
+        val log = guiLog.getMDPluginsLog
         log.error(s"Cannot create computed derived feature for '$computedDerivedFeature' because of an error", t)
         None
     }

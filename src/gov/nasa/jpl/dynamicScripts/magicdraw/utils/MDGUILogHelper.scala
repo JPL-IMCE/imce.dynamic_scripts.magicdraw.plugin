@@ -54,7 +54,7 @@ import scala.Predef.{augmentString, refArrayOps, ArrowAssoc, String}
 @scala.deprecated("", "")
 class MDGUILogHelper(val guiLog: GUILog) extends AnyVal {
 
-  def getMDPluginsLog(): Logger = MDLog.getPluginsLog()
+  def getMDPluginsLog: Logger = MDLog.getPluginsLog
 
   /**
     * The format string is expected to have one or more '<A>%s</A>' hyperlink format specifiers

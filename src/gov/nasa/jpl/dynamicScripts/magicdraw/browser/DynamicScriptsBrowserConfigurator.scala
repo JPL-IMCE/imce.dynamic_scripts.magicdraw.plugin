@@ -93,7 +93,7 @@ class DynamicScriptsBrowserConfigurator
 
     import MDGUILogHelper._
     val guiLog = getGUILog
-    val log = guiLog.getMDPluginsLog()
+    val log = guiLog.getMDPluginsLog
     val previousTime = System.currentTimeMillis()
       
     def getSelectedElement
