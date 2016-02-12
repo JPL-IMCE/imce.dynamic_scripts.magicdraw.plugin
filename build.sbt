@@ -37,18 +37,7 @@ cleanFiles <+= baseDirectory { base => base / "imce.md.package" }
 
 lazy val artifactZipFile = taskKey[File]("Location of the zip artifact file")
 
-lazy val extractArchives = TaskKey[Seq[Attributed[File]]]("extract-archives", "Extracts ZIP files")
-
 lazy val zipInstall = TaskKey[File]("zip-install", "Zip the MD Installation directory")
-
-lazy val buildUTCDate = SettingKey[String]("build-utc-date", "The UDC Date of the build")
-
-buildUTCDate in Global := {
-  import java.util.{ Date, TimeZone }
-  val formatter = new java.text.SimpleDateFormat("yyyy-MM-dd-HH:mm")
-  formatter.setTimeZone(TimeZone.getTimeZone("UTC"))
-  formatter.format(new Date)
-}
 
 lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-magicdraw-plugin", file("."))
   .enablePlugins(IMCEGitPlugin)
@@ -109,9 +98,9 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
     ),
 
-    extractArchives <<= (baseDirectory, libraryDependencies, update, streams,
-      mdInstallDirectory in Global, scalaBinaryVersion) map {
-      (base, libs, up, s, mdInstallDir, sbV) =>
+    extractArchives <<= (baseDirectory, update, streams,
+      mdInstallDirectory in ThisBuild) map {
+      (base, up, s, mdInstallDir) =>
 
         if (!mdInstallDir.exists) {
 
@@ -130,27 +119,29 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
           val mdBinFolder = mdInstallDir / "bin"
           require(mdBinFolder.exists, "md bin: $mdBinFolder")
-          val mdPropertiesFiles: Seq[File] = mdBinFolder.listFiles(new java.io.FilenameFilter() {
-            override def accept(dir: File, name: String): Boolean =
-              name.endsWith(".properties")
-          }).to[Seq]
 
         } else {
           s.log.info(
             s"=> use existing md.install.dir=$mdInstallDir")
         }
 
-        val libPath = (mdInstallDir / "lib").toPath
-        val mdJars = for {
-          jar <- Files.walk(libPath).iterator().filter(_.toString.endsWith(".jar")).map(_.toFile)
-        } yield Attributed.blank(jar)
-
-        val jars = ((mdInstallDir / "lib") ** "*.jar").get
-        s.log.info(s"jars: ${jars.size}")
-        mdJars.to[Seq]
     },
 
-    unmanagedJars in Compile <++= extractArchives,
+    unmanagedJars in Compile <++= (baseDirectory, update, streams,
+      mdInstallDirectory in ThisBuild,
+      extractArchives) map {
+      (base, up, s, mdInstallDir, _) =>
+
+        val mdBinFolder = mdInstallDir / "bin"
+        require(mdBinFolder.exists, "md bin: $mdBinFolder")
+
+        val libJars = ((mdInstallDir / "lib") ** "*.jar").get
+        s.log.info(s"jar libraries: ${libJars.size}")
+
+        val mdJars = libJars.map { jar => Attributed.blank(jar) }
+
+        mdJars
+    },
 
     compile <<= (compile in Compile) dependsOn extractArchives,
 
