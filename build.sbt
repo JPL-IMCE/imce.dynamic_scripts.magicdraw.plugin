@@ -58,7 +58,9 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
     projectID := {
       val previous = projectID.value
-      previous.extra("build.date.utc" -> buildUTCDate.value)
+      previous.extra(
+        "build.date.utc" -> buildUTCDate.value,
+        "artifact.kind" -> "magicdraw.resource.plugin")
     },
 
     artifactZipFile := {
