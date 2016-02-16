@@ -64,7 +64,9 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     },
 
     artifactZipFile := {
-      baseDirectory.value / "target" / "imce_md18_0_sp5_dynamic-scripts_resource.zip"
+      baseDirectory.value /
+        "target" /
+        s"imce_md18_0_sp5_dynamic-scripts_resource_${scalaBinaryVersion.value}-${Versions.version}.zip"
     },
 
     addArtifact(
