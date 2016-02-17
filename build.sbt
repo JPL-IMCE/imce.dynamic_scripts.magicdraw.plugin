@@ -44,6 +44,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
   .enablePlugins(IMCEReleasePlugin)
   .settings(IMCEReleasePlugin.libraryReleaseProcessSettings)
   .settings(IMCEPlugin.aspectJSettings)
+  .settings(IMCEPlugin.strictScalacFatalWarningsSettings)
   .settings(
     IMCEKeys.licenseYearOrRange := "2014-2016",
     IMCEKeys.organizationInfo := IMCEPlugin.Organizations.cae,
@@ -523,4 +524,3 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           zip
       }
   )
-  .settings(IMCEPlugin.strictScalacFatalWarningsSettings)
