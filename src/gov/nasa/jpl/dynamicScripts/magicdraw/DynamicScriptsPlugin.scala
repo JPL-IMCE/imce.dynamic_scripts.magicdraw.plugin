@@ -156,6 +156,9 @@ class DynamicScriptsPlugin
         log.debug(
           s"${this.getPluginName()} -- updateRegistryForConfigurationFiles: "+
           s"current dynamic scripts registry:\n$registry" )
+
+        ClassLoaderHelper.clearUnavailableDynamicScriptsExplanationCache()
+
         if ( errors.isEmpty )
           None
         else {
@@ -193,7 +196,8 @@ class DynamicScriptsPlugin
     val meta = e.getClassType.asSubclass( classOf[Element] )
     val metaName = ClassTypes.getShortName( meta )
     MagicDrawElementKindDesignation.METACLASS_2_CLASSIFIER_QUERY.get( meta ) match {
-      case None => Map()
+      case None =>
+        Map()
       case Some( query ) =>
         val scripts = for {
           c <- query( e )
@@ -322,8 +326,10 @@ class DynamicScriptsPlugin
       ( key, scripts ) <- registry.classifierActions
       cScript <- scripts.filter { s: DynamicScriptsForInstancesOfKind =>
         MagicDrawElementKindDesignation.getMagicDrawDesignation( Project.getProject( d ), s.applicableTo ) match {
-          case _: UnresolvedMagicDrawDesignation => false
-          case d: ResolvedMagicDrawDesignation   => d.isResolved
+          case _: UnresolvedMagicDrawDesignation =>
+            false
+          case d: ResolvedMagicDrawDesignation   =>
+            d.isResolved
         }
       }
       availableActions = cScript.scripts filter criteria
@@ -416,14 +422,16 @@ class DynamicScriptsPlugin
 
   def getDynamicScriptIcon( ds: DynamicScriptInfo ): Icon =
     ds.icon match {
-      case None => getJPLCustomLinkIcon
+      case None =>
+        getJPLCustomLinkIcon
       case Some( iconPath ) =>
         try {
           val iconURL = new File( MDUML.getInstallRoot + File.separator + iconPath.path ).toURI.toURL
           new ImageIcon( iconURL )
         }
         catch {
-          case e: MalformedURLException => getJPLCustomLinkIcon
+          case e: MalformedURLException =>
+            getJPLCustomLinkIcon
         }
     }
 
@@ -502,11 +510,8 @@ class DynamicScriptsPlugin
       			
 			EvaluationConfigurator.getInstance
         .registerBinaryImplementers(classOf[DynamicScriptsPlugin].getClassLoader)
-      
-      val dynamicScriptsMainMenuActionsCategory = DynamicScriptsMainMenuActionsCategory()
 
       val manager: ActionsConfiguratorsManager = ActionsConfiguratorsManager.getInstance
-
       manager.addMainMenuConfigurator( new AMConfigurator() {
         override def getPriority: Int = ConfiguratorWithPriority.MEDIUM_PRIORITY
 
@@ -580,8 +585,10 @@ object DynamicScriptsPlugin {
     val diagramDependencyContext =
       for ( dep <- d.getClientDependency; sup <- dep.getSupplier )
         yield sup match {
-          case p: Package => MDUML.getAllImportedPackages(p)
-          case _ => Set[Package]()
+          case p: Package =>
+            MDUML.getAllImportedPackages(p)
+          case _ =>
+            Set[Package]()
         }
 
     ( getInstance().getDynamicScriptsRegistry,

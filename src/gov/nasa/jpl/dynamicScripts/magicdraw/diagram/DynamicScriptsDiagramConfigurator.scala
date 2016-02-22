@@ -202,19 +202,24 @@ class DynamicScriptsDiagramConfigurator
   }
 
   /**
-   * @BUG
-   *
-   * MD Open API problem:
-   * (selected, requestor) seems to be either:
-   * 1: ([requestor], [requestor]) 	-- i.e., only 1 element is selected
-   * 2: ([s1, s2, ...], null)				-- i.e., 2 or more elements are selected but the requestor is null
-   * 3: ([], null)										-- i.e., no selection
-   */
-
-  /**
-   * Workaround for cases 1 and 2:
-   * determine the selected element that triggered MD to configure the diagram context menu
-   */
+    * Configure the DynamicScripts context menu according to the selected diagram symbols (shapes, paths)
+    * and the symbol, if any, on which the context menu is invoked (the requestor).
+    *
+    * The trigger is either:
+    *   - a diagram symbol (possibly that of the diagram if selected) on which the context menu is invoked or
+    *   - none if the context menu is invoked on the diagram and the diagram itself isn't selected
+    *
+    * The selection is the set of all diagram symbols selected when the context menu is invoked.
+    *
+    * Note that the MD Open API does not allow making such distinctions reliably.
+    * In terms of the actual arguments passed from MD, (selected, requestor) seems to be either:
+    * 1: ([requestor], [requestor]) 	-- i.e., only 1 element is selected
+    * 2: ([s1, s2, ...], null)				-- i.e., 2 or more elements are selected but the requestor is null
+    * 3: ([], null)										-- i.e., no selection
+    *
+    * Workaround for cases 1 and 2:
+    * determine the selected element that triggered MD to configure the diagram context menu
+    */
   override def configure
   ( manager: ActionsManager,
     diagram: DiagramPresentationElement,

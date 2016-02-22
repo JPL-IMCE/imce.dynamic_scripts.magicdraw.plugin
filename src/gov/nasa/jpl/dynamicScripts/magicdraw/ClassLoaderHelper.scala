@@ -60,7 +60,8 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.HName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.JName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.PluginContext
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ProjectContext
-import gov.nasa.jpl.dynamicScripts.magicdraw.utils.{TraversePath, MDGUILogHelper, MDUML}
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.{MDGUILogHelper, MDUML, TraversePath}
+import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper._
 
 import java.nio.file.Paths
 import java.nio.file.Files
@@ -413,35 +414,112 @@ object ClassLoaderHelper {
     else
       true
 
-  def isDynamicActionScriptAvailable( ds: DynamicScriptInfo ): Boolean = ds.context match {
-    case c: ProjectContext => isDynamicActionScriptAvailable( ds, c )
-    case c: PluginContext  => isDynamicActionScriptAvailable( ds, c )
+  private val unavailableDynamicScriptsExplanation =
+    new scala.collection.mutable.HashMap[DynamicScriptInfo, Option[String]]()
+
+  def clearUnavailableDynamicScriptsExplanationCache(): Unit = {
+    unavailableDynamicScriptsExplanation.clear()
+  }
+
+  def isDynamicActionScriptAvailable( ds: DynamicScriptInfo ): Boolean = {
+    val previousExplanation
+    : Option[String]
+    = unavailableDynamicScriptsExplanation.getOrElse(ds, Option.empty[String])
+
+    val isAvailable =
+      ds.context match {
+        case c: ProjectContext =>
+          isDynamicActionScriptAvailable(ds, c)
+        case c: PluginContext =>
+          isDynamicActionScriptAvailable(ds, c)
+      }
+
+    if (isAvailable)
+      unavailableDynamicScriptsExplanation.update(ds, Some("OK"))
+
+    val currentExplanation
+    : Option[String]
+    = unavailableDynamicScriptsExplanation.getOrElse(ds, Option.empty[String])
+    require(currentExplanation.isDefined, "Check the logic of isDynamicScriptAvailable(ds, c)")
+
+    val guiLog = getGUILog
+    val log = guiLog.getMDPluginsLog
+
+    (previousExplanation, currentExplanation) match {
+      case (None, Some("OK")) =>
+        ()
+      case (None, Some(explanation)) =>
+        // report the 1st explanation for the unavailability of the dynamic script ds
+        val message = "Unavailable DynamicScript:\n"+ds.prettyPrint("  ")
+        val lines = message.split("\n")
+        lines.foreach { line => guiLog.log(line) }
+        log.warn(message)
+        ()
+      case (Some(explanation1), Some("OK")) =>
+        if (explanation1.compareTo("OK") != 0) {
+          // report the new availability of the dynamic script ds
+          val message = "Available DynamicScript:\n"+ds.prettyPrint("  ")
+          val lines = message.split("\n")
+          lines.foreach { line => guiLog.log(line) }
+          log.info(message)
+        }
+      case (Some(explanation1), Some(explanation2)) =>
+        if (explanation1.compareTo(explanation2) != 0) {
+          // report the updated explanation for the unavailability of the dynamic script ds
+          val message = "Unavailable DynamicScript:\n"+ds.prettyPrint("  ")
+          val lines = message.split("\n")
+          lines.foreach { line => guiLog.log(line) }
+          log.warn(message)
+        }
+      case (_, None) =>
+        // cannot happen.
+    }
+
+    isAvailable
   }
 
   def getPluginIfLoadedAndEnabled( pluginID: String ): Option[Plugin] =
     PluginUtils.getPlugins.toList find { p => p.getDescriptor.getID == pluginID } match {
-      case None => None
+      case None =>
+        None
       case Some( p ) =>
-        if ( p.getDescriptor.isEnabled && p.getDescriptor.isLoaded ) Some( p )
-        else None
+        if ( p.getDescriptor.isEnabled && p.getDescriptor.isLoaded )
+          Some( p )
+        else
+          None
     }
 
-  def isDynamicActionScriptAvailable( ds: DynamicScriptInfo, c: PluginContext ): Boolean =
-    getPluginIfLoadedAndEnabled( c.pluginID.hname ).isDefined
+  def isDynamicActionScriptAvailable( ds: DynamicScriptInfo, c: PluginContext ): Boolean = {
+    val isAvailable = getPluginIfLoadedAndEnabled(c.pluginID.hname).isDefined
+    if (!isAvailable)
+      unavailableDynamicScriptsExplanation.update(
+        ds,
+        Some(s"Missing required plugin: ${c.pluginID.hname}"))
+    isAvailable
+  }
 
   def isDynamicActionScriptAvailable( ds: DynamicScriptInfo, c: ProjectContext ): Boolean = {
     val scriptProjectPath = getDynamicScriptsRootPath + File.separator + c.project.jname + File.separator
     val scriptProjectDir = new File( scriptProjectPath )
 
     c.requiresPlugin match {
-      case None => ()
+      case None =>
+        ()
       case Some( rp: HName ) =>
-        if ( getPluginIfLoadedAndEnabled( rp.hname ).isEmpty )
+        if ( getPluginIfLoadedAndEnabled( rp.hname ).isEmpty ) {
+          unavailableDynamicScriptsExplanation.update(
+            ds,
+            Some(s"Missing required plugin: ${rp.hname}"))
           return false
+        }
     }
 
-    if ( !isFolderAvailable( scriptProjectDir ) )
+    if ( !isFolderAvailable( scriptProjectDir ) ) {
+      unavailableDynamicScriptsExplanation.update(
+        ds,
+        Some(s"Project folder not found: $scriptProjectDir"))
       return false
+    }
 
     val scriptProjectBin = new File( scriptProjectPath + "bin" )
     if ( isFolderAvailable( scriptProjectBin ) )
@@ -452,13 +530,23 @@ object ClassLoaderHelper {
       TraversePath.listFilesRecursively(scriptProjectLib, jarFilenameFilter)
     else
       List()
+
+    if (jars.isEmpty) {
+      unavailableDynamicScriptsExplanation.update(
+        ds,
+        Some(s"Empty classpath in: $scriptProjectPath (./bin and/or ./lib/**.jar"))
+    }
     jars.nonEmpty
   }
 
-  val classpathLibEntry = """(?m)<classpathentry.*?\s+?kind="lib".*?\s+?path="(.*?)".*?/>""".r
-  val classpathConEntry = """(?m)<classpathentry.*?\s+?kind="con".*?\s+?path="gov\.nasa\.jpl\.magicdraw\.CLASSPATH_LIB_CONTAINER/(.*?)".*?/>""".r
-  val classpathSrcEntry = """(?m)<classpathentry.*?\s+?kind="src".*?\s+?path="/(.*?)".*?/>""".r
-  val classpathBinEntry = """(?m)<classpathentry.*?\s+?kind="output".*?\s+?path="(.*?)".*?/>""".r
+  val classpathLibEntry =
+    """(?m)<classpathentry.*?\s+?kind="lib".*?\s+?path="(.*?)".*?/>""".r
+  val classpathConEntry =
+    """(?m)<classpathentry.*?\s+?kind="con".*?\s+?path="gov\.nasa\.jpl\.magicdraw\.CLASSPATH_LIB_CONTAINER/(.*?)".*?/>""".r
+  val classpathSrcEntry =
+    """(?m)<classpathentry.*?\s+?kind="src".*?\s+?path="/(.*?)".*?/>""".r
+  val classpathBinEntry =
+    """(?m)<classpathentry.*?\s+?kind="output".*?\s+?path="(.*?)".*?/>""".r
 
   def resolveProjectPaths( urls: Try[List[URL]], projectName: JName ): Try[List[URL]] =
 

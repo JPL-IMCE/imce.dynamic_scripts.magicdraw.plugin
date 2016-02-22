@@ -27,11 +27,79 @@ developers := List(
     email="nicolas.f.rouquette@jpl.nasa.gov",
     url=url("https://gateway.jpl.nasa.gov/personal/rouquett/default.aspx")))
 
+import scala.io.Source
+import scala.util.control.Exception._
+
+def docSettings(diagrams:Boolean): Seq[Setting[_]] =
+  Seq(
+    sources in (Compile,doc) <<= (git.gitUncommittedChanges, sources in (Compile,compile)) map {
+      (uncommitted, compileSources) =>
+        if (uncommitted)
+          Seq.empty
+        else
+          compileSources
+    },
+
+    sources in (Test,doc) <<= (git.gitUncommittedChanges, sources in (Test,compile)) map {
+      (uncommitted, testSources) =>
+        if (uncommitted)
+          Seq.empty
+        else
+          testSources
+    },
+
+    scalacOptions in (Compile,doc) ++=
+      (if (diagrams)
+        Seq("-diagrams")
+      else
+        Seq()
+        ) ++
+        Seq(
+          "-doc-title", name.value,
+          "-doc-root-content", baseDirectory.value + "/rootdoc.txt"
+        ),
+    autoAPIMappings := ! git.gitUncommittedChanges.value,
+    apiMappings <++=
+      ( git.gitUncommittedChanges,
+        dependencyClasspath in Compile in doc,
+        IMCEKeys.nexusJavadocRepositoryRestAPIURL2RepositoryName,
+        IMCEKeys.pomRepositoryPathRegex,
+        streams ) map { (uncommitted, deps, repoURL2Name, repoPathRegex, s) =>
+        if (uncommitted)
+          Map[File, URL]()
+        else
+          (for {
+            jar <- deps
+            url <- jar.metadata.get(AttributeKey[ModuleID]("moduleId")).flatMap { moduleID =>
+              val urls = for {
+                (repoURL, repoName) <- repoURL2Name
+                (query, match2publishF) = IMCEPlugin.nexusJavadocPOMResolveQueryURLAndPublishURL(
+                  repoURL, repoName, moduleID)
+                url <- nonFatalCatch[Option[URL]]
+                  .withApply { (_: java.lang.Throwable) => None }
+                  .apply({
+                    val conn = query.openConnection.asInstanceOf[java.net.HttpURLConnection]
+                    conn.setRequestMethod("GET")
+                    conn.setDoOutput(true)
+                    repoPathRegex
+                      .findFirstMatchIn(Source.fromInputStream(conn.getInputStream).getLines.mkString)
+                      .map { m =>
+                        val javadocURL = match2publishF(m)
+                        s.log.info(s"Javadoc for: $moduleID")
+                        s.log.info(s"= mapped to: $javadocURL")
+                        javadocURL
+                      }
+                  })
+              } yield url
+              urls.headOption
+            }
+          } yield jar.data -> url).toMap
+      }
+  )
+
 shellPrompt in ThisBuild := { state => Project.extract(state).currentRef.project + "> " }
 
-lazy val mdInstallDirectory = SettingKey[File]("md-install-directory", "MagicDraw Installation Directory")
-
-mdInstallDirectory in Global := baseDirectory.value / "imce.md.package"
+lazy val thisVersion = SettingKey[String]("this-version", "This Module's version")
 
 cleanFiles <+= baseDirectory { base => base / "imce.md.package" }
 
@@ -45,11 +113,14 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
   .settings(IMCEReleasePlugin.libraryReleaseProcessSettings)
   .settings(IMCEPlugin.aspectJSettings)
   .settings(IMCEPlugin.strictScalacFatalWarningsSettings)
+  .settings(docSettings(diagrams=true))
   .settings(
     IMCEKeys.licenseYearOrRange := "2014-2016",
     IMCEKeys.organizationInfo := IMCEPlugin.Organizations.cae,
     IMCEKeys.targetJDK := IMCEKeys.jdk18.value,
     git.baseVersion := Versions.version,
+
+    thisVersion := version.value,
 
     buildInfoPackage := "gov.nasa.jpl.imce.dynamic_scripts.plugin",
     buildInfoKeys ++= Seq[BuildInfoKey](BuildInfoKey.action("buildDateUTC") { buildUTCDate.value }),
@@ -67,18 +138,24 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     artifactZipFile := {
       baseDirectory.value /
         "target" /
-        s"imce_md18_0_sp5_dynamic-scripts_resource_${scalaBinaryVersion.value}-${Versions.version}.zip"
+        s"imce_md18_0_sp5_dynamic-scripts_resource_${scalaBinaryVersion.value}-${version.value}.zip"
     },
 
     addArtifact(
       Artifact("imce_md18_0_sp5_dynamic-scripts", "zip", "zip", Some("resource"), Seq(), None, Map()),
       artifactZipFile),
 
+    IMCEKeys.nexusJavadocRepositoryRestAPIURL2RepositoryName := Map(
+      "https://oss.sonatype.org/service/local" -> "releases",
+      "https://cae-nexuspro.jpl.nasa.gov/nexus/service/local" -> "JPL"),
+    IMCEKeys.pomRepositoryPathRegex := """\<repositoryPath\>\s*([^\"]*)\s*\<\/repositoryPath\>""".r,
+
     resourceDirectory in Compile := baseDirectory.value / "resources",
 
     scalaSource in Compile := baseDirectory.value / "src",
 
     unmanagedClasspath in Compile <++= unmanagedJars in Compile,
+
     libraryDependencies ++= Seq(
 
       "gov.nasa.jpl.imce.magicdraw.libraries" %% "imce-magicdraw-library-enhanced_api"
@@ -103,9 +180,10 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
     ),
 
-    extractArchives <<= (baseDirectory, update, streams,
-      mdInstallDirectory in ThisBuild) map {
-      (base, up, s, mdInstallDir) =>
+    extractArchives <<= (baseDirectory, update, streams) map {
+      (base, up, s) =>
+
+        val mdInstallDir = base / "target" / "imce.md.package"
 
         if (!mdInstallDir.exists) {
 
@@ -132,10 +210,10 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
     },
 
-    unmanagedJars in Compile <++= (baseDirectory, update, streams,
-      mdInstallDirectory in ThisBuild,
-      extractArchives) map {
-      (base, up, s, mdInstallDir, _) =>
+    unmanagedJars in Compile <++= (baseDirectory, update, streams, extractArchives) map {
+      (base, up, s, _) =>
+
+        val mdInstallDir = base / "target" / "imce.md.package"
 
         val mdBinFolder = mdInstallDir / "bin"
         require(mdBinFolder.exists, "md bin: $mdBinFolder")
@@ -153,24 +231,24 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     publish <<= publish dependsOn zipInstall,
     PgpKeys.publishSigned <<= PgpKeys.publishSigned dependsOn zipInstall,
 
-    publishLocal <<= publishLocal dependsOn zipInstall,
+    publishM2 <<= publishM2 dependsOn zipInstall,
     PgpKeys.publishLocalSigned <<= PgpKeys.publishLocalSigned dependsOn zipInstall,
 
     zipInstall <<=
       (baseDirectory, update, streams,
-        mdInstallDirectory in Global,
+        version,
         artifactZipFile,
         packageBin in Compile,
         packageSrc in Compile,
         packageDoc in Compile,
         makePom, buildUTCDate,
-        scalaBinaryVersion
-        ) map {
-        (base, up, s, mdInstallDir, zip, libJar, libSrc, libDoc, pom, d, sbV) =>
+        scalaBinaryVersion) map {
+        (base, up, s, ver, zip, libJar, libSrc, libDoc, pom, d, sbV) =>
 
           import com.typesafe.sbt.packager.universal._
           import java.nio.file.attribute.PosixFilePermission
 
+          val mdInstallDir = base / "target" / "imce.md.package"
           val root = base / "target" / "imce_md18_0_sp5_dynamic-scripts"
           s.log.info(s"\n*** top: $root")
 
@@ -405,7 +483,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
                | exit -1
                |fi
                |
-               |IMCE_CONFIG_DIR="-imce-${Versions.version}"
+               |IMCE_CONFIG_DIR="-imce-$ver"
                |
                |IMCE_JAVA_ARGS_PREFIX="\\
                |-javaagent:$weaverJar \\
@@ -447,7 +525,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           val pluginInfo =
             <plugin id="gov.nasa.jpl.magicdraw.dynamicScripts"
                     name="IMCE Dynamic Scripts Plugin"
-                    version={Versions.version} internalVersion={Versions.version + "0"}
+                    version={ver} internalVersion={ver + "0"}
                     provider-name="JPL"
                     class="gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin">
               <requires>
@@ -482,7 +560,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
                                 name="IMCE Dynamic Scripts Plugin"
                                 product="IMCE Dynamic Scripts Plugin"
                                 restartMagicdraw="false" type="Plugin">
-              <version human={Versions.version} internal={Versions.version} resource={Versions.version + "0"}/>
+              <version human={ver} internal={ver} resource={ver + "0"}/>
               <provider email="nicolas.f.rouquette@jpl.nasa.gov"
                         homePage="https://github.jpl.nasa.gov/imce/jpl-dynamicscripts-magicdraw-plugin"
                         name="IMCE"/>

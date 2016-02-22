@@ -53,13 +53,17 @@ package object magicdraw {
 
     def wildCardMatch( matchHead: Boolean, anyTail: Boolean, cards: List[String], text: String ): Boolean =
       cards match {
-        case Nil => anyTail || text.isEmpty
+        case Nil =>
+          anyTail || text.isEmpty
         case c :: cs =>
           text.indexOf( c ) match {
-            case -1 => false
+            case -1 =>
+              false
             case idx =>
-              if ( matchHead && ( idx > 1 ) ) false
-              else wildCardMatch( false, anyTail, cs, text.substring( idx + c.length ) )
+              if ( matchHead && ( idx > 1 ) )
+                false
+              else
+                wildCardMatch( false, anyTail, cs, text.substring( idx + c.length ) )
           }
       }
 
