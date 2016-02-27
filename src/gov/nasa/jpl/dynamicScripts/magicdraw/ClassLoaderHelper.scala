@@ -511,7 +511,7 @@ object ClassLoaderHelper {
   /**
     * Is a plugin-defined dynamic script action available for invocation?
     *
-    * @TODO use a caching technique based on monitoring changes to the dynamic script's file
+    * @todo use a caching technique based on monitoring changes to the dynamic script's file
     *
     * @param ds A Dynamic Script defined in a plugin
     * @param c The MagicDraw plugin context where ds is implemented
@@ -529,7 +529,7 @@ object ClassLoaderHelper {
   /**
     * Is a project-defined dynamic script action available for invocation?
     *
-    * @TODO use a caching technique based on monitoring changes to the dynamic script's file
+    * @todo use a caching technique based on monitoring changes to the dynamic script's file
     *        and the project context '.classpath'
     *
     * @param ds A Dynamic Script defined in a project
