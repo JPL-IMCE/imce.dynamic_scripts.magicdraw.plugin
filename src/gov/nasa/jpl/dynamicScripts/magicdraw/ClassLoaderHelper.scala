@@ -606,11 +606,11 @@ object ClassLoaderHelper {
     * @param projectName the name of a MagicDraw DynamicScripts project to resolve its classpath URLs
     * @return If the DynamicScript project has an Eclipse '.classpath' use it to determine the project's classpath:
     *         - recursively search for '*.jar' in all .classpath entries of the form:
-    *           <classpathentry kind="lib" path="$project_relative_or_absolute_dir"/>
+    *           <classpathentry kind="lib" path="$$project_relative_or_absolute_dir"/>
     *         - recursively search for '*.jar' in all MD-relative paths in all .classpath entries of the form:
-    *           <classpathentry kind="con" path="gov.nasa.jpl.magicdraw.CLASSPATH_LIB_CONTAINER/{,$md_relative_path}*"/>
+    *           <classpathentry kind="con" path="gov.nasa.jpl.magicdraw.CLASSPATH_LIB_CONTAINER/{,$$md_relative_path}*"/>
     *         - use as '*.class' files directories all entries of the form:
-    *           <classpathentry kind="output" path="$project_relative_dir"/>
+    *           <classpathentry kind="output" path="$$project_relative_dir"/>
     */
   def resolveProjectPaths( urls: Try[Option[URLPaths]], projectName: JName )
   : Try[Some[URLPaths]] =
