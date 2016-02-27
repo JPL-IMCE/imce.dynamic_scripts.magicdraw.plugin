@@ -512,7 +512,6 @@ object ClassLoaderHelper {
     * Is a plugin-defined dynamic script action available for invocation?
     *
     * @todo use a caching technique based on monitoring changes to the dynamic script's file
-    *
     * @param ds A Dynamic Script defined in a plugin
     * @param c The MagicDraw plugin context where ds is implemented
     * @return true if ds can be invoked
@@ -531,7 +530,6 @@ object ClassLoaderHelper {
     *
     * @todo use a caching technique based on monitoring changes to the dynamic script's file
     *        and the project context '.classpath'
-    *
     * @param ds A Dynamic Script defined in a project
     * @param c The MagicDraw DynamicScript project context where ds is implemented
     * @return true if ds can be invoked
@@ -575,12 +573,19 @@ object ClassLoaderHelper {
   val classpathBinEntry =
     """(?m)<classpathentry.*?\s+?kind="output".*?\s+?path="(.*?)".*?/>""".r
 
+  /**
+    * Wrapper for constructing a URL ClassLoader in terms of a set of
+    * - 'bin' directories (*.class files) and
+    * - 'jars' files
+    *
+    * @param bins A set of URLs for 'bin' directories containing '*.class' files
+    * @param jars A set of URLs for '*.jar' files
+    */
   case class URLPaths
   (bins: Set[URL],
    jars: Set[URL]) {
 
-    require(bins.nonEmpty)
-    require(jars.nonEmpty)
+    require(bins.nonEmpty || jars.nonEmpty)
 
     def merge(other: Option[URLPaths]): URLPaths =
       other.fold[URLPaths](this) { that =>
@@ -594,6 +599,19 @@ object ClassLoaderHelper {
       (bins.toList.sortBy(_.toString) ::: jars.toList.sortBy(_.toString)).toArray
   }
 
+  /**
+    * Resolve the classpath URls for a DynamicScript project
+    *
+    * @param urls Optionally, resolved URLs for other projects to be appended to this project's resolved URLs
+    * @param projectName the name of a MagicDraw DynamicScripts project to resolve its classpath URLs
+    * @return If the DynamicScript project has an Eclipse '.classpath' use it to determine the project's classpath:
+    *         - recursively search for '*.jar' in all .classpath entries of the form:
+    *           <classpathentry kind="lib" path="$project_relative_or_absolute_dir"/>
+    *         - recursively search for '*.jar' in all MD-relative paths in all .classpath entries of the form:
+    *           <classpathentry kind="con" path="gov.nasa.jpl.magicdraw.CLASSPATH_LIB_CONTAINER/{,$md_relative_path}*"/>
+    *         - use as '*.class' files directories all entries of the form:
+    *           <classpathentry kind="output" path="$project_relative_dir"/>
+    */
   def resolveProjectPaths( urls: Try[Option[URLPaths]], projectName: JName )
   : Try[Some[URLPaths]] =
 
@@ -660,8 +678,30 @@ object ClassLoaderHelper {
                 Success(Some(URLPaths(bins, allJars).merge(urlPaths)))
 
             })
-        else
-          Failure(DynamicScriptsProjectMissingClasspath(projectName, classpathFilepath))
+        else {
+
+          // no '.classpath', try default paths...
+
+          val scriptProjectBin = scriptProjectPath.resolve("bin").toFile
+          val bins =
+            if (!isFolderAvailable(scriptProjectBin))
+              Set[URL]()
+            else
+              Set[URL](scriptProjectBin.toURI.toURL)
+
+          val scriptProjectLib = scriptProjectPath.resolve("lib").toFile
+          val jars =
+            if (!isFolderAvailable(scriptProjectLib))
+              Set[URL]()
+            else
+              TraversePath.listFilesRecursively(scriptProjectLib, jarFilenameFilter).map(_.toURI.toURL).toSet
+
+          if (bins.isEmpty && jars.isEmpty)
+            Failure(DynamicScriptsProjectMissingClasspath(projectName, classpathFilepath))
+          else
+            Success(Some(URLPaths(bins, jars).merge(urlPaths)))
+
+        }
 
         classpathURLs
     }
