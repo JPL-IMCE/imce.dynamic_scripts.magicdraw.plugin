@@ -43,7 +43,7 @@ import java.io.File
 import java.io.FilenameFilter
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
-import java.lang.{Class, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, Object}
+import java.lang.{Class, ClassLoader, ClassNotFoundException, IllegalAccessException, IllegalArgumentException, Object}
 import java.lang.{NoClassDefFoundError, NoSuchMethodException, RuntimeException}
 import java.lang.{SecurityException, System, Throwable}
 import java.net.URL
@@ -54,7 +54,6 @@ import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.openapi.uml.SessionManager
 import com.nomagic.magicdraw.plugins.Plugin
 import com.nomagic.magicdraw.plugins.PluginUtils
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicScriptInfo
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.HName
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.JName
@@ -62,10 +61,8 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.PluginContext
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ProjectContext
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.{MDGUILogHelper, MDUML, TraversePath}
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper._
-
 import java.nio.file.Paths
-import java.nio.file.Files
-
+import java.nio.file.{Files, Path}
 import java.nio.charset.spi.CharsetProvider
 import java.nio.charset.StandardCharsets
 
@@ -79,7 +76,7 @@ import scala.language.postfixOps
 import scala.{Any, Array, Boolean, Long, None, Option, Some, StringContext, Unit}
 import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
-import scala.Predef.{augmentString, classOf, refArrayOps, require, String}
+import scala.Predef.{String, augmentString, classOf, refArrayOps, require}
 
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
@@ -152,20 +149,33 @@ object ClassLoaderHelper {
   sealed abstract class ClassLoaderException( error: String, t: Throwable )
     extends RuntimeException( error, t ) {}
 
-  case class DynamicScriptsProjectNotFound( projectName: String, projectPath: File )
-    extends ClassLoaderError( s"DynamicScripts project '$projectName' not found (expected: $projectPath)" ) {}
+  case class DynamicScriptsProjectAccessException( projectName: JName, t: Throwable )
+    extends ClassLoaderException(
+      s"DynamicScripts project '$projectName' access exception: ${t.getMessage}", t ) {}
 
-  case class DynamicScriptsProjectIncomplete( projectName: String )
-    extends ClassLoaderError( s"DynamicScripts project '$projectName' does not resolve to any loadable URLs" ) {}
+  case class DynamicScriptsProjectNotFound( projectName: JName, projectPath: File )
+    extends ClassLoaderError(
+      s"DynamicScripts project '$projectName' not found (expected: $projectPath)" ) {}
+
+  case class DynamicScriptsProjectMissingClasspath( projectName: JName, classpathFile: Path )
+    extends ClassLoaderError(
+      s"DynamicScripts project '$projectName' is missing '.classpath' file (expected: $classpathFile)" ) {}
+
+  case class DynamicScriptsProjectEmptyClasspath( projectName: JName, classpathFile: Path )
+    extends ClassLoaderError(
+      s"DynamicScripts project '$projectName' .classpath yields no jars!, check: $classpathFile" ) {}
 
   case class DynamicScriptsPluginNotFound( pluginName: String )
-    extends ClassLoaderError( s"DynamicScripts plugin '$pluginName' not found" ) {}
+    extends ClassLoaderError(
+      s"DynamicScripts plugin '$pluginName' not found" ) {}
 
   case class DynamicScriptsPluginNotEnabled( pluginName: String )
-    extends ClassLoaderError( s"DynamicScripts plugin '$pluginName' not enabled" ) {}
+    extends ClassLoaderError(
+      s"DynamicScripts plugin '$pluginName' not enabled" ) {}
 
   case class DynamicScriptsPluginNotLoaded( pluginName: String )
-    extends ClassLoaderError( s"DynamicScripts plugin '$pluginName' not loaded" ) {}
+    extends ClassLoaderError(
+      s"DynamicScripts plugin '$pluginName' not loaded" ) {}
 
   case class DynamicScriptsClassNotFound( message: String )
     extends ClassLoaderError( message ) {}
@@ -450,7 +460,8 @@ object ClassLoaderHelper {
         ()
       case (None, Some(explanation)) =>
         // report the 1st explanation for the unavailability of the dynamic script ds
-        val message = "Unavailable DynamicScript:\n"+ds.prettyPrint("  ")
+        val message =
+          s"Unavailable DynamicScript report: $explanation\n"+ds.prettyPrint("  ")
         val lines = message.split("\n")
         lines.foreach { line => guiLog.log(line) }
         log.warn(message)
@@ -458,7 +469,8 @@ object ClassLoaderHelper {
       case (Some(explanation1), Some("OK")) =>
         if (explanation1.compareTo("OK") != 0) {
           // report the new availability of the dynamic script ds
-          val message = "Available DynamicScript:\n"+ds.prettyPrint("  ")
+          val message =
+            s"Available DynamicScript change:\n(previously unavailable because: $explanation1)\n"+ds.prettyPrint("  ")
           val lines = message.split("\n")
           lines.foreach { line => guiLog.log(line) }
           log.info(message)
@@ -466,7 +478,8 @@ object ClassLoaderHelper {
       case (Some(explanation1), Some(explanation2)) =>
         if (explanation1.compareTo(explanation2) != 0) {
           // report the updated explanation for the unavailability of the dynamic script ds
-          val message = "Unavailable DynamicScript:\n"+ds.prettyPrint("  ")
+          val message =
+            s"Unavailable DynamicScript update: $explanation2\n"+ds.prettyPrint("  ")
           val lines = message.split("\n")
           lines.foreach { line => guiLog.log(line) }
           log.warn(message)
@@ -548,11 +561,31 @@ object ClassLoaderHelper {
   val classpathBinEntry =
     """(?m)<classpathentry.*?\s+?kind="output".*?\s+?path="(.*?)".*?/>""".r
 
-  def resolveProjectPaths( urls: Try[List[URL]], projectName: JName ): Try[List[URL]] =
+  case class URLPaths
+  (bins: Set[URL],
+   jars: Set[URL]) {
+
+    require(bins.nonEmpty)
+    require(jars.nonEmpty)
+
+    def merge(other: Option[URLPaths]): URLPaths =
+      other.fold[URLPaths](this) { that =>
+        URLPaths(bins ++ that.bins, jars ++ that.jars)
+      }
+
+    def toURLClassLoader(parent: ClassLoader): URLClassLoader =
+      new URLClassLoader(classpath, parent)
+
+    lazy val classpath: Array[URL] =
+      (bins.toList.sortBy(_.toString) ::: jars.toList.sortBy(_.toString)).toArray
+  }
+
+  def resolveProjectPaths( urls: Try[Option[URLPaths]], projectName: JName )
+  : Try[Some[URLPaths]] =
 
     urls match {
       case Failure( t ) => Failure( t )
-      case Success( list ) =>
+      case Success( urlPaths ) =>
 
         val root = MDUML.getApplicationInstallDir
 
@@ -563,75 +596,60 @@ object ClassLoaderHelper {
           ( path, dir )
         } catch {
           case t: Throwable =>
-            return Failure( t )
+            return  Failure( DynamicScriptsProjectAccessException( projectName, t ) )
         }
 
         if ( !isFolderAvailable( scriptProjectDir ) )
-          return Failure( DynamicScriptsProjectNotFound( projectName.jname, scriptProjectDir ) )
+          return Failure( DynamicScriptsProjectNotFound( projectName, scriptProjectDir ) )
 
         val classpathFilepath = scriptProjectPath.resolve( ".classpath" )
-        val classpathURLs =
-        if ( Files.isReadable( classpathFilepath ) && Files.isRegularFile( classpathFilepath ) )
-          nonFatalCatch[Try[List[URL]]]
+
+        val classpathURLs
+        : Try[Some[URLPaths]]
+        = if ( Files.isReadable( classpathFilepath ) && Files.isRegularFile( classpathFilepath ) )
+          nonFatalCatch[Try[Some[URLPaths]]]
             .withApply { (t: java.lang.Throwable) => Failure(t) }
             .apply({
               val classpathContent = new String(Files.readAllBytes(classpathFilepath))
+
               val cons = classpathConEntry.findAllMatchIn(classpathContent).flatMap { m =>
                 for {
                   relPath <- m.group(1).split(",")
                   absPath = root.toPath.resolve(relPath)
                   absDir = absPath.toFile
                   if absDir.exists && absDir.isDirectory
-                } yield absDir.toURI.toURL
-              } toList
-              val libs = classpathLibEntry.findAllMatchIn(classpathContent).map { m =>
-                val libpath = scriptProjectPath.resolve(m.group(1))
-                require(Files.isRegularFile(libpath), s"lib path: $libpath")
-                require(Files.isReadable(libpath), s"lib path: $libpath")
-                libpath.toUri.toURL
-              } toList
+                  jarFile <- TraversePath.listFilesRecursively(absDir, jarFilenameFilter)
+                  jarURL = jarFile.toURI.toURL
+                } yield jarURL
+              } toSet
+
+              val jars = classpathLibEntry.findAllMatchIn(classpathContent).map { m =>
+                val jarpath = scriptProjectPath.resolve(m.group(1))
+                require(Files.isRegularFile(jarpath), s"jar path: $jarpath")
+                require(Files.isReadable(jarpath), s"jar path: $jarpath")
+                jarpath.toUri.toURL
+              } toSet
+
               val bins = classpathBinEntry.findAllMatchIn(classpathContent).flatMap { m =>
                 val binpath = scriptProjectPath.resolve(m.group(1))
                 if (Files.isDirectory(binpath) && Files.isReadable(binpath))
                   Some(binpath.toUri.toURL)
                 else
                   None
-              } toList
-              val srcs = classpathSrcEntry.findAllMatchIn(classpathContent).map { m => JName(m.group(1)) }
-              val resolved0: Try[List[URL]] = Success(bins ++ libs ++ cons)
-              val resolvedN = (resolved0 /: srcs) (resolveProjectPaths)
-              resolvedN
+              } toSet
+
+              val allJars = jars ++ cons
+
+              if (bins.isEmpty && allJars.isEmpty)
+                Failure( DynamicScriptsProjectEmptyClasspath( projectName, classpathFilepath ) )
+              else
+                Success(Some(URLPaths(bins, allJars).merge(urlPaths)))
+
             })
         else
-          Success(Nil)
+          Failure(DynamicScriptsProjectMissingClasspath(projectName, classpathFilepath))
 
-        classpathURLs match {
-          case Failure(t) =>
-            Failure(t)
-          case Success(resolvedURLs) =>
-            val scriptProjectBin = scriptProjectPath.resolve("bin").toFile
-            val binURL =
-              if (!isFolderAvailable(scriptProjectBin))
-                List()
-              else
-                List(scriptProjectBin.toURI.toURL)
-
-            val scriptProjectLib = scriptProjectPath.resolve("lib").toFile
-            val jars =
-              if (!isFolderAvailable(scriptProjectLib))
-                List()
-              else
-                TraversePath.listFilesRecursively(scriptProjectLib, jarFilenameFilter) map (_.toURI.toURL)
-
-            val combinedList = (list /: (resolvedURLs ::: binURL ::: jars)) { case (us, u) =>
-              if (us.contains(u)) us else us :+ u
-            }
-
-            if (combinedList.isEmpty)
-              Failure(DynamicScriptsProjectNotFound(projectName.jname, scriptProjectDir))
-            else
-              Success(combinedList)
-        }
+        classpathURLs
     }
 
   def createDynamicScriptClassLoader( s: DynamicScriptInfo, pluginContext: PluginContext ): Try[URLClassLoader] =
@@ -658,9 +676,8 @@ object ClassLoaderHelper {
     val guiLog = getGUILog
     val log = guiLog.getMDPluginsLog
 
-    val init: Try[List[URL]] = Success( Nil )
-    val projectPaths = projectContext.project +: projectContext.dependencies
-    val last: Try[List[URL]] = ( init /: projectPaths )( resolveProjectPaths )
+    val init: Try[Some[URLPaths]] = resolveProjectPaths(Success(None), projectContext.project)
+    val last: Try[Some[URLPaths]] = ( init /: projectContext.dependencies )( resolveProjectPaths )
 
     val parentClassLoader = projectContext.requiresPlugin match {
       case None =>
@@ -677,13 +694,12 @@ object ClassLoaderHelper {
     last match {
       case Failure( t )   =>
         Failure( t )
-      case Success( Nil ) =>
-        Failure( DynamicScriptsProjectIncomplete( projectContext.prettyPrint( " " ) ) )
-      case Success( urls ) =>
+      case Success( Some( urlPaths ) ) =>
         log.info(
-          s"gov.nasa.jpl.dynamicScripts.magicdraw - ${urls.size} URLs for ClassLoader for: "+
-          s"$s${urls.mkString( "\n => ", "\n => ", "" )}" )
-        Success( new URLClassLoader( urls.toArray, parentClassLoader ) )
+          s"gov.nasa.jpl.dynamicScripts.magicdraw - " +
+          s"ClassLoader with ${urlPaths.classpath.size} URLs: "+
+          s"$s${urlPaths.classpath.mkString( "\n => ", "\n => ", "\n" )}" )
+        Success( urlPaths.toURLClassLoader(parentClassLoader) )
     }
   }
 
