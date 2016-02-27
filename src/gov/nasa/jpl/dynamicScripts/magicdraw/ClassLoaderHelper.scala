@@ -431,6 +431,12 @@ object ClassLoaderHelper {
     unavailableDynamicScriptsExplanation.clear()
   }
 
+  /**
+    * Is a plugin or project defined dynamic script action available for invocation?
+    *
+    * @param ds A plugin or project defined DynamicScript
+    * @return true if ds can be invoked
+    */
   def isDynamicActionScriptAvailable( ds: DynamicScriptInfo ): Boolean = {
     val previousExplanation
     : Option[String]
@@ -502,6 +508,15 @@ object ClassLoaderHelper {
           None
     }
 
+  /**
+    * Is a plugin-defined dynamic script action available for invocation?
+    *
+    * @TODO use a caching technique based on monitoring changes to the dynamic script's file
+    *
+    * @param ds A Dynamic Script defined in a plugin
+    * @param c The MagicDraw plugin context where ds is implemented
+    * @return true if ds can be invoked
+    */
   def isDynamicActionScriptAvailable( ds: DynamicScriptInfo, c: PluginContext ): Boolean = {
     val isAvailable = getPluginIfLoadedAndEnabled(c.pluginID.hname).isDefined
     if (!isAvailable)
@@ -511,6 +526,16 @@ object ClassLoaderHelper {
     isAvailable
   }
 
+  /**
+    * Is a project-defined dynamic script action available for invocation?
+    *
+    * @TODO use a caching technique based on monitoring changes to the dynamic script's file
+    *        and the project context '.classpath'
+    *
+    * @param ds A Dynamic Script defined in a project
+    * @param c The MagicDraw DynamicScript project context where ds is implemented
+    * @return true if ds can be invoked
+    */
   def isDynamicActionScriptAvailable( ds: DynamicScriptInfo, c: ProjectContext ): Boolean = {
     val scriptProjectPath = getDynamicScriptsRootPath + File.separator + c.project.jname + File.separator
     val scriptProjectDir = new File( scriptProjectPath )
@@ -534,7 +559,7 @@ object ClassLoaderHelper {
       case Failure( t ) =>
         unavailableDynamicScriptsExplanation.update(
           ds,
-          Some(t.getMessage)
+          Some(t.getMessage))
         false
       case Success(_) =>
         true
