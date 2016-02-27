@@ -527,29 +527,18 @@ object ClassLoaderHelper {
         }
     }
 
-    if ( !isFolderAvailable( scriptProjectDir ) ) {
-      unavailableDynamicScriptsExplanation.update(
-        ds,
-        Some(s"Project folder not found: $scriptProjectDir"))
-      return false
+    val init: Try[Some[URLPaths]] = resolveProjectPaths(Success(None), c.project)
+    val last: Try[Some[URLPaths]] = ( init /: c.dependencies )( resolveProjectPaths )
+
+    last match {
+      case Failure( t ) =>
+        unavailableDynamicScriptsExplanation.update(
+          ds,
+          Some(t.getMessage)
+        false
+      case Success(_) =>
+        true
     }
-
-    val scriptProjectBin = new File( scriptProjectPath + "bin" )
-    if ( isFolderAvailable( scriptProjectBin ) )
-      return true
-
-    val scriptProjectLib = new File( scriptProjectPath + "lib" )
-    val jars = if ( isFolderAvailable( scriptProjectLib ) )
-      TraversePath.listFilesRecursively(scriptProjectLib, jarFilenameFilter)
-    else
-      List()
-
-    if (jars.isEmpty) {
-      unavailableDynamicScriptsExplanation.update(
-        ds,
-        Some(s"Empty classpath in: $scriptProjectPath (./bin and/or ./lib/**.jar"))
-    }
-    jars.nonEmpty
   }
 
   val classpathLibEntry =
