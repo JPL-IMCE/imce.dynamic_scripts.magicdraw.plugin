@@ -61,6 +61,8 @@ import scala.Predef.String
  */
 class LoadDynamicScriptFilesCommand( refresh: () => Unit ) extends RunnableWithProgress {
 
+  val exclude_dynamicScripts_parent_folder_names: Set[String] = Set("bin", "classes")
+
   override def run( progressStatus: ProgressStatus ): Unit = {
     val p = DynamicScriptsPlugin.getInstance()
     val files = p.getDynamicScriptsOptions.getDynamicScriptConfigurationFiles
@@ -78,6 +80,7 @@ class LoadDynamicScriptFilesCommand( refresh: () => Unit ) extends RunnableWithP
       val dsFilenameFilter = new FilenameFilter() {
         override def accept( file: File, name: String ): Boolean =
           file.isDirectory &&
+            !exclude_dynamicScripts_parent_folder_names.contains(file.getName) &&
             name.toLowerCase.endsWith(".dynamicscripts")
       }
 
