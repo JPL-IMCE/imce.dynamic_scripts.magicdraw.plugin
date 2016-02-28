@@ -530,6 +530,20 @@ object ClassLoaderHelper {
     *
     * @todo use a caching technique based on monitoring changes to the dynamic script's file
     *        and the project context '.classpath'
+    *
+    *        It is too expensive to resolve the project's classpath:
+    *        {{{
+    *          val init: Try[Some[URLPaths]] = resolveProjectPaths(Success(None), c.project)
+    *          val last: Try[Some[URLPaths]] = ( init /: c.dependencies )( resolveProjectPaths )
+    *          last match {
+    *            case Failure( t ) =>
+    *              unavailableDynamicScriptsExplanation.update(ds, Some(t.getMessage))
+    *              false
+    *            case Success( _ ) =>
+    *              true
+    *          }
+    *        }}}
+    *
     * @param ds A Dynamic Script defined in a project
     * @param c The MagicDraw DynamicScript project context where ds is implemented
     * @return true if ds can be invoked
@@ -540,27 +554,15 @@ object ClassLoaderHelper {
 
     c.requiresPlugin match {
       case None =>
-        ()
+        true
       case Some( rp: HName ) =>
         if ( getPluginIfLoadedAndEnabled( rp.hname ).isEmpty ) {
           unavailableDynamicScriptsExplanation.update(
             ds,
             Some(s"Missing required plugin: ${rp.hname}"))
-          return false
-        }
-    }
-
-    val init: Try[Some[URLPaths]] = resolveProjectPaths(Success(None), c.project)
-    val last: Try[Some[URLPaths]] = ( init /: c.dependencies )( resolveProjectPaths )
-
-    last match {
-      case Failure( t ) =>
-        unavailableDynamicScriptsExplanation.update(
-          ds,
-          Some(t.getMessage))
-        false
-      case Success(_) =>
-        true
+          false
+        } else
+          true
     }
   }
 
