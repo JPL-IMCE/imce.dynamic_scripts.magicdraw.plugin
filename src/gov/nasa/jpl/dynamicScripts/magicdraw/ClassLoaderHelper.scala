@@ -625,7 +625,7 @@ object ClassLoaderHelper {
         val scriptProjectPathname = getDynamicScriptsRootPath + File.separator + projectName.jname + File.separator
         val ( scriptProjectLogicalPath, scriptProjectRealPath, scriptProjectRealDir ) = try {
           val lpath = Paths.get( new File( scriptProjectPathname ).toURI )
-          val rpath = lpath.toRealPath()
+          val rpath = lpath.normalize().toRealPath()
           val dir = rpath.toFile
           ( lpath, rpath, dir )
         } catch {
@@ -649,7 +649,7 @@ object ClassLoaderHelper {
               val cons = classpathConEntry.findAllMatchIn(classpathContent).flatMap { m =>
                 for {
                   relPath <- m.group(1).split(",")
-                  absPath = root.toPath.resolve(relPath)
+                  absPath = root.toPath.resolve(relPath).normalize().toRealPath()
                   absDir = absPath.toFile
                   if absDir.exists && absDir.isDirectory
                   jarFile <- TraversePath.listFilesRecursively(absDir, jarFilenameFilter)
@@ -660,12 +660,12 @@ object ClassLoaderHelper {
               val jars = classpathLibEntry.findAllMatchIn(classpathContent).map { m =>
                 val entry = m.group(1)
                 if (entry.startsWith(File.separator)) {
-                  val jarpath = new File(entry).toPath
+                  val jarpath = new File(entry).toPath.normalize().toRealPath()
                   require(Files.isRegularFile(jarpath), s"absolute jar path: $jarpath")
                   require(Files.isReadable(jarpath), s"absolute jar path: $jarpath")
                   jarpath.toUri.toURL
                 } else {
-                  val jarpath = scriptProjectLogicalPath.resolve(entry)
+                  val jarpath = scriptProjectLogicalPath.resolve(entry).normalize().toRealPath()
                   require(Files.isRegularFile(jarpath), s"$entry => resolved jar path: $jarpath")
                   require(Files.isReadable(jarpath), s"$entry => resolved jar path: $jarpath")
                   jarpath.toUri.toURL
@@ -673,7 +673,7 @@ object ClassLoaderHelper {
               } toSet
 
               val bins = classpathBinEntry.findAllMatchIn(classpathContent).flatMap { m =>
-                val binpath = scriptProjectRealPath.resolve(m.group(1))
+                val binpath = scriptProjectRealPath.resolve(m.group(1)).normalize().toRealPath()
                 if (Files.isDirectory(binpath) && Files.isReadable(binpath))
                   Some(binpath.toUri.toURL)
                 else
