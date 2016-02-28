@@ -543,7 +543,6 @@ object ClassLoaderHelper {
     *              true
     *          }
     *        }}}
-    *
     * @param ds A Dynamic Script defined in a project
     * @param c The MagicDraw DynamicScript project context where ds is implemented
     * @return true if ds can be invoked
@@ -624,19 +623,20 @@ object ClassLoaderHelper {
         val root = MDUML.getApplicationInstallDir
 
         val scriptProjectPathname = getDynamicScriptsRootPath + File.separator + projectName.jname + File.separator
-        val ( scriptProjectPath, scriptProjectDir ) = try {
-          val path = Paths.get( new File( scriptProjectPathname ).toURI ).toRealPath()
-          val dir = path.toFile
-          ( path, dir )
+        val ( scriptProjectLogicalPath, scriptProjectRealPath, scriptProjectRealDir ) = try {
+          val lpath = Paths.get( new File( scriptProjectPathname ).toURI )
+          val rpath = lpath.toRealPath()
+          val dir = rpath.toFile
+          ( lpath, rpath, dir )
         } catch {
           case t: Throwable =>
             return  Failure( DynamicScriptsProjectAccessException( projectName, t ) )
         }
 
-        if ( !isFolderAvailable( scriptProjectDir ) )
-          return Failure( DynamicScriptsProjectNotFound( projectName, scriptProjectDir ) )
+        if ( !isFolderAvailable( scriptProjectRealDir ) )
+          return Failure( DynamicScriptsProjectNotFound( projectName, scriptProjectRealDir ) )
 
-        val classpathFilepath = scriptProjectPath.resolve( ".classpath" )
+        val classpathFilepath = scriptProjectRealPath.resolve( ".classpath" )
 
         val classpathURLs
         : Try[Some[URLPaths]]
@@ -658,14 +658,22 @@ object ClassLoaderHelper {
               } toSet
 
               val jars = classpathLibEntry.findAllMatchIn(classpathContent).map { m =>
-                val jarpath = scriptProjectPath.resolve(m.group(1))
-                require(Files.isRegularFile(jarpath), s"jar path: $jarpath")
-                require(Files.isReadable(jarpath), s"jar path: $jarpath")
-                jarpath.toUri.toURL
+                val entry = m.group(1)
+                if (entry.startsWith(File.separator)) {
+                  val jarpath = new File(entry).toPath
+                  require(Files.isRegularFile(jarpath), s"absolute jar path: $jarpath")
+                  require(Files.isReadable(jarpath), s"absolute jar path: $jarpath")
+                  jarpath.toUri.toURL
+                } else {
+                  val jarpath = scriptProjectLogicalPath.resolve(entry)
+                  require(Files.isRegularFile(jarpath), s"$entry => resolved jar path: $jarpath")
+                  require(Files.isReadable(jarpath), s"$entry => resolved jar path: $jarpath")
+                  jarpath.toUri.toURL
+                }
               } toSet
 
               val bins = classpathBinEntry.findAllMatchIn(classpathContent).flatMap { m =>
-                val binpath = scriptProjectPath.resolve(m.group(1))
+                val binpath = scriptProjectRealPath.resolve(m.group(1))
                 if (Files.isDirectory(binpath) && Files.isReadable(binpath))
                   Some(binpath.toUri.toURL)
                 else
@@ -684,14 +692,14 @@ object ClassLoaderHelper {
 
           // no '.classpath', try default paths...
 
-          val scriptProjectBin = scriptProjectPath.resolve("bin").toFile
+          val scriptProjectBin = scriptProjectRealPath.resolve("bin").toFile
           val bins =
             if (!isFolderAvailable(scriptProjectBin))
               Set[URL]()
             else
               Set[URL](scriptProjectBin.toURI.toURL)
 
-          val scriptProjectLib = scriptProjectPath.resolve("lib").toFile
+          val scriptProjectLib = scriptProjectRealPath.resolve("lib").toFile
           val jars =
             if (!isFolderAvailable(scriptProjectLib))
               Set[URL]()
