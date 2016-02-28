@@ -478,7 +478,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
                |# The imce-specific MagicDraw properties adapted from 'bin/magicdraw.properties'
                |MD_IMCE_PROPERTIES=$$MD_INSTALL_BIN/magicdraw.imce.properties
                |
-               |if test ! -e ; then
+               |if test ! -e "$$MD_ORIG_PROPERTIES"; then
                | echo "There is no 'bin/magicdraw.properties' file!"
                | exit -1
                |fi
@@ -503,6 +503,12 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
                | > $$MD_IMCE_PROPERTIES
                |
                |echo "Wrote $$MD_IMCE_PROPERTIES"
+               |
+               |grep -q "log4j\.category\.i18n" $$MD_INSTALL_DIR/data/debug.properties
+               |if test $$? -eq 1; then
+               |  echo -e "\nlog4j.category.i18n=OFF" >> $$MD_INSTALL_DIR/data/debug.properties
+               |  echo "Turned off i18n logging"
+               |fi
              """.stripMargin
 
           val setup = root / "bin" / "magicdraw.imce.setup.sh"
