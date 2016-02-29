@@ -692,12 +692,11 @@ object ClassLoaderHelper {
 
           // no '.classpath', try default paths...
 
-          val scriptProjectBin = scriptProjectRealPath.resolve("bin").toFile
-          val bins =
-            if (!isFolderAvailable(scriptProjectBin))
-              Set[URL]()
-            else
-              Set[URL](scriptProjectBin.toURI.toURL)
+          val bins = for {
+            apath <- Set("bin", "classes", "target/scala-2.11/classes")
+            folder = scriptProjectRealPath.resolve(apath).toFile
+            if isFolderAvailable(folder)
+          } yield folder.toURI.toURL
 
           val scriptProjectLib = scriptProjectRealPath.resolve("lib").toFile
           val jars =
