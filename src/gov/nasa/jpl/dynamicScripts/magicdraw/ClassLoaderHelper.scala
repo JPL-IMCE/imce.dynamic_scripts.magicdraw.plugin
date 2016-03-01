@@ -411,7 +411,10 @@ object ClassLoaderHelper {
   }
 
   val jarFilenameFilter = new FilenameFilter() {
-    override def accept( file: File, name: String ): Boolean = name.toLowerCase.endsWith( ".jar" )
+    override def accept( file: File, name: String ): Boolean = {
+      val lname = name.toLowerCase
+      lname.endsWith(".jar") && !lname.endsWith("-sources.jar") && !lname.endsWith("-javadoc.jar")
+    }
   }
 
   def isFolderAvailable( f: File ): Boolean =
@@ -681,11 +684,14 @@ object ClassLoaderHelper {
               } toSet
 
               val allJars = jars ++ cons
-
               if (bins.isEmpty && allJars.isEmpty)
                 Failure( DynamicScriptsProjectEmptyClasspath( projectName, classpathFilepath ) )
-              else
-                Success(Some(URLPaths(bins, allJars).merge(urlPaths)))
+              else {
+                val srcs = classpathSrcEntry.findAllMatchIn(classpathContent).map { m => JName(m.group(1)) }
+                val resolved0: Try[Some[URLPaths]] = Success(Some(URLPaths(bins, allJars).merge(urlPaths)))
+                val resolvedN: Try[Some[URLPaths]] = (resolved0 /: srcs) (resolveProjectPaths)
+                resolvedN
+              }
 
             })
         else {
