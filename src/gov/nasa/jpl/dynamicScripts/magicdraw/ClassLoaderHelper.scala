@@ -641,6 +641,8 @@ object ClassLoaderHelper {
 
         val classpathFilepath = scriptProjectRealPath.resolve( ".classpath" )
 
+        val dynamicScriptsFolder = new File(getDynamicScriptsRootPath)
+
         val classpathURLs
         : Try[Some[URLPaths]]
         = if ( Files.isReadable( classpathFilepath ) && Files.isRegularFile( classpathFilepath ) )
@@ -655,7 +657,7 @@ object ClassLoaderHelper {
                   if relPath.nonEmpty
                   absPath = root.toPath.resolve(relPath).normalize().toRealPath()
                   absDir = absPath.toFile
-                  if absDir.exists && absDir.isDirectory && absDir != root
+                  if absDir.exists && absDir.isDirectory && absDir != root && absDir != dynamicScriptsFolder
                   jarFile <- TraversePath.listFilesRecursively(absDir, jarFilenameFilter)
                   jarURL = jarFile.toURI.toURL
                 } yield jarURL
