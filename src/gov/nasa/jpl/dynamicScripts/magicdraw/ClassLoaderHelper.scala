@@ -652,9 +652,10 @@ object ClassLoaderHelper {
               val cons = classpathConEntry.findAllMatchIn(classpathContent).flatMap { m =>
                 for {
                   relPath <- m.group(1).split(",")
+                  if relPath.nonEmpty
                   absPath = root.toPath.resolve(relPath).normalize().toRealPath()
                   absDir = absPath.toFile
-                  if absDir.exists && absDir.isDirectory
+                  if absDir.exists && absDir.isDirectory && absDir != root
                   jarFile <- TraversePath.listFilesRecursively(absDir, jarFilenameFilter)
                   jarURL = jarFile.toURI.toURL
                 } yield jarURL
