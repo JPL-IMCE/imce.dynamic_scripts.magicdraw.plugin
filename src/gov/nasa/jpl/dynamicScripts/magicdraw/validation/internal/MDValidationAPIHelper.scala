@@ -389,12 +389,12 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
         ) { level =>
           val runData = new ValidationRunData(vSuite, false, elementMessages.keys, level)
           val results =
-            elementMessages
-            .map {
-              case (element, (message, actions)) =>
-                new RuleViolationResult(new Annotation(element, c, message, actions), c)
-            }
-            .to[scala.collection.mutable.ListBuffer]
+            new java.util.ArrayList[RuleViolationResult](
+              elementMessages
+                .map {
+                  case (element, (message, actions)) =>
+                    new RuleViolationResult(new Annotation(element, c, message, actions), c)
+                })
           MagicDrawValidationDataResultsException(
             MagicDrawValidationDataResults(
               validationMessage,

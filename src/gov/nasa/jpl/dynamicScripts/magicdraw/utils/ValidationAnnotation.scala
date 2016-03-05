@@ -139,9 +139,9 @@ object ValidationAnnotation {
       val runData =
         new ValidationRunData( validationAnnotations.head.validationSuite, false, elements, lowestValidation )
       val ruleViolationResults =
-        validationAnnotations
-          .map( _.toRuleViolationResult )
-          .to[scala.collection.mutable.ListBuffer]
+        new java.util.ArrayList[RuleViolationResult](
+          validationAnnotations
+          .map( _.toRuleViolationResult ))
       Some( MagicDrawValidationDataResults( title, runData, ruleViolationResults, postSessionActions ) )
     }
 }
