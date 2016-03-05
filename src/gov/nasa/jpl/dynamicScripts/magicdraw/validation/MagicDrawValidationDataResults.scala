@@ -58,69 +58,73 @@ import scala.{Boolean, Option, None, Some, Unit}
 import scala.Predef.String
 
 /**
- * Convenient wrapper for MagicDraw validation results with a new capability for post-processing actions
+  * Convenience wrapper for MagicDraw validation results with a new capability for post-processing actions
   *
   * @see Validation chapter in MD Open API User Manual
- *
- * The MD Open API for creating validation annotations & actions requires references to
- * <<UML Standard Profile::Validation Profile::validationRule>>-stereotyped constraints defined in an
- * <<UML Standard Profile::Validation Profile::validationSuite>>-stereotyped package.
- *
- * The MD Open API manual does not have any concept of "post-processing action".
+  *
+  * The MD Open API for creating validation annotations & actions requires references to
+  * <<UML Standard Profile::Validation Profile::validationRule>>-stereotyped constraints defined in an
+  * <<UML Standard Profile::Validation Profile::validationSuite>>-stereotyped package.
+  *
+  * The MD Open API manual does not have any concept of "post-processing action".
   * @example Java's tediousness {{{
- *
- * // Constructing a ValidationRunData object requires a reference to validation suite package.
- * // For example, given a set of MD Annotations: Set<Annotation> annotations,
- *
- * Application application = Application.getInstance();
- * Project project = application.getProject();
- * ValidationSuiteHelper vsh = ValidationSuiteHelper.getInstance(project);
- * String suiteQName = "...";
- * Package validationSuite = null;
- * 	for (Package suite : vsh.getValidationSuites()) {
- * 			if (suiteQName.equals(suite.getQualifiedName())) {
- * 				validationSuite = suite;
- * 				break;
- * 			}
- * 		}
- * 		if (null != validationSuite) {
- *    Collection<Constraint> validationConstraints = vsh.getValidationRules(validationSuite);
- *    ...
- *    EnumerationLiteral lowestLevel = ...;
- *    Set<Element> elements = ...;
- *    ...
- *    ValidationRunData runData = new ValidationRunData(validationSuite, false, elements, lowestLevel);
- *    ...
- *  }
- *
- * // Constructing a RuleViolationResult object requires a reference to a validation constraint;
- * // for example, in the context of the above:
- *
- * 		if (null != validationSuite) {
- *    Collection<Constraint> validationConstraints = vsh.getValidationRules(validationSuite);
- *    EnumerationLiteral lowestLevel = null;
- *    Set<Element> elements = new HashSet<Element>();
- *    List<RuleViolationResult> results = new ArrayList<RuleViolationResult>();
- *    for (Annotation annotation : annotations) {
- *      EnumerationLevel severity = annotation.getSeverity();
- *      if (lowestLevel == null || ValidationSuiteHelper.isSeverityHigherOrEqual(lowestLevel, severity)) {
- *         lowestLevel = severity;
- *      }
- *      elements.add((Element) annotation.getTarget());
- *      results.add(new RuleViolationResult(annotation, annotation.getConstraint()));
- *    }
- *    ValidationRunData runData = new ValidationRunData(validationSuite, false, elements, lowestLevel);
- *    List<RunnableWithProgress> postSessionActions = new ArrayList<RunnableWithProgress>();
- *    return new MagicDrawValidationDataResults("<title>", runData, results, postSessionActions);
- *  }
- * }}}
-  * @author Nicolas.F.Rouquette@jpl.nasa.gov
- */
+  *
+  * // Constructing a ValidationRunData object requires a reference to validation suite package.
+  * // For example, given a set of MD Annotations: Set<Annotation> annotations,
+  *
+  * Application application = Application.getInstance();
+  * Project project = application.getProject();
+  * ValidationSuiteHelper vsh = ValidationSuiteHelper.getInstance(project);
+  * String suiteQName = "...";
+  * Package validationSuite = null;
+  * 	for (Package suite : vsh.getValidationSuites()) {
+  * 			if (suiteQName.equals(suite.getQualifiedName())) {
+  * 				validationSuite = suite;
+  * 				break;
+  * 			}
+  * 		}
+  * 		if (null != validationSuite) {
+  *    Collection<Constraint> validationConstraints = vsh.getValidationRules(validationSuite);
+  *    ...
+  *    EnumerationLiteral lowestLevel = ...;
+  *    Set<Element> elements = ...;
+  *    ...
+  *    ValidationRunData runData = new ValidationRunData(validationSuite, false, elements, lowestLevel);
+  *    ...
+  *  }
+  *
+  * // Constructing a RuleViolationResult object requires a reference to a validation constraint;
+  * // for example, in the context of the above:
+  *
+  * 		if (null != validationSuite) {
+  *    Collection<Constraint> validationConstraints = vsh.getValidationRules(validationSuite);
+  *    EnumerationLiteral lowestLevel = null;
+  *    Set<Element> elements = new HashSet<Element>();
+  *    List<RuleViolationResult> results = new ArrayList<RuleViolationResult>();
+  *    for (Annotation annotation : annotations) {
+  *      EnumerationLevel severity = annotation.getSeverity();
+  *      if (lowestLevel == null || ValidationSuiteHelper.isSeverityHigherOrEqual(lowestLevel, severity)) {
+  *         lowestLevel = severity;
+  *      }
+  *      elements.add((Element) annotation.getTarget());
+  *      results.add(new RuleViolationResult(annotation, annotation.getConstraint()));
+  *    }
+  *    ValidationRunData runData = new ValidationRunData(validationSuite, false, elements, lowestLevel);
+  *    List<RunnableWithProgress> postSessionActions = new ArrayList<RunnableWithProgress>();
+  *    return new MagicDrawValidationDataResults("<title>", runData, results, postSessionActions);
+  *  }
+  * }}}
+  *
+  * @param title Title for the MagicDraw validation results window
+  * @param runData A MagicDraw ValidationRunData
+  * @param results This must be a mutable Java collection of RuleViolationResult
+  * @param postSessionActions
+  */
 case class MagicDrawValidationDataResults(
-  val title: String,
-  val runData: ValidationRunData,
-  val results: java.util.Collection[RuleViolationResult],
-  val postSessionActions: java.util.Collection[RunnableWithProgress] )
+  title: String,
+  runData: ValidationRunData,
+  results: java.util.Collection[RuleViolationResult],
+  postSessionActions: java.util.Collection[RunnableWithProgress] )
 
 object MagicDrawValidationDataResults {
 
