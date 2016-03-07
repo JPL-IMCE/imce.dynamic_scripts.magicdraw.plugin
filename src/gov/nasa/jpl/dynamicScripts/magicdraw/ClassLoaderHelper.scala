@@ -314,7 +314,7 @@ object ClassLoaderHelper {
         sm.cancelSession( p )
       }
 
-    val actionAndArgumentValues = Seq( p, ev, cm.s ) ++ argumentValues toSeq;
+    val actionAndArgumentValues = Seq( p, ev, cm.s ) ++ argumentValues
     try {
 
       import validation.internal.MDValidationAPIHelper._
@@ -322,7 +322,7 @@ object ClassLoaderHelper {
       val r = cm.m.invoke( null, actionAndArgumentValues: _* )
 
       val currentTime = System.currentTimeMillis()
-      log.info( s"$message took ${currentTime - previousTime} ms" )
+      log.info( s"$message took ${prettyDurationFromTo(previousTime, currentTime)}" )
 
       r match {
         case Failure( t @ MagicDrawValidationDataResultsException( r ) ) =>

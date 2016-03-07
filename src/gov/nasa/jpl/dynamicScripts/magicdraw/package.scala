@@ -38,8 +38,11 @@
  */
 package gov.nasa.jpl.dynamicScripts
 
+import java.util.concurrent.TimeUnit
+
 import scala.collection.immutable._
-import scala.Boolean
+import scala.concurrent.duration.FiniteDuration
+import scala.{Boolean, Long, StringContext}
 import scala.Predef.{refArrayOps, String}
 
 package object magicdraw {
@@ -69,4 +72,24 @@ package object magicdraw {
 
     wildCardMatch( true, pattern.endsWith( "*" ), pattern.split( "\\*" ).toList, text )
   }
+
+  def prettyDurationFromTo(from: Long, to: Long): String = {
+
+    val d = FiniteDuration(to - from, TimeUnit.MILLISECONDS)
+
+    val (hours, minutes, seconds, millis) =
+      (d.toHours, d.toMinutes, d.toSeconds, d.toMillis)
+
+    val adjMinutes = minutes - hours * 60
+    val adjSeconds = seconds - minutes * 60
+    val adjMillis = millis - seconds * 1000
+
+    val r1 = if (hours > 0) s"$hours h" else ""
+    val r2 = if (adjMinutes > 0) (if (!r1.isEmpty) r1+", " else "") + s"$adjMinutes m" else r1
+    val r3 = if (adjSeconds > 0) (if (!r2.isEmpty) r2+", " else "") + s"$adjSeconds s" else r2
+    val r4 = if (adjMillis > 0) (if (!r3.isEmpty) r3+", " else "") + s"$adjMillis ms" else r3
+    val r5 = if (r4.isEmpty) "<1 ms" else r4
+    r5
+  }
+
 }

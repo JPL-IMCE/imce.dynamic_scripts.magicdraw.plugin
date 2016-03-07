@@ -52,6 +52,7 @@ import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 
+import gov.nasa.jpl.dynamicScripts.magicdraw._
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.BrowserContextMenuAction
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
@@ -124,7 +125,7 @@ class DynamicScriptsBrowserConfigurator
     }
 
     val currentTime = System.currentTimeMillis()
-    log.info( s"DynamicScriptsBrowserConfigurator.configure took ${currentTime - previousTime} ms" )
+    log.info( s"DynamicScriptsBrowserConfigurator.configure took ${prettyDurationFromTo(previousTime, currentTime)}" )
   }
 
   def configure

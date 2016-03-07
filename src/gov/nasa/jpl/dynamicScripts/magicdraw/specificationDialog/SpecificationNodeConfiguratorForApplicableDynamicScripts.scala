@@ -57,6 +57,7 @@ import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 
+import gov.nasa.jpl.dynamicScripts.magicdraw._
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.BinaryDerivationRefresh.DELAYED_COMPUTATION_UNTIL_INVOKED
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.BinaryDerivationRefresh.EAGER_COMPUTATION_AS_NEEDED
@@ -110,7 +111,8 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
     } finally {
       val currentTime = System.currentTimeMillis()
       log.info(
-        s"SpecificationNodeConfiguratorForApplicableDynamicScripts.configure took ${currentTime - previousTime} ms" )
+        s"SpecificationNodeConfiguratorForApplicableDynamicScripts.configure took "+
+        prettyDurationFromTo(previousTime, currentTime))
     }
   }
 

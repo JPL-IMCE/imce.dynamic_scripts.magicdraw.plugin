@@ -68,6 +68,7 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Diagram
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.mdprofiles.Stereotype
 
+import gov.nasa.jpl.dynamicScripts.magicdraw._
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
@@ -139,7 +140,7 @@ class DynamicScriptsDiagramConfigurator
     val currentTime = System.currentTimeMillis()
     log.info(
       "DynamicScriptsDiagramConfigurator.configure(manager, pElement) took "+
-      s"${currentTime - previousTime} ms" )
+      prettyDurationFromTo(previousTime, currentTime))
   }
 
   def getOrCreateActionsManagerCategory
@@ -263,7 +264,7 @@ class DynamicScriptsDiagramConfigurator
     val currentTime = System.currentTimeMillis()
     log.info(
       "DynamicScriptsDiagramConfigurator.configure(manager, diagram, selected, requestor) took " +
-      s"${currentTime - previousTime} ms" )
+      prettyDurationFromTo(previousTime, currentTime))
   }
 
   def getOrCreateActionsSubCategory

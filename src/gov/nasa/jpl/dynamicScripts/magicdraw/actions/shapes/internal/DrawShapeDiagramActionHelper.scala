@@ -55,6 +55,7 @@ import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.utils.Utilities
 
+import gov.nasa.jpl.dynamicScripts.magicdraw._
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ToplevelShapeInstanceCreator
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults
@@ -172,7 +173,7 @@ object DrawShapeDiagramActionHelper {
               val r = creatorHelper.invokeMethod(m, action, pe, point, e)
 
               val currentTime = System.currentTimeMillis()
-              log.info(s"$message took ${currentTime - previousTime} ms")
+              log.info(s"$message took ${prettyDurationFromTo(previousTime, currentTime)}")
 
               r match {
                 case Failure(ex) =>
