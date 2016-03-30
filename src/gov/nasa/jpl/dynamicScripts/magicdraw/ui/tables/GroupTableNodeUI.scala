@@ -241,8 +241,8 @@ case class GroupTableNodeUI(
     new SearchableBar.Installer() {
       def openSearchBar( searchableBar: SearchableBar ): Unit = {
         panel.add( searchableBar, BorderLayout.AFTER_LAST_LINE )
-        panel.invalidate
-        panel.revalidate
+        panel.invalidate()
+        panel.revalidate()
       }
 
       def closeSearchBar( searchableBar: SearchableBar ): Unit = {
@@ -265,10 +265,10 @@ case class GroupTableNodeUI(
     override def toString( x: Object, context: ConverterContext ): String =
       x match {
         case row: DefaultGroupRow =>
-          val buf = new StringBuffer( row.toString() )
-          val allVisibleChildrenCount = TreeTableUtils.getDescendantCount( _table.getModel(), row, true, true )
+          val buf = new StringBuffer( row.toString )
+          val allVisibleChildrenCount = TreeTableUtils.getDescendantCount( _table.getModel, row, true, true )
           buf.append( " (" ).append( allVisibleChildrenCount ).append( " items)" )
-          buf.toString()
+          buf.toString
 
         case _ => null
       }
@@ -302,13 +302,13 @@ object GroupTableNodeUI {
   case class FitScrollPaneToAncestor( panel: JPanel, treeTable: TreeTable, otherPanels: Component* )
     extends JScrollPane( treeTable ) with ComponentListener {
 
-    initScrollPane
+    initScrollPane()
 
     def initScrollPane() = {
       setBorder( BorderFactory.createLineBorder( Color.GRAY ) )
       setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED )
       setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED )
-      getViewport().getView().addComponentListener( this )
+      getViewport.getView.addComponentListener( this )
     }
 
     override def componentMoved( e: ComponentEvent ) = ()
@@ -321,10 +321,12 @@ object GroupTableNodeUI {
 
   }
 
-  def fitTreeTableToAncestorViewport(
-    panel: JPanel,
+  def fitTreeTableToAncestorViewport
+  ( jpanel: JPanel,
     treeTable: TreeTable,
-    otherPanels: Component* ): Unit = {
+    otherPanels: Component* )
+  : Unit
+  = {
 
     SpecificationComputedComponent.getTreeLikeHierarchicalPanelAncestorOfTable( Some( treeTable ) ) match {
       case None =>
@@ -342,7 +344,7 @@ object GroupTableNodeUI {
               val children = for {
                 row <- 0 until htable.getRowCount
                 child = htable.getChildComponentAt( row )
-                if null != child != null
+                if null != child
                 if ancestors contains child
               } yield ( child, row )
 
@@ -363,8 +365,9 @@ object GroupTableNodeUI {
                       hi - pi.getHeight
                   }
                   val fitRest = fitHeight % treeTable.getRowHeight()
-                  val fitExact = fitHeight - fitRest - ( if ( fitRest > 0 ) treeTable.getRowHeight() else 0 )
-                  val fitCheck = fitExact % treeTable.getRowHeight()
+                  val fitExact = fitHeight - fitRest
+//                  val fitCheck = fitExact % treeTable.getRowHeight()
+//                  require(0 == fitCheck)
 
                   val newSize = new Dimension()
                   val totalRowsHeight = ( 0 /: treeTable.getRowHeights.getRowHeights )( _ + _ )
@@ -372,8 +375,9 @@ object GroupTableNodeUI {
                     case ( hi, pi ) => hi + pi.getHeight
                   }
                   val totalRest = totalFitHeight % treeTable.getRowHeight()
-                  val totalExact = totalFitHeight - totalRest - ( if ( totalRest > 0 ) treeTable.getRowHeight() else 0 )
-                  val totalCheck = totalExact % treeTable.getRowHeight()
+                  val totalExact = totalFitHeight - totalRest
+//                  val totalCheck = totalExact % treeTable.getRowHeight()
+//                  require(0 == totalCheck)
 
                   val newHeight = Seq( totalExact, fitExact ).min
                   newSize.setSize( viewport.getWidth, newHeight )
@@ -389,7 +393,8 @@ object GroupTableNodeUI {
   ( derived: DynamicScriptsTypes.ComputedDerivedTree,
     rows: Seq[Map[String, AbstractTreeNodeInfo]],
     columns: Seq[String] )
-  : TableModel = {
+  : TableModel
+  = {
 
     require(
       derived.columnValueTypes.isDefined,
@@ -451,8 +456,8 @@ object GroupTableNodeUI {
 
     override def paint
     ( g: Graphics, component: Component, row: Int, column: Int, cellRect: Rectangle, value: Object )
-    : Unit =
-      value match {
+    : Unit
+    = value match {
 
         case node: AbstractTreeNodeInfo =>
           node.getAnnotations match {

@@ -158,7 +158,7 @@ object TreeNodeUI {
 
     val _filterTimesLabel = new StyledLabel( "Not filtered yet." )
 
-    val filterableTreeTableModel = new FilterableTreeTableModel( filterField.getDisplayTableModel() )
+    val filterableTreeTableModel = new FilterableTreeTableModel( filterField.getDisplayTableModel )
     val sortableTreeTableModel = new SortableTreeTableModel( filterableTreeTableModel )
 
     var uniqueRows: Option[Int] = None
@@ -167,16 +167,18 @@ object TreeNodeUI {
     var uniqueTableSummary: String = ""
     def updateTableLabels(): Unit = {
       val totalExtent = uniqueRows match {
-        case Some( extent ) => extent
+        case Some( extent ) =>
+          extent
         case None =>
-          val topRows = model.getRows.toSet;
-          val extent = topRows flatMap ( TreeNodeUI.getTreeRowExtent( _ ) )
+          val topRows = model.getRows.toSet
+          val extent = topRows flatMap TreeNodeUI.getTreeRowExtent
           uniqueRows = Some( extent.size )
-          val elements = extent flatMap ( TreeNodeUI.getDerivedPropertyComputedTreeRowElement( _ ) )
+          val elements = extent flatMap TreeNodeUI.getDerivedPropertyComputedTreeRowElement
           uniqueElements = Some( elements.size )
-          val annotations = extent flatMap ( TreeNodeUI.getDerivedPropertyComputedTreeRowValidationAnnotations( _ ) )
+          val annotations = extent flatMap TreeNodeUI.getDerivedPropertyComputedTreeRowValidationAnnotations
           uniqueAnnotations = Some( annotations.size )
-          uniqueTableSummary = s"[Total of ${uniqueElements.get} unique elements; ${uniqueAnnotations.get} unique validation annotations]"
+          uniqueTableSummary =
+            s"[Total of ${uniqueElements.get} unique elements; ${uniqueAnnotations.get} unique validation annotations]"
           extent.size
       }
 
@@ -184,7 +186,8 @@ object TreeNodeUI {
       val totalRows = filterableTreeTableModel.getActualModel.getRowCount
 
       if ( visibleRows == totalRows ) {
-        tableTitleBorder.setTitle( s"Filtered /${derived.name.hname} (All $totalRows rows with $totalExtent unique values. $uniqueTableSummary" )
+        tableTitleBorder.setTitle(
+          s"Filtered /${derived.name.hname} (All $totalRows rows with $totalExtent unique values. $uniqueTableSummary" )
         StyledLabelBuilder.setStyledText(
           _filterTimesLabel,
           s"Filters in are cleared. {$totalRows:f:blue} rows shown with $totalExtent unique values." )
@@ -217,10 +220,13 @@ object TreeNodeUI {
           case am =>
             -1
         }
-        tableTitleBorder.setTitle( s"Filtered /${derived.name.hname} ($visibleRows visible rows with $visibleExtent unique values shown after applying filters to all $totalRows rows with $totalExtent unique values) $uniqueTableSummary" )
+        tableTitleBorder.setTitle(
+          s"Filtered /${derived.name.hname} ($visibleRows visible rows with $visibleExtent unique values "+
+          s"shown after applying filters to all $totalRows rows with $totalExtent unique values) $uniqueTableSummary" )
         StyledLabelBuilder.setStyledText(
           _filterTimesLabel,
-          s"Filters result in {$visibleRows:f:blue} visible rows with {$visibleExtent:f:blue} unique values from a total of $totalRows rows with $totalExtent unique values" )
+          s"Filters result in {$visibleRows:f:blue} visible rows with {$visibleExtent:f:blue} "+
+          s"unique values from a total of $totalRows rows with $totalExtent unique values" )
       }
     }
 
@@ -228,15 +234,15 @@ object TreeNodeUI {
     sortableTreeTableModel.setSortableOption( 0, SortableTreeTableModel.SORTABLE_ROOT_LEVEL )
     sortableTreeTableModel.addTableModelListener( new TableModelListener() {
       def tableChanged( e: TableModelEvent ): Unit =
-        if ( e == null || e.getFirstRow() == TableModelEvent.HEADER_ROW ) {
-          updateTableLabels
+        if ( e == null || e.getFirstRow == TableModelEvent.HEADER_ROW ) {
+          updateTableLabels()
         }
     } )
     sortableTreeTableModel.addIndexChangeListener( new IndexChangeListener() {
       def indexChanged( event: IndexChangeEvent ): Unit = {
         ( event.getSource, event.getType ) match {
           case ( _: FilterableTreeTableModel[_], IndexChangeEvent.INDEX_CHANGED_EVENT ) =>
-            updateTableLabels
+            updateTableLabels()
           case ( x, y ) =>
             ()
         }
@@ -244,7 +250,8 @@ object TreeNodeUI {
     } )
 
     val treeTable = new TreeTable( sortableTreeTableModel ) {
-      override def scrollRectToVisible( aRect: Rectangle ) = SpecificationComputedComponent.scrollRectToVisible( this, aRect )
+      override def scrollRectToVisible( aRect: Rectangle ) =
+        SpecificationComputedComponent.scrollRectToVisible( this, aRect )
 
       /**
        * Intent: When the table is first displayed, do the following:
@@ -258,9 +265,9 @@ object TreeNodeUI {
        */
       override def tableChanged( e: TableModelEvent ): Unit = {
         super.tableChanged( e )
-        if ( e == null || e.getFirstRow() == TableModelEvent.HEADER_ROW ) {
-          model.expandAll
-          updateTableLabels
+        if ( e == null || e.getFirstRow == TableModelEvent.HEADER_ROW ) {
+          model.expandAll()
+          updateTableLabels()
         }
       }
 
@@ -299,7 +306,7 @@ object TreeNodeUI {
     panel.add( tablePanel )
     panel.add( infoPanel, BorderLayout.AFTER_LAST_LINE )
 
-    TreeNodeUI.createTableHeaderPopupMenuInstaller( panel, treeTable, updateTableLabels, quickSearchPanel, infoPanel )
+    TreeNodeUI.createTableHeaderPopupMenuInstaller( panel, treeTable, updateTableLabels(), quickSearchPanel, infoPanel )
 
     val collapseIcon = IconsFactory.getImageIcon( classOf[GroupTable], "icons/collapse.png" )
     require( collapseIcon != null )
@@ -318,7 +325,10 @@ object TreeNodeUI {
 
     treeTable.setDefaultCellRenderer( new StyledTableCellRenderer() {
 
-      override def customizeStyledLabel( table: JTable, value: Object, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int ): Unit = {
+      override def customizeStyledLabel
+      ( table: JTable, value: Object, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int )
+      : Unit
+      = {
         super.customizeStyledLabel( table, value, isSelected, hasFocus, row, column )
         val r = model.getRowAt( row )
         val style = treeTable.getCellStyleAt( row, column )
@@ -340,12 +350,12 @@ object TreeNodeUI {
     treeTable.addTreeExpansionListener( new TreeExpansionListener() {
 
       def treeExpanded( event: TreeExpansionEvent ): Unit = {
-        updateTableLabels
+        updateTableLabels()
         SpecificationComputedComponent.fitTreeTableToAncestorViewport( panel, treeTable, quickSearchPanel, infoPanel )
       }
 
       def treeCollapsed( event: TreeExpansionEvent ): Unit = {
-        updateTableLabels
+        updateTableLabels()
       }
     } )
 
@@ -390,16 +400,17 @@ object TreeNodeUI {
     ( panel, treeTable )
   }
 
-  def getTreeRowExtent[T <: ExpandableRow]( row: T )( implicit tag: ClassTag[T] ): Set[T] =
-    row.getChildren() match {
+  def getTreeRowExtent[T <: ExpandableRow]
+  ( row: T )
+  ( implicit tag: ClassTag[T] )
+  : Set[T]
+  = row.getChildren match {
       case null => Set()
       case rows =>
-        val childRows = rows flatMap { child =>
-          child match {
-            case childRow: T => Some( childRow )
-            case _           => None
-          }
-        } toSet;
+        val childRows = rows flatMap {
+          case childRow: T => Some(childRow)
+          case _ => None
+        } toSet
         val childRowExtents = childRows flatMap ( getTreeRowExtent( _ ) )
         val extent = childRows ++ childRowExtents
         extent
@@ -445,25 +456,25 @@ object TreeNodeUI {
 
         val expandAll = new JMenuItem( new AbstractAction( "Expand All" ) {
           def actionPerformed( ev: ActionEvent ): Unit = {
-            treeTable.expandAll
+            treeTable.expandAll()
             callback
           }
         } )
 
         val expandFirst = new JMenuItem( new AbstractAction( "Expand First Level" ) {
           def actionPerformed( ev: ActionEvent ): Unit = {
-            treeTable.expandFirstLevel
+            treeTable.expandFirstLevel()
             callback
           }
         } )
 
         val expandNext = new JMenuItem( new AbstractAction( "Expand Next Level (or selected rows)" ) {
           def actionPerformed( ev: ActionEvent ): Unit =
-            treeTable.getModel() match {
+            treeTable.getModel match {
               case ttm: ITreeTableModel[_] =>
                 val rows = treeTable.getSelectedRows
                 if ( rows.isEmpty ) {
-                  treeTable.expandNextLevel
+                  treeTable.expandNextLevel()
                 }
                 else {
                   val treeRows = rows.toList flatMap { rowIndex =>
@@ -472,7 +483,10 @@ object TreeNodeUI {
                       case _                             => None
                     }
                   }
-                  treeRows.head.getTreeTableModel.asInstanceOf[TreeTableModel[DefaultExpandableRow]].expandRows( treeRows, true )
+                  treeRows.head
+                    .getTreeTableModel
+                    .asInstanceOf[TreeTableModel[DefaultExpandableRow]]
+                    .expandRows( treeRows, true )
                 }
                 callback
               case _ => ()
@@ -488,18 +502,18 @@ object TreeNodeUI {
 
         val collapseFirst = new JMenuItem( new AbstractAction( "Collapse First Level" ) {
           def actionPerformed( ev: ActionEvent ): Unit = {
-            treeTable.collapseFirstLevel
+            treeTable.collapseFirstLevel()
             callback
           }
         } )
 
         val collapseLast = new JMenuItem( new AbstractAction( "Collapse Last Level (or selected rows)" ) {
           def actionPerformed( ev: ActionEvent ): Unit =
-            treeTable.getModel() match {
+            treeTable.getModel match {
               case ttm: ITreeTableModel[_] =>
                 val rows = treeTable.getSelectedRows
                 if ( rows.isEmpty ) {
-                  treeTable.collapseLastLevel
+                  treeTable.collapseLastLevel()
                 }
                 else {
                   val treeRows = rows.toList flatMap { rowIndex =>
@@ -508,7 +522,10 @@ object TreeNodeUI {
                       case _                             => None
                     }
                   }
-                  treeRows.head.getTreeTableModel.asInstanceOf[TreeTableModel[DefaultExpandableRow]].collapseRows( treeRows, true )
+                  treeRows.head
+                    .getTreeTableModel
+                    .asInstanceOf[TreeTableModel[DefaultExpandableRow]]
+                    .collapseRows( treeRows, true )
                 }
                 callback
               case _ => ()
@@ -551,8 +568,10 @@ object TreeNodeUI {
 
   val cellPainter = new CellPainter() {
 
-    override def paint( g: Graphics, component: Component, row: Int, column: Int, cellRect: Rectangle, value: Object ): Unit =
-      value match {
+    override def paint
+    ( g: Graphics, component: Component, row: Int, column: Int, cellRect: Rectangle, value: Object )
+    : Unit
+    = value match {
 
         case node: AbstractTreeNodeInfo =>
           node.getAnnotations match {
@@ -572,8 +591,10 @@ object TreeNodeUI {
               }
 
               annotationIcon match {
-                case None         => ()
-                case Some( icon ) => icon.paintIcon( component, g, cellRect.x + cellRect.width - icon.getIconWidth() - 1, cellRect.y )
+                case None         =>
+                  ()
+                case Some( icon ) =>
+                  icon.paintIcon( component, g, cellRect.x + cellRect.width - icon.getIconWidth - 1, cellRect.y )
               }
           }
 
@@ -589,9 +610,16 @@ object TreeNodeUI {
   val style2 = new CellStyle()
   style2.setOverlayCellPainter( cellPainter )
 
-  def treeNodeInfo2Table( derived: DynamicScriptsTypes.ComputedDerivedTree, node: TreeNodeInfo ): TreeTableModel[DerivedPropertyComputedTreeRow] = {
-    require( derived.columnValueTypes.isDefined, s"A DerivedPropertyComputedTree must have explicitly-specified column value types!" )
-    require( derived.columnValueTypes.get.nonEmpty, s"A DerivedPropertyComputedTree must have at least 1 column value type!" )
+  def treeNodeInfo2Table
+  ( derived: DynamicScriptsTypes.ComputedDerivedTree, node: TreeNodeInfo )
+  : TreeTableModel[DerivedPropertyComputedTreeRow]
+  = {
+    require(
+      derived.columnValueTypes.isDefined,
+      s"A DerivedPropertyComputedTree must have explicitly-specified column value types!" )
+    require(
+      derived.columnValueTypes.get.nonEmpty,
+      s"A DerivedPropertyComputedTree must have at least 1 column value type!" )
     val table = new TreeTableModel[DerivedPropertyComputedTreeRow]() with GroupableTableModel with StyleModel {
 
       val defaultLabel: String = s"/${derived.name.hname}"
@@ -638,7 +666,7 @@ object TreeNodeUI {
 
       override def getCellStyleAt( row: Int, column: Int ): CellStyle = {
         val r = getRowAt( row )
-        val style = if ( ( r.getParent == getRoot ) || ( r.children.nonEmpty ) ) style1 else style2
+        val style = if ( ( r.getParent == getRoot ) || r.children.nonEmpty ) style1 else style2
         style
       }
 
@@ -650,9 +678,17 @@ object TreeNodeUI {
     table
   }
 
-  def addTree( derived: DynamicScriptsTypes.ComputedDerivedTree, model: TreeTableModel[DerivedPropertyComputedTreeRow], tree: TreeNodeInfo ): Unit = {
+  def addTree
+  ( derived: DynamicScriptsTypes.ComputedDerivedTree,
+    model: TreeTableModel[DerivedPropertyComputedTreeRow],
+    tree: TreeNodeInfo )
+  : Unit
+  = {
 
-    def makeTreeRow( tree: TreeNodeInfo, row: Map[String, AbstractTreeNodeInfo] ): DerivedPropertyComputedTreeRow = {
+    def makeTreeRow
+    ( tree: TreeNodeInfo, row: Map[String, AbstractTreeNodeInfo] )
+    : DerivedPropertyComputedTreeRow
+    = {
       val children = tree.nested map {
         case ( _info: AbstractTreeNodeInfo, _row: Map[String, AbstractTreeNodeInfo] ) =>
           _info match {
@@ -669,8 +705,10 @@ object TreeNodeUI {
       treeRow
     }
 
-    def addChildRows( prefix: String, parent: DerivedPropertyComputedTreeRow ): Unit =
-      parent.children foreach { child =>
+    def addChildRows
+    ( prefix: String, parent: DerivedPropertyComputedTreeRow )
+    : Unit
+    = parent.children foreach { child =>
         parent.addChild( child )
         addChildRows( prefix + " ", child )
       }
@@ -681,15 +719,16 @@ object TreeNodeUI {
 
   }
 
-  case class FitScrollPaneToAncestor( panel: JPanel, treeTable: TreeTable, otherPanels: JPanel* ) extends JScrollPane( treeTable ) with ComponentListener {
+  case class FitScrollPaneToAncestor( panel: JPanel, treeTable: TreeTable, otherPanels: JPanel* )
+    extends JScrollPane( treeTable ) with ComponentListener {
 
-    initScrollPane
+    initScrollPane()
 
     def initScrollPane() = {
       setBorder( BorderFactory.createLineBorder( Color.GRAY ) )
       setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED )
       setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED )
-      getViewport().getView().addComponentListener( this )
+      getViewport.getView.addComponentListener( this )
     }
 
     override def componentMoved( e: ComponentEvent ) = ()
@@ -702,12 +741,16 @@ object TreeNodeUI {
 
   }
 
-  def fitTreeTableToAncestorViewport( panel: JPanel, treeTable: TreeTable, otherPanels: JPanel* ): Unit = {
+  def fitTreeTableToAncestorViewport
+  ( jpanel: JPanel, treeTable: TreeTable, otherPanels: JPanel* )
+  : Unit
+  = {
     SpecificationComputedComponent.getTreeLikeHierarchicalPanelAncestorOfTable( Some( treeTable ) ) match {
       case None =>
         ()
       case Some( panel ) =>
-        ( SpecificationComputedComponent.getHierarchicalTableMainViewportAncestor( panel ), SpecificationComputedComponent.getHierarchicalTableContainer( treeTable ) ) match {
+        ( SpecificationComputedComponent.getHierarchicalTableMainViewportAncestor( panel ),
+          SpecificationComputedComponent.getHierarchicalTableContainer( treeTable ) ) match {
           case ( None, _ ) =>
             ()
           case ( _, None ) =>
@@ -715,10 +758,10 @@ object TreeNodeUI {
           case ( Some( viewport ), Some( htable ) ) =>
             val ancestors = SpecificationComputedComponent.collectParentsUpTo( treeTable, viewport )
             val children = for {
-              row <- 0 until htable.getRowCount()
+              row <- 0 until htable.getRowCount
               child = htable.getChildComponentAt( row )
-              if ( child != null )
-              if ( ancestors contains child )
+              if null != child
+              if ancestors contains child
             } yield ( child, row )
 
             children.toList match {
@@ -730,7 +773,9 @@ object TreeNodeUI {
                   case theader => theader.getHeight
                 }
                 val viewHeight = viewport.getHeight - tableHeaderHeight
-                val adjustedHeight = ( viewHeight /: rowsAbove ) { case ( hi, ri ) => hi - htable.getActualRowHeight( ri ) }
+                val adjustedHeight = ( viewHeight /: rowsAbove ) { case ( hi, ri ) =>
+                  hi - htable.getActualRowHeight( ri )
+                }
                 val fitHeight = ( adjustedHeight /: otherPanels ) {
                   case ( hi, pi ) =>
                     val borderHeight = pi.getBorder match {
