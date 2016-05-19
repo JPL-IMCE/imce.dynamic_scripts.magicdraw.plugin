@@ -1,3 +1,5 @@
+MBSE Asset Catalog: [MagicDraw DynamicScripts Plugin](https://cae-cop.jpl.nasa.gov/assetcatalog-admin/index.html#/view/tool/155)
+
 # IMCE Dynamic Scripts plugin for MagicDraw 18
 
 The IMCE Dynamic Scripts plugin is compatible with any edition of MagicDraw 18, including all CAE MagicDraw 18 packages.
