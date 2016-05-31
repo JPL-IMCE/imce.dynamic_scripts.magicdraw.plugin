@@ -56,12 +56,15 @@ import scala.util.{Success,Try}
 import scala.{Boolean, None, Some, StringContext, Unit}
 import scala.Predef.String
 
-/**
- * @author Nicolas F. Rouquette (JPL)
- */
-class LoadDynamicScriptFilesCommand( refresh: () => Unit ) extends RunnableWithProgress {
+object LoadDynamicScriptFilesCommand {
 
-  val exclude_dynamicScripts_parent_folder_names: Set[String] = Set("bin", "classes")
+  val exclude_parent_folder_names
+  : Set[String]
+  = Set(".git", "bin", "classes", "target")
+
+}
+
+class LoadDynamicScriptFilesCommand( refresh: () => Unit ) extends RunnableWithProgress {
 
   override def run( progressStatus: ProgressStatus ): Unit = {
     val p = DynamicScriptsPlugin.getInstance()
@@ -80,8 +83,9 @@ class LoadDynamicScriptFilesCommand( refresh: () => Unit ) extends RunnableWithP
       val dsFilenameFilter = new FilenameFilter() {
         override def accept( file: File, name: String ): Boolean =
           file.isDirectory &&
-            !exclude_dynamicScripts_parent_folder_names.contains(file.getName) &&
-            name.toLowerCase.endsWith(".dynamicscripts")
+            !LoadDynamicScriptFilesCommand.exclude_parent_folder_names.contains(file.getName) &&
+            name.toLowerCase.endsWith(".dynamicscripts") &&
+            new File(file, name).isFile
       }
 
       val dsPaths: List[String] =
