@@ -636,6 +636,13 @@ object ClassLoaderHelper {
             return  Failure( DynamicScriptsProjectAccessException( projectName, t ) )
         }
 
+        val scriptProjectLib = scriptProjectRealPath.resolve("lib").toFile
+        val libJars =
+          if (!isFolderAvailable(scriptProjectLib))
+            Set[URL]()
+          else
+            TraversePath.listFilesRecursively(scriptProjectLib, jarFilenameFilter).map(_.toURI.toURL).toSet
+
         if ( !isFolderAvailable( scriptProjectRealDir ) )
           return Failure( DynamicScriptsProjectNotFound( projectName, scriptProjectRealDir ) )
 
@@ -655,36 +662,44 @@ object ClassLoaderHelper {
                 for {
                   relPath <- m.group(1).split(",")
                   if relPath.nonEmpty
-                  absPath = root.toPath.resolve(relPath).normalize().toRealPath()
-                  absDir = absPath.toFile
+                  absPath = root.toPath.resolve(relPath).normalize()
+                  if Files.exists(absPath)
+                  absDir = absPath.toRealPath().toFile
                   if absDir.exists && absDir.isDirectory && absDir != root && absDir != dynamicScriptsFolder
                   jarFile <- TraversePath.listFilesRecursively(absDir, jarFilenameFilter)
                   jarURL = jarFile.toURI.toURL
                 } yield jarURL
               } toSet
 
-              val jars = classpathLibEntry.findAllMatchIn(classpathContent).map { m =>
+              val jars = classpathLibEntry.findAllMatchIn(classpathContent).flatMap { m =>
                 val entry = m.group(1)
                 if (entry.startsWith(File.separator)) {
-                  val jarpath = new File(entry).toPath.normalize().toRealPath()
-                  require(Files.isRegularFile(jarpath), s"absolute jar path: $jarpath")
-                  require(Files.isReadable(jarpath), s"absolute jar path: $jarpath")
-                  jarpath.toUri.toURL
+                  val jarpath = new File(entry).toPath.normalize()
+                  if (Files.exists(jarpath) && Files.isReadable(jarpath) && Files.isRegularFile(jarpath))
+                    Some(jarpath.toRealPath().toUri.toURL)
+                  else
+                    None
                 } else {
-                  val jarpath = scriptProjectLogicalPath.resolve(entry).normalize().toRealPath()
-                  require(Files.isRegularFile(jarpath), s"$entry => resolved jar path: $jarpath")
-                  require(Files.isReadable(jarpath), s"$entry => resolved jar path: $jarpath")
-                  jarpath.toUri.toURL
+                  val jarpath = scriptProjectLogicalPath.resolve(entry).normalize()
+                  if (Files.exists(jarpath) && Files.isReadable(jarpath) && Files.isRegularFile(jarpath))
+                    Some(jarpath.toRealPath().toUri.toURL)
+                  else
+                    None
                 }
               } toSet
 
-              val bins = classpathBinEntry.findAllMatchIn(classpathContent).flatMap { m =>
-                val binpath = scriptProjectRealPath.resolve(m.group(1)).normalize().toRealPath()
-                if (Files.isDirectory(binpath) && Files.isReadable(binpath))
-                  Some(binpath.toUri.toURL)
+              val cpbins = classpathBinEntry.findAllMatchIn(classpathContent).flatMap { m =>
+                val binpath = scriptProjectRealPath.resolve(m.group(1)).normalize()
+                if (Files.exists(binpath) && Files.isDirectory(binpath) && Files.isReadable(binpath))
+                  Some(binpath.toRealPath().toUri.toURL)
                 else
                   None
               } toSet
+
+              val bins = if (cpbins.nonEmpty)
+                cpbins
+              else
+                libJars
 
               val allJars = jars ++ cons
               if (bins.isEmpty && allJars.isEmpty)
@@ -707,17 +722,10 @@ object ClassLoaderHelper {
             if isFolderAvailable(folder)
           } yield folder.toURI.toURL
 
-          val scriptProjectLib = scriptProjectRealPath.resolve("lib").toFile
-          val jars =
-            if (!isFolderAvailable(scriptProjectLib))
-              Set[URL]()
-            else
-              TraversePath.listFilesRecursively(scriptProjectLib, jarFilenameFilter).map(_.toURI.toURL).toSet
-
-          if (bins.isEmpty && jars.isEmpty)
+          if (bins.isEmpty && libJars.isEmpty)
             Failure(DynamicScriptsProjectMissingClasspath(projectName, classpathFilepath))
           else
-            Success(Some(URLPaths(bins, jars).merge(urlPaths)))
+            Success(Some(URLPaths(bins, libJars).merge(urlPaths)))
 
         }
 
