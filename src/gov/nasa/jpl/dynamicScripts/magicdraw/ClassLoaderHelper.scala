@@ -362,7 +362,7 @@ object ClassLoaderHelper {
     catch {
       case ex: InvocationTargetException =>
         cancelSessionIfNeeded()
-        val t = ex.getTargetException match { case null => ex; case t => t }
+        val t = Option.apply(ex.getTargetException).getOrElse(ex)
         val ex_message = message + s"\nError: ${t.getClass.getName}\nMessage: ${t.getMessage}\n(do not submit!)"
         ClassLoaderHelper.reportError( cm.s, ex_message, t )
         Failure( ReportedException( t ) )
