@@ -73,7 +73,7 @@ import scala.collection.immutable._
 import scala.language.existentials
 import scala.language.implicitConversions
 import scala.language.postfixOps
-import scala.{Any, Array, Boolean, Long, None, Option, Some, StringContext, Unit}
+import scala.{Any, Array, Boolean, Long, None, Option, Some, StringContext, Tuple2, Unit}
 import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 import scala.Predef.{String, augmentString, classOf, refArrayOps, require}
@@ -362,9 +362,8 @@ object ClassLoaderHelper {
     catch {
       case ex: InvocationTargetException =>
         cancelSessionIfNeeded()
-        val t = Option.apply(ex.getTargetException).getOrElse(ex)
-        val ex_message = message + s"\nError: ${t.getClass.getName}\nMessage: ${t.getMessage}\n(do not submit!)"
-        ClassLoaderHelper.reportError( cm.s, ex_message, t )
+        val (t, tMessage) = describeException(Option.apply(ex.getTargetException).getOrElse(ex))
+        ClassLoaderHelper.reportError( cm.s, tMessage, t )
         Failure( ReportedException( t ) )
 
       case t: IllegalArgumentException =>
@@ -394,6 +393,22 @@ object ClassLoaderHelper {
     }
     finally {
       cancelSessionIfNeeded()
+    }
+  }
+
+  @scala.annotation.tailrec
+  def describeException(t: Throwable, message: Option[String] = None)
+  : Tuple2[Throwable, String]
+  = {
+    val t_message =
+      message.getOrElse("") +
+        "\nError: " + t.getClass.getName +
+        Option.apply(t.getMessage).map("\nMessage: " + _).getOrElse("")
+    Option.apply(t.getCause) match {
+      case None =>
+        Tuple2(t, t_message)
+      case Some(nested) =>
+        describeException(nested, Some(t_message))
     }
   }
 
