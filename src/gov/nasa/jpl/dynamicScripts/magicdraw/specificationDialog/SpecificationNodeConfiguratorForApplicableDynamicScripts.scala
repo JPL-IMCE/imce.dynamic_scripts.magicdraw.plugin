@@ -44,8 +44,6 @@ import scala.collection.immutable._
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.immutable.SortedSet
-import scala.language.implicitConversions
-import scala.language.postfixOps
 import scala.{Option, None, Some, StringContext, Unit}
 import scala.Predef.String
 

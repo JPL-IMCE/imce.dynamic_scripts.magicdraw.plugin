@@ -47,9 +47,8 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import org.apache.log4j.Logger
 
 import scala.collection.JavaConversions.mapAsJavaMap
-import scala.language.postfixOps
-import scala.{AnyVal, StringContext, Unit}
-import scala.Predef.{augmentString, refArrayOps, ArrowAssoc, String}
+import scala.{AnyVal, Unit}
+import scala.Predef.{ArrowAssoc, String}
 
 @scala.deprecated("", "")
 class MDGUILogHelper(val guiLog: GUILog) extends AnyVal {

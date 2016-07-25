@@ -44,15 +44,12 @@ import com.jidesoft.swing.OverlayableIconsFactory
 
 import scala.collection.immutable._
 import scala.collection.JavaConversions.seqAsJavaList
-import scala.language.implicitConversions
-import scala.language.postfixOps
-import scala.{Option, Ordering, None, Some}
-import scala.Predef.{String}
+import scala.{Option, None, Some}
+import scala.Predef.String
 
 import com.nomagic.magicdraw.annotation.Annotation
 import com.nomagic.magicdraw.validation.RuleViolationResult
 import com.nomagic.magicdraw.validation.ValidationRunData
-import com.nomagic.magicdraw.validation.ValidationSuiteHelper
 import com.nomagic.task.RunnableWithProgress
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.{Constraint, EnumerationLiteral, Package}
 

@@ -42,7 +42,6 @@ import java.lang.{IllegalArgumentException, Object, System, Thread}
 import java.awt.event.ActionEvent
 
 import scala.collection.immutable._
-import scala.language.existentials
 import scala.util.{Failure, Success}
 import scala.{Int, Option, None, Some, StringContext, Unit}
 import scala.Predef.{classOf, require, String}

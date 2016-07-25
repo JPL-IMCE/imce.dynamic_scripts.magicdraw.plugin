@@ -134,7 +134,6 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes
 import gov.nasa.jpl.dynamicScripts.magicdraw.validation.internal.MDValidationAPIHelper
-import gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AbstractTreeNodeInfo
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AnnotationNodeInfo
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.DoubleClickMouseListener

@@ -75,7 +75,7 @@ import scala.collection.immutable._
 import scala.language.postfixOps
 import scala.reflect.ClassTag
 import scala.{Boolean, Int, Option, None, Some, StringContext, Unit}
-import scala.Predef.{classOf, intArrayOps, intWrapper, refArrayOps, require, ArrowAssoc, String}
+import scala.Predef.{classOf, intArrayOps, intWrapper, refArrayOps, require, String}
 
 
 import com.jidesoft.converter.ConverterContext

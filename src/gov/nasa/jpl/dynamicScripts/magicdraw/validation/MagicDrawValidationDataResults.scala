@@ -53,7 +53,6 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.validation
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable._
-import scala.language.{implicitConversions, postfixOps}
 import scala.{Boolean, Option, None, Some, Unit}
 import scala.Predef.String
 

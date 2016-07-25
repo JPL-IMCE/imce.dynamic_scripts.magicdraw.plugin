@@ -49,7 +49,6 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
 
 import scala.language.existentials
 import scala.util.Success
-import scala.util.Failure
 import scala.util.Try
 import scala.{Boolean, None}
 

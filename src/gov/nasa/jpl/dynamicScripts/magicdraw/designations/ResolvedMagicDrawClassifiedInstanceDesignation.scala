@@ -39,15 +39,13 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.designations
 
 import com.nomagic.magicdraw.core.Project
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.{ Association, Class, Classifier, DataType, Diagram, Element, ElementImport, Enumeration, EnumerationLiteral, Generalization, InstanceSpecification, Operation, Package, PackageImport, PackageMerge, PrimitiveType, Slot }
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.{ Classifier, Element}
 
 import com.nomagic.uml2.impl.ElementsFactory
 
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
 
 import scala.language.existentials
-import scala.util.Success
-import scala.util.Failure
 import scala.util.Try
 import scala.{Boolean, None, Some}
 

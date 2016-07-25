@@ -45,8 +45,6 @@ import java.net.URLClassLoader
 import javax.swing.KeyStroke
 
 import scala.collection.JavaConversions.collectionAsScalaIterable
-import scala.language.implicitConversions
-import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
 
@@ -60,7 +58,7 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper.ResolvedClassAndMethod
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 
-import scala.{Boolean, StringContext, Unit}
+import scala.{StringContext, Unit}
 import scala.Predef.{classOf, String}
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov

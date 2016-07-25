@@ -75,7 +75,6 @@ import com.nomagic.uml2.ext.magicdraw.statemachines.mdbehaviorstatemachines._
 import com.nomagic.uml2.impl.ElementsFactory
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
 import scala.collection.JavaConversions._
-import scala.language.existentials
 import scala.language.postfixOps
 import scala.util.Success
 import scala.util.Failure

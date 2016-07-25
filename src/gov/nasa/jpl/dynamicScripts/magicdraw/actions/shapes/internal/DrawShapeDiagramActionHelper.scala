@@ -46,7 +46,7 @@ import java.net.MalformedURLException
 import javax.swing.Icon
 import javax.swing.KeyStroke
 
-import com.nomagic.magicdraw.core.{Application, Project}
+import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.ui.actions.DrawShapeDiagramAction
 import com.nomagic.magicdraw.uml.symbols.{DiagramPresentationElement, PresentationElement}
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
@@ -63,7 +63,6 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes.DynamicShapeCreatorH
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.UncaughtExceptionHandler
 
-import scala.language.implicitConversions
 import scala.util.Failure
 import scala.util.Success
 import scala.{Boolean, None, Some, StringContext, Unit}

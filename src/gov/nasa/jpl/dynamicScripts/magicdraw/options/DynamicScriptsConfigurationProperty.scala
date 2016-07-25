@@ -45,7 +45,7 @@ import java.lang.Object
 import gov.nasa.jpl.dynamicScripts.magicdraw.options.resources.DynamicScriptsResources
 
 import scala.collection.immutable._
-import scala.{Boolean,StringContext}
+import scala.Boolean
 import scala.Predef.{refArrayOps, String}
 
 /**

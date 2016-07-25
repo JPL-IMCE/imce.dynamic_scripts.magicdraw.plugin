@@ -52,7 +52,7 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedMetaclassDesig
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ToplevelShapeInstanceCreator
 import gov.nasa.jpl.dynamicScripts.magicdraw.designations._
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
-import gov.nasa.jpl.dynamicScripts.magicdraw.validation.{MagicDrawValidationDataResultsException, MagicDrawValidationDataResults}
+import gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResultsException
 
 import scala.util.Failure
 import scala.util.Try

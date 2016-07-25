@@ -42,7 +42,7 @@ import java.lang.{Thread, Throwable}
 import com.nomagic.utils.Utilities
 import com.nomagic.magicdraw.core.Application
 
-import scala.{Boolean, Option, None, Some, StringContext, Unit}
+import scala.{Option, None, Some, StringContext, Unit}
 import scala.Predef.String
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov

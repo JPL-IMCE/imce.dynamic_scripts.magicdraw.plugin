@@ -50,7 +50,6 @@ import com.nomagic.actions.ActionsManager
 import com.nomagic.magicdraw.actions.ActionsConfiguratorsManager
 import com.nomagic.magicdraw.actions.ConfiguratorWithPriority
 import com.nomagic.magicdraw.core.Application
-import com.nomagic.magicdraw.core.ApplicationEnvironment
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.core.options.EnvironmentOptions
 import com.nomagic.magicdraw.plugins.Plugin
@@ -63,7 +62,6 @@ import com.nomagic.magicdraw.ui.MagicDrawProgressStatusRunner
 import com.nomagic.magicdraw.ui.dialogs.specifications.SpecificationDialogManager
 import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.magicdraw.uml.DiagramType
-import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.ui.ResizableIcon
 import com.nomagic.ui.SwingImageIcon
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Diagram
@@ -94,7 +92,6 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ComputedCharacterization
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 import com.nomagic.magicdraw.evaluation.EvaluationConfigurator
-import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes
 
 import scala.collection.immutable._
 import scala.collection.JavaConversions._

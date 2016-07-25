@@ -49,7 +49,6 @@ import java.lang.{SecurityException, System, Throwable}
 import java.net.URL
 import java.net.URLClassLoader
 
-import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.openapi.uml.SessionManager
 import com.nomagic.magicdraw.plugins.Plugin
@@ -63,15 +62,12 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.{MDGUILogHelper, MDUML, Trave
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper._
 import java.nio.file.Paths
 import java.nio.file.{Files, Path}
-import java.nio.charset.spi.CharsetProvider
-import java.nio.charset.StandardCharsets
 
 import gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResultsException
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable._
 import scala.language.existentials
-import scala.language.implicitConversions
 import scala.language.postfixOps
 import scala.{Any, Array, Boolean, Long, None, Option, Some, StringContext, Tuple2, Unit}
 import scala.util.control.Exception._

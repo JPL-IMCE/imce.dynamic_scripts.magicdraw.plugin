@@ -42,23 +42,18 @@ import java.awt.Component
 import java.awt.Graphics
 import java.awt.Rectangle
 import java.lang.{Comparable, Object}
-import javax.swing.table.AbstractTableModel
-import javax.swing.table.DefaultTableModel
 import com.jidesoft.grid.CellPainter
 import com.jidesoft.grid.CellStyle
 import com.jidesoft.grid.StyleModel
-import com.jidesoft.swing.OverlayableIconsFactory
 
 import com.nomagic.magicdraw.annotation.Annotation
 
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
-import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AnnotationNodeInfo
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AbstractTreeNodeInfo
 import gov.nasa.jpl.dynamicScripts.magicdraw.validation.internal.MDValidationAPIHelper
 
-import scala.language.postfixOps
 import scala.collection.immutable._
-import scala.{Boolean, Int, Option, None, Some, Unit}
+import scala.{Boolean, Int, None, Some, Unit}
 import scala.Predef.{require, String}
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov

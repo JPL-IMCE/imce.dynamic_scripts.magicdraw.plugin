@@ -49,7 +49,6 @@ import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.core.modules.ModulesServiceInternal
 import com.nomagic.magicdraw.core.project.ProjectsManager
 import com.nomagic.magicdraw.core.utils.ChangeElementID
-import com.nomagic.magicdraw.ui.browser.Browser
 import com.nomagic.magicdraw.ui.browser.BrowserTabTree
 import com.nomagic.magicdraw.ui.browser.Node
 import com.nomagic.magicdraw.uml.BaseElement
@@ -76,9 +75,8 @@ import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.Iterator
 import scala.collection.immutable._
 import scala.language.implicitConversions
-import scala.language.postfixOps
-import scala.util.{Failure,Success,Try}
-import scala.{AnyVal, Array, Boolean, Int, Option, None, Some, StringContext, Unit}
+import scala.util.Try
+import scala.{AnyVal, Boolean, Int, Option, None, Some, Unit}
 import scala.Predef.{classOf, refArrayOps, require, String}
 
 case class BrowserNodeElementInfo

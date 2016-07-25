@@ -44,8 +44,6 @@ import java.awt.Component
 import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Rectangle
-import java.awt.event.ComponentEvent
-import java.awt.event.ComponentListener
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
@@ -65,9 +63,8 @@ import javax.swing.table.TableModel
 import scala.collection.immutable._
 import scala.collection.JavaConversions._
 import scala.collection.TraversableOnce._
-import scala.language.implicitConversions
 import scala.language.postfixOps
-import scala.{Array, Boolean, Int, Option, None, Some, StringContext, Unit}
+import scala.{Array, Boolean, Int, None, Some, StringContext, Unit}
 import scala.Predef.{Map => _, Set => _, _}
 
 import com.jidesoft.converter.ConverterContext

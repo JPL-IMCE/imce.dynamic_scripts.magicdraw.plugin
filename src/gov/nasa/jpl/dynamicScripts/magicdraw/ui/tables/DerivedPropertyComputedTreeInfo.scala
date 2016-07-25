@@ -42,14 +42,11 @@ import java.lang.{Class, IllegalArgumentException, Object, Runnable, Thread, Sys
 import java.awt.event.ActionEvent
 
 import scala.collection.immutable._
-import scala.language.existentials
-import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
 import scala.{Int, Option, None, Some, StringContext, Unit}
-import scala.Predef.{classOf, refArrayOps, require, ArrowAssoc, String}
+import scala.Predef.{classOf, require, ArrowAssoc, String}
 
-import com.jidesoft.grid.Row
 import com.jidesoft.grid.TreeTableModel
 
 import com.nomagic.magicdraw.core.Project

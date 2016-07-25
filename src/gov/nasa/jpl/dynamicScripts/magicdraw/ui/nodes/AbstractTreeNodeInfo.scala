@@ -45,7 +45,7 @@ import com.jidesoft.comparator.AlphanumComparator
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
 
 import scala.collection.immutable._
-import scala.{Boolean, Int, StringContext, Unit}
+import scala.{Int, Unit}
 import scala.Predef.{augmentString, String}
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov

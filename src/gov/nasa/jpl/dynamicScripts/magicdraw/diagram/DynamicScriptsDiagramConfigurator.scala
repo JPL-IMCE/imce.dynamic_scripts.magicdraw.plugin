@@ -46,9 +46,8 @@ import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.implicitConversions
-import scala.language.postfixOps
-import scala.{AnyVal, Array, Boolean, Int, Option, None, Some, StringContext, Unit}
-import scala.Predef.{identity, refArrayOps, String}
+import scala.{AnyVal, Array, Boolean, Int, Option, None, Some, Unit}
+import scala.Predef.{refArrayOps, String}
 
 import com.nomagic.actions.AMConfigurator
 import com.nomagic.actions.ActionsCategory
@@ -62,7 +61,6 @@ import com.nomagic.magicdraw.ui.DiagramCanvas
 import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
-import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Diagram
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element

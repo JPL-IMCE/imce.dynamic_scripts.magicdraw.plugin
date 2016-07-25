@@ -45,14 +45,12 @@ import java.nio.file.Paths
 
 import com.nomagic.task.RunnableWithProgress
 import com.nomagic.task.ProgressStatus
-import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.magicdraw.core.Application
 
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.{MDUML, TraversePath}
 
 import scala.collection.immutable._
-import scala.util.{Success,Try}
 import scala.{Boolean, None, Some, StringContext, Unit}
 import scala.Predef.String
 

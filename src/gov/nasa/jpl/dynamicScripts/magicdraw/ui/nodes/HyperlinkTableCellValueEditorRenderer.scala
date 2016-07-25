@@ -46,7 +46,6 @@ import javax.swing.JOptionPane
 import javax.swing.JTable
 
 import scala.collection.JavaConversions.enumerationAsScalaIterator
-import scala.language.postfixOps
 import scala.reflect.ClassTag
 import scala.{Int, Option, None, PartialFunction, Some, StringContext, Tuple2, Unit}
 

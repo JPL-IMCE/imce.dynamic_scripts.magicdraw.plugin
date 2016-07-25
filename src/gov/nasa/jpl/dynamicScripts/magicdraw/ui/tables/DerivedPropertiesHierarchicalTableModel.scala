@@ -41,7 +41,7 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables
 import java.lang.Object
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.collection.immutable._
-import scala.{Int, StringContext}
+import scala.Int
 import scala.Predef.{require, String}
 
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element

@@ -42,7 +42,6 @@ import java.awt.Point
 import java.lang.{IllegalArgumentException, Object}
 import java.lang.reflect.Method
 import scala.util.Failure
-import scala.util.Success
 import scala.util.Try
 import com.nomagic.magicdraw.core.Project
 import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
@@ -59,9 +58,9 @@ import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.StereotypedMetaclassDesig
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ToplevelPathInstanceCreator
 import gov.nasa.jpl.dynamicScripts.magicdraw.designations._
 import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
-import gov.nasa.jpl.dynamicScripts.magicdraw.validation.{MagicDrawValidationDataResultsException, MagicDrawValidationDataResults}
+import gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResultsException
 
-import scala.{AnyVal, Boolean, StringContext, Unit}
+import scala.{AnyVal, Boolean, StringContext}
 import scala.Predef.{???, classOf}
 
 @scala.deprecated("", "")

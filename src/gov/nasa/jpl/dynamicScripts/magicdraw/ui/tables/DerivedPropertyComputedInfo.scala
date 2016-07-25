@@ -47,7 +47,6 @@ import scala.Predef.{require, String}
 
 import com.nomagic.magicdraw.annotation.Annotation
 import com.nomagic.magicdraw.core.Project
-import com.nomagic.magicdraw.uml.UUIDRegistry
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.InstanceSpecification
 

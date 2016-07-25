@@ -39,27 +39,15 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables
 
 import java.lang.{Class, Comparable, Object}
-import java.awt.event.ActionEvent
 
 import scala.collection.immutable._
-import scala.language.existentials
-import scala.util.Failure
-import scala.util.Success
 import scala.{Int, StringContext}
 import scala.Predef.{classOf, require, String}
 
-import com.jidesoft.grid.TreeTableModel
-import com.jidesoft.grid.AbstractExpandableRow
-import com.jidesoft.grid.DefaultExpandable
 import com.jidesoft.grid.DefaultExpandableRow
 
-import com.nomagic.magicdraw.core.Project
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
-import gov.nasa.jpl.dynamicScripts.magicdraw.ClassLoaderHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AbstractTreeNodeInfo
-import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.TreeNodeInfo
 
 /**

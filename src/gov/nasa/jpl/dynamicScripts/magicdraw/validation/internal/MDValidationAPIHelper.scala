@@ -39,12 +39,9 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.validation.internal
 
 import java.awt.event.ActionEvent
-import java.awt.event.KeyListener
-import java.awt.event.MouseEvent
-import java.awt.event.MouseListener
 import java.lang.reflect.InvocationTargetException
 import java.lang.{IllegalAccessException, IllegalArgumentException, NoSuchMethodException, Runnable}
-import java.lang.{SecurityException, System, Thread, Throwable}
+import java.lang.{SecurityException, System, Throwable}
 
 import javax.swing.JComponent
 import javax.swing.KeyStroke
@@ -53,18 +50,15 @@ import javax.swing.JOptionPane
 
 import com.nomagic.actions.NMAction
 import com.nomagic.magicdraw.annotation.Annotation
-import com.nomagic.magicdraw.annotation.AnnotationAction
 import com.nomagic.magicdraw.core.Application
 import com.nomagic.magicdraw.core.Project
-import com.nomagic.magicdraw.openapi.uml.ReadOnlyElementException
 import com.nomagic.magicdraw.openapi.uml.SessionManager
-import com.nomagic.magicdraw.ui.{ProjectWindow, MagicDrawProgressStatusRunner}
+import com.nomagic.magicdraw.ui.MagicDrawProgressStatusRunner
 import com.nomagic.magicdraw.validation.RuleViolationResult
 import com.nomagic.magicdraw.validation.ValidationRunData
 import com.nomagic.magicdraw.validation.ValidationSuiteHelper
 import com.nomagic.magicdraw.validation.ui.ValidationResultPanel
 import com.nomagic.magicdraw.validation.ui.ValidationResultsWindowManager
-import com.nomagic.magicdraw.validation.ui.table.row.ValidationRuleResultTableRow
 import com.nomagic.task.ProgressStatus
 import com.nomagic.task.RunnableWithProgress
 import com.nomagic.ui.ProgressStatusRunner
@@ -75,8 +69,6 @@ import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.utils.Utilities
 
 import gov.nasa.jpl.dynamicScripts.magicdraw.wildCardMatch
-import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.AnnotationNodeInfo
-import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 import gov.nasa.jpl.dynamicScripts.magicdraw.validation.{MagicDrawValidationDataResultsException, MagicDrawValidationDataResults}
 
 import scala.collection.immutable._
@@ -84,13 +76,11 @@ import scala.collection.JavaConversions.asJavaCollection
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.implicitConversions
-import scala.language.postfixOps
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 import scala.{AnyVal, Boolean, Option, None, Ordering, Some, StringContext, Unit}
 import scala.Predef.{classOf, require, String}
-
 
 @scala.deprecated("", "")
 class MDValidationAPIHelper(val p: Project) extends AnyVal {

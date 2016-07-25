@@ -63,8 +63,6 @@ import gov.nasa.jpl.magicdraw.enhanced.ui.browser.EnhancedBrowserContextAMConfig
 
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.JavaConversions.seqAsJavaList
-import scala.language.implicitConversions
-import scala.language.postfixOps
 import scala.collection.immutable._
 import scala.{Boolean, Int, Option, None, Some, StringContext, Unit}
 import scala.Predef.String
