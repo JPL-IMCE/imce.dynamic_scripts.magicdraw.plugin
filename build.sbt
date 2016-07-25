@@ -113,7 +113,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
   .settings(IMCEReleasePlugin.libraryReleaseProcessSettings)
   .settings(IMCEPlugin.aspectJSettings)
   .settings(IMCEPlugin.strictScalacFatalWarningsSettings)
-  .settings(docSettings(diagrams=true))
+  //.settings(docSettings(diagrams=true))
   .settings(
     IMCEKeys.licenseYearOrRange := "2014-2016",
     IMCEKeys.organizationInfo := IMCEPlugin.Organizations.cae,
@@ -125,7 +125,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     buildInfoPackage := "gov.nasa.jpl.imce.dynamic_scripts.plugin",
     buildInfoKeys ++= Seq[BuildInfoKey](BuildInfoKey.action("buildDateUTC") { buildUTCDate.value }),
 
-    name := "imce_md18_0_sp5_dynamic-scripts",
+    name := "imce_md18_0_sp6_dynamic-scripts",
     organization := "gov.nasa.jpl.imce.magicdraw.plugins",
 
     projectID := {
@@ -138,11 +138,11 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     artifactZipFile := {
       baseDirectory.value /
         "target" /
-        s"imce_md18_0_sp5_dynamic-scripts_resource_${scalaBinaryVersion.value}-${version.value}.zip"
+        s"imce_md18_0_sp6_dynamic-scripts_resource_${scalaBinaryVersion.value}-${version.value}.zip"
     },
 
     addArtifact(
-      Artifact("imce_md18_0_sp5_dynamic-scripts", "zip", "zip", Some("resource"), Seq(), None, Map()),
+      Artifact("imce_md18_0_sp6_dynamic-scripts", "zip", "zip", Some("resource"), Seq(), None, Map()),
       artifactZipFile),
 
     IMCEKeys.nexusJavadocRepositoryRestAPIURL2RepositoryName := Map(
@@ -189,7 +189,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
           val zfilter: DependencyFilter = new DependencyFilter {
             def apply(c: String, m: ModuleID, a: Artifact): Boolean = {
-              a.`type` == "zip" && a.extension == "zip" && a.name == "cae_md18_0_sp5_vendor"
+              a.`type` == "zip" && a.extension == "zip" && a.name == "cae_md18_0_sp6_vendor"
             }
           }
           val zs: Seq[File] = up.matching(zfilter).to[Seq]
@@ -249,7 +249,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           import java.nio.file.attribute.PosixFilePermission
 
           val mdInstallDir = base / "target" / "imce.md.package"
-          val root = base / "target" / "imce_md18_0_sp5_dynamic-scripts"
+          val root = base / "target" / "imce_md18_0_sp6_dynamic-scripts"
           s.log.info(s"\n*** top: $root")
 
           val compileConfig: ConfigurationReport = {
