@@ -189,7 +189,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
           val zfilter: DependencyFilter = new DependencyFilter {
             def apply(c: String, m: ModuleID, a: Artifact): Boolean = {
-              a.`type` == "zip" && a.extension == "zip" && a.name == "cae_md18_0_sp6_vendor"
+              a.`type` == "zip" && a.extension == "zip" && a.name.startsWith("cae_md18_0")
             }
           }
           val zs: Seq[File] = up.matching(zfilter).to[Seq]
