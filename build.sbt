@@ -267,7 +267,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
             def acc(focus: Set[Module], result: Set[Module]): Set[Module] = {
               val next = g.edges.flatMap { case (fID, tID) =>
                 focus.find(m => m.id == fID && (m.jarFile.isDefined || includeZips)).flatMap { _ =>
-                  g.nodes.find(m => m.id == tID && (m.jarFile.isDefined || includeZips))
+                  g.nodes.find(m => !m.isEvicted && m.id == tID && (m.jarFile.isDefined || includeZips))
                 }
               }.to[Set]
               if (next.isEmpty)
@@ -290,6 +290,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
             if "zip" == artifact.extension
             graph = backend.SbtUpdateReport.fromConfigurationReport(compileConfig, mReport.module)
             root <- graph.nodes.filter { m =>
+              !m.isEvicted &&
               m.id.organisation == mReport.module.organization &&
                 m.id.name == mReport.module.name &&
                 m.id.version == mReport.module.revision
@@ -308,7 +309,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
             r -> (group, files, includes)
           }
 
-          val zipFiles: Map[Module, Set[File]] = zipAllFiles.map { case (r, (group, allFiles, includes)) =>
+          val zipFiles: Map[Module, Seq[File]] = zipAllFiles.map { case (r, (group, allFiles, includes)) =>
             val others: Set[File] = for {
               i <- includes
               (_, files, _) = zipAllFiles(i)
@@ -316,7 +317,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
             } yield f
 
 
-            val files: Set[File] = allFiles -- others
+            val files: Seq[File] = (allFiles -- others).to[Seq].sortBy(_.name)
             s.log.info(s"group: $group root: ${r.id.organisation} ${r.id.name} ${r.id.version} => group files: ${files.size}")
             files.foreach { f =>
               IO.copyFile(f, root / "lib" / group / f.name)
@@ -340,7 +341,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
             oReport <- compileConfig.details
             mReport <- oReport.modules
             (artifact, file) <- mReport.artifacts
-            if "jar" == artifact.extension && !groupedFiles.contains(file)
+            if !mReport.evicted && "jar" == artifact.extension && !groupedFiles.contains(file)
           } yield {
             s.log.info(s"additional: ${file.getParentFile.getParentFile.name}/${file.getParentFile.name}/${file.name}")
             (oReport.organization, oReport.name, file, artifact)
@@ -352,12 +353,12 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
           // -----
 
-          val jarArtifacts = fileArtifactsByType("jar")
-          val srcArtifacts = fileArtifactsByType("sources")
-          val docArtifacts = fileArtifactsByType("javadoc")
+          val jarArtifacts = fileArtifactsByType("jar").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
+          val srcArtifacts = fileArtifactsByType("sources").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
+          val docArtifacts = fileArtifactsByType("javadoc").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
 
           val jars = {
-            val libs = jarArtifacts.map { case (o, _, jar, _) =>
+            val libs = jarArtifacts.map { case (o, jar) =>
               s.log.info(s"* copying jar: $o/${jar.name}")
               IO.copyFile(jar, root / "lib" / o / jar.name)
               "lib/" + o + "/" + jar.name
@@ -425,13 +426,13 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
             otherJars.sorted ++
             jars.sorted).mkString("", "\\\\\\\\:", "\\\\\\\\:")
 
-          srcArtifacts.foreach { case (o, _, jar, _) =>
+          srcArtifacts.foreach { case (o, jar) =>
             s.log.info(s"* copying source: $o/${jar.name}")
             IO.copyFile(jar, root / "lib.sources" / o / jar.name)
             "lib.sources/" + o + "/" + jar.name
           }
 
-          docArtifacts.foreach { case (o, _, jar, _) =>
+          docArtifacts.foreach { case (o, jar) =>
             s.log.info(s"* copying javadoc: $o/${jar.name}")
             IO.copyFile(jar, root / "lib.javadoc" / o / jar.name)
             "lib.javadoc/" + o + "/" + jar.name
