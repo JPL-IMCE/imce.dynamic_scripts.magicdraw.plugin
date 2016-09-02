@@ -18,16 +18,7 @@ import scala.collection.immutable._
 
 import gov.nasa.jpl.imce.sbt._
 
-useGpg := true
-
 updateOptions := updateOptions.value.withCachedResolution(true)
-
-developers := List(
-  Developer(
-    id="rouquett",
-    name="Nicolas F. Rouquette",
-    email="nicolas.f.rouquette@jpl.nasa.gov",
-    url=url("https://gateway.jpl.nasa.gov/personal/rouquett/default.aspx")))
 
 import scala.io.Source
 import scala.util.control.Exception._
@@ -103,7 +94,7 @@ shellPrompt in ThisBuild := { state => Project.extract(state).currentRef.project
 
 lazy val thisVersion = SettingKey[String]("this-version", "This Module's version")
 
-cleanFiles <+= baseDirectory { base => base / "imce.md.package" }
+cleanFiles <+= baseDirectory { base => base / "md.package" }
 
 lazy val artifactZipFile = taskKey[File]("Location of the zip artifact file")
 
@@ -127,9 +118,6 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     buildInfoPackage := "gov.nasa.jpl.imce.dynamic_scripts.plugin",
     buildInfoKeys ++= Seq[BuildInfoKey](BuildInfoKey.action("buildDateUTC") { buildUTCDate.value }),
 
-    name := "imce_md18_0_sp6_dynamic-scripts",
-    organization := "gov.nasa.jpl.imce.magicdraw.plugins",
-
     projectID := {
       val previous = projectID.value
       previous.extra(
@@ -140,58 +128,54 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     artifactZipFile := {
       baseDirectory.value /
         "target" /
-        s"imce_md18_0_sp6_dynamic-scripts_resource_${scalaBinaryVersion.value}-${version.value}.zip"
+        s"imce_${Versions.md_version}_dynamic-scripts_resource_${scalaBinaryVersion.value}-${version.value}.zip"
     },
 
     addArtifact(
-      Artifact("imce_md18_0_sp6_dynamic-scripts", "zip", "zip", Some("resource"), Seq(), None, Map()),
+      Artifact(s"imce_${Versions.md_version}_dynamic-scripts", "zip", "zip", Some("resource"), Seq(), None, Map()),
       artifactZipFile),
-
-    IMCEKeys.nexusJavadocRepositoryRestAPIURL2RepositoryName := Map(
-      "https://oss.sonatype.org/service/local" -> "releases",
-      "https://cae-nexuspro.jpl.nasa.gov/nexus/service/local" -> "JPL"),
-    IMCEKeys.pomRepositoryPathRegex := """\<repositoryPath\>\s*([^\"]*)\s*\<\/repositoryPath\>""".r,
 
     resourceDirectory in Compile := baseDirectory.value / "resources",
 
-    scalaSource in Compile := baseDirectory.value / "src",
-
     unmanagedClasspath in Compile <++= unmanagedJars in Compile,
+
+    resolvers += Resolver.bintrayRepo("jpl-imce", "gov.nasa.jpl.imce"),
+    resolvers += Resolver.bintrayRepo("tiwg", "org.omg.tiwg"),
 
     libraryDependencies ++= Seq(
 
-      "gov.nasa.jpl.imce.magicdraw.libraries" %% "imce-magicdraw-library-enhanced_api"
+      "gov.nasa.jpl.imce" %% "imce.magicdraw.library.enhanced_api"
         % Versions_enhanced_api.version
         % "compile" withSources(),
 
-      "gov.nasa.jpl.imce.dynamic_scripts" %% "imce-dynamic_scripts-generic_dsl"
+      "gov.nasa.jpl.imce" %% "imce.dynamic_scripts.generic_dsl"
         % Versions_dynamic_scripts_generic_dsl.version
         % "compile" withSources() withJavadoc(),
 
-      "gov.nasa.jpl.imce.thirdParty" %% "scala-graph-libraries"
+      "gov.nasa.jpl.imce" %% "imce.third_party.scala_graph_libraries"
         % Versions_scala_graph_libraries.version artifacts
-        Artifact("scala-graph-libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
+        Artifact("imce.third_party.scala_graph_libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
 
-      "gov.nasa.jpl.imce.thirdParty" %% "jena-libraries"
+      "gov.nasa.jpl.imce" %% "imce.third_party.jena_libraries"
         % Versions_jena_libraries.version artifacts
-        Artifact("jena-libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
+        Artifact("imce.third_party.jena_libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
 
-      "gov.nasa.jpl.imce.thirdParty" %% "owlapi-libraries"
+      "gov.nasa.jpl.imce" %% "imce.third_party.owlapi_libraries"
         % Versions_owlapi_libraries.version artifacts
-        Artifact("owlapi-libraries", "zip", "zip", Some("resource"), Seq(), None, Map())
+        Artifact("imce.third_party.owlapi_libraries", "zip", "zip", Some("resource"), Seq(), None, Map())
 
     ),
 
     extractArchives <<= (baseDirectory, update, streams) map {
       (base, up, s) =>
 
-        val mdInstallDir = base / "target" / "imce.md.package"
+        val mdInstallDir = base / "target" / "md.package"
 
         if (!mdInstallDir.exists) {
 
           val zfilter: DependencyFilter = new DependencyFilter {
             def apply(c: String, m: ModuleID, a: Artifact): Boolean = {
-              a.`type` == "zip" && a.extension == "zip" && a.name.startsWith("cae_md18_0")
+              a.`type` == "zip" && a.extension == "zip" && a.name.startsWith(Versions.md_version)
             }
           }
           val zs: Seq[File] = up.matching(zfilter).to[Seq]
@@ -215,7 +199,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     unmanagedJars in Compile <++= (baseDirectory, update, streams, extractArchives) map {
       (base, up, s, _) =>
 
-        val mdInstallDir = base / "target" / "imce.md.package"
+        val mdInstallDir = base / "target" / "md.package"
 
         val mdBinFolder = mdInstallDir / "bin"
         require(mdBinFolder.exists, "md bin: $mdBinFolder")
@@ -250,8 +234,8 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           import com.typesafe.sbt.packager.universal._
           import java.nio.file.attribute.PosixFilePermission
 
-          val mdInstallDir = base / "target" / "imce.md.package"
-          val root = base / "target" / "imce_md18_0_sp6_dynamic-scripts"
+          val mdInstallDir = base / "target" / "md.package"
+          val root = base / "target" / s"imce_${Versions.md_version}_dynamic-scripts"
           s.log.info(s"\n*** top: $root")
 
           val compileConfig: ConfigurationReport = {
