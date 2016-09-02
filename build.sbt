@@ -175,7 +175,8 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
           val zfilter: DependencyFilter = new DependencyFilter {
             def apply(c: String, m: ModuleID, a: Artifact): Boolean = {
-              a.`type` == "zip" && a.extension == "zip" && a.name.startsWith(Versions.md_version)
+              a.`type` == "zip" && a.extension == "zip" &&
+                (a.name.startsWith(Versions.md_version) || a.name.startsWith("cae_"+Versions.md_version))
             }
           }
           val zs: Seq[File] = up.matching(zfilter).to[Seq]
@@ -351,7 +352,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           }
 
           val weaverJar: File = {
-            val weaverJars = (( root / "lib" / "aspectj" ) * "aspectjweaver-*.jar").get
+            val weaverJars = (( root / "lib" / "imce.third_party.aspectj" ) * "aspectjweaver-*.jar").get
             require(1 == weaverJars.size)
             val relJar = weaverJars.head.relativeTo(root)
             require(relJar.isDefined)
@@ -359,7 +360,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           }
 
           val rtJar: File = {
-            val rtJars = (( root / "lib" / "aspectj" ) * "aspectjrt-*.jar").get
+            val rtJars = (( root / "lib" / "imce.third_party.aspectj" ) * "aspectjrt-*.jar").get
             require(1 == rtJars.size)
             val relJar = rtJars.head.relativeTo(root)
             require(relJar.isDefined)
@@ -367,7 +368,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           }
 
           val aspectjJars: Seq[File] = {
-            val ajJars = (( root / "lib" / "aspectj" ) * "*.jar").get
+            val ajJars = (( root / "lib" / "imce.third_party.aspectj" ) * "*.jar").get
             require(1 < ajJars.size)
             (for {
               jar <- ajJars
@@ -376,7 +377,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           }
 
           val scalaLib: File = {
-            val scalaLibs = ((root / "lib" / "scala" ) * "scala-library-*.jar").get
+            val scalaLibs = ((root / "lib" / "imce.third_party.scala" ) * "scala-library-*.jar").get
             require(1 == scalaLibs.size)
             val relJar = scalaLibs.head.relativeTo(root)
             require(relJar.isDefined)
@@ -384,7 +385,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           }
 
           val scalaJars: Seq[File] = {
-            val sJars = (( root / "lib" / "scala" ) * "*.jar").get
+            val sJars = (( root / "lib" / "imce.third_party.scala" ) * "*.jar").get
             require(1 < sJars.size)
             (for {
               jar <- sJars
@@ -393,7 +394,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           }
 
           val otherJars: Seq[File] = {
-            val oJars = (( root / "lib" / "other-scala" ) * "*.jar").get
+            val oJars = (( root / "lib" / "imce.third_party.other_scala" ) * "*.jar").get
             require(1 < oJars.size)
             (for {
               jar <- oJars
