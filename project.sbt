@@ -3,7 +3,7 @@ sbtPlugin := false
 
 name := "imce.dynamic_scripts.magicdraw.plugin"
 
-description := "..."
+description := "Implementation of IMCE's dynamic scripts DSL for MagicDraw"
 
 moduleName := name.value
 
