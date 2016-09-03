@@ -1,0 +1,1395 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>AbstractHierarchicalDisposableTableModel - gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel</title>
+          <meta name="description" content="AbstractHierarchicalDisposableTableModel - gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel" />
+          <meta name="keywords" content="AbstractHierarchicalDisposableTableModel gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../../../index.html';
+            var hash = 'gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <a href="AbstractHierarchicalDisposableTableModel$.html" title="See companion object"><img alt="Class/Object" src="../../../../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a href="../../../../../../package.html" class="extype" name="gov">gov</a>.<a href="../../../../../package.html" class="extype" name="gov.nasa">nasa</a>.<a href="../../../../package.html" class="extype" name="gov.nasa.jpl">jpl</a>.<a href="../../../package.html" class="extype" name="gov.nasa.jpl.dynamicScripts">dynamicScripts</a>.<a href="../../package.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw">magicdraw</a>.<a href="../package.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui">ui</a>.<a href="package.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables">tables</a></p>
+        <h1><a href="AbstractHierarchicalDisposableTableModel$.html" title="See companion object">AbstractHierarchicalDisposableTableModel</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="AbstractHierarchicalDisposableTableModel$.html" title="See companion object">object AbstractHierarchicalDisposableTableModel</a>
+            | <a href="package.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables">package tables</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">AbstractHierarchicalDisposableTableModel</span><span class="result"> extends <a href="AbstractDefaultDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDefaultDisposableTableModel">AbstractDefaultDisposableTableModel</a> with <span class="extype" name="com.jidesoft.grid.HierarchicalTableModel">HierarchicalTableModel</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.jidesoft.grid.HierarchicalTableModel">HierarchicalTableModel</span>, <a href="AbstractDefaultDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDefaultDisposableTableModel">AbstractDefaultDisposableTableModel</a>, <a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a>, <span class="extype" name="com.jidesoft.grid.StyleModel">StyleModel</span>, <span class="extype" name="java.lang.Comparable">Comparable</span>[<a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a>], <span class="extype" name="javax.swing.table.DefaultTableModel">DefaultTableModel</span>, <span class="extype" name="javax.swing.table.AbstractTableModel">AbstractTableModel</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="javax.swing.table.TableModel">TableModel</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">Known Subclasses</span>
+            <div class="subClasses hiddenContent"><a href="DerivedPropertiesHierarchicalTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.DerivedPropertiesHierarchicalTableModel">DerivedPropertiesHierarchicalTableModel</a></div>
+          </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel"><span>AbstractHierarchicalDisposableTableModel</span></li><li class="in" name="com.jidesoft.grid.HierarchicalTableModel"><span>HierarchicalTableModel</span></li><li class="in" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDefaultDisposableTableModel"><span>AbstractDefaultDisposableTableModel</span></li><li class="in" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel"><span>AbstractDisposableTableModel</span></li><li class="in" name="com.jidesoft.grid.StyleModel"><span>StyleModel</span></li><li class="in" name="java.lang.Comparable"><span>Comparable</span></li><li class="in" name="javax.swing.table.DefaultTableModel"><span>DefaultTableModel</span></li><li class="in" name="javax.swing.table.AbstractTableModel"><span>AbstractTableModel</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="javax.swing.table.TableModel"><span>TableModel</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(table:java.util.Vector[java.util.Vector[String]],columns:java.util.Vector[String]):gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel"></a>
+      <a id="&lt;init&gt;:AbstractHierarchicalDisposableTableModel"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">AbstractHierarchicalDisposableTableModel</span><span class="params">(<span name="table">table: <span class="extype" name="java.util.Vector">Vector</span>[<span class="extype" name="java.util.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>, <span name="columns">columns: <span class="extype" name="java.util.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@&lt;init&gt;(table:java.util.Vector[java.util.Vector[String]],columns:java.util.Vector[String]):gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel#dispose" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="dispose():Unit"></a>
+      <a id="dispose():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dispose</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@dispose():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel">AbstractHierarchicalDisposableTableModel</a> → <a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a></dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel#getChildValueAt" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="getChildValueAt(row:Int):Object"></a>
+      <a id="getChildValueAt(Int):AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getChildValueAt</span><span class="params">(<span name="row">row: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getChildValueAt(row:Int):Object" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel">AbstractHierarchicalDisposableTableModel</a> → HierarchicalTableModel</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel#getLabel" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="getLabel:String"></a>
+      <a id="getLabel:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getLabel</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getLabel:String" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a></dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel#update" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="update():scala.collection.immutable.Seq[gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation]"></a>
+      <a id="update():Seq[ValidationAnnotation]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.collection.immutable.Seq">Seq</span>[<a href="../../utils/ValidationAnnotation.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation">ValidationAnnotation</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@update():scala.collection.immutable.Seq[gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation]" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Concrete Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@##():Int" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#addColumn" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addColumn(x$1:Any,x$2:Array[Object]):Unit"></a>
+      <a id="addColumn(Any,Array[AnyRef]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addColumn</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.AnyRef">AnyRef</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@addColumn(x$1:Any,x$2:Array[Object]):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#addColumn" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addColumn(x$1:Any,x$2:java.util.Vector):Unit"></a>
+      <a id="addColumn(Any,Vector):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addColumn</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>, <span name="arg1">arg1: <span class="extype" name="java.util.Vector">Vector</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@addColumn(x$1:Any,x$2:java.util.Vector):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#addColumn" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addColumn(x$1:Any):Unit"></a>
+      <a id="addColumn(Any):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addColumn</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@addColumn(x$1:Any):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#addRow" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addRow(x$1:Array[Object]):Unit"></a>
+      <a id="addRow(Array[AnyRef]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addRow</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.AnyRef">AnyRef</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@addRow(x$1:Array[Object]):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#addRow" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addRow(x$1:java.util.Vector):Unit"></a>
+      <a id="addRow(Vector):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addRow</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.util.Vector">Vector</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@addRow(x$1:java.util.Vector):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#addTableModelListener" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addTableModelListener(x$1:javax.swing.event.TableModelListener):Unit"></a>
+      <a id="addTableModelListener(TableModelListener):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addTableModelListener</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.event.TableModelListener">TableModelListener</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@addTableModelListener(x$1:javax.swing.event.TableModelListener):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel → TableModel</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel#columns" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="columns:java.util.Vector[String]"></a>
+      <a id="columns:Vector[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">columns</span><span class="result">: <span class="extype" name="java.util.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@columns:java.util.Vector[String]" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel">AbstractHierarchicalDisposableTableModel</a> → <a href="AbstractDefaultDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDefaultDisposableTableModel">AbstractDefaultDisposableTableModel</a></dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel#compareTo" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="compareTo(o:gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel):Int"></a>
+      <a id="compareTo(AbstractDisposableTableModel):Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compareTo</span><span class="params">(<span name="o">o: <a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@compareTo(o:gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel):Int" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a> → Comparable</dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#findColumn" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="findColumn(x$1:String):Int"></a>
+      <a id="findColumn(String):Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">findColumn</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@findColumn(x$1:String):Int" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#fireTableCellUpdated" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fireTableCellUpdated(x$1:Int,x$2:Int):Unit"></a>
+      <a id="fireTableCellUpdated(Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fireTableCellUpdated</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@fireTableCellUpdated(x$1:Int,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#fireTableChanged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fireTableChanged(x$1:javax.swing.event.TableModelEvent):Unit"></a>
+      <a id="fireTableChanged(TableModelEvent):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fireTableChanged</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.event.TableModelEvent">TableModelEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@fireTableChanged(x$1:javax.swing.event.TableModelEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#fireTableDataChanged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fireTableDataChanged():Unit"></a>
+      <a id="fireTableDataChanged():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fireTableDataChanged</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@fireTableDataChanged():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#fireTableRowsDeleted" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fireTableRowsDeleted(x$1:Int,x$2:Int):Unit"></a>
+      <a id="fireTableRowsDeleted(Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fireTableRowsDeleted</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@fireTableRowsDeleted(x$1:Int,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#fireTableRowsInserted" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fireTableRowsInserted(x$1:Int,x$2:Int):Unit"></a>
+      <a id="fireTableRowsInserted(Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fireTableRowsInserted</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@fireTableRowsInserted(x$1:Int,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#fireTableRowsUpdated" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fireTableRowsUpdated(x$1:Int,x$2:Int):Unit"></a>
+      <a id="fireTableRowsUpdated(Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fireTableRowsUpdated</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@fireTableRowsUpdated(x$1:Int,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#fireTableStructureChanged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fireTableStructureChanged():Unit"></a>
+      <a id="fireTableStructureChanged():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fireTableStructureChanged</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@fireTableStructureChanged():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel#getCellStyleAt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getCellStyleAt(rowIndex:Int,columnIndex:Int):com.jidesoft.grid.CellStyle"></a>
+      <a id="getCellStyleAt(Int,Int):CellStyle"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getCellStyleAt</span><span class="params">(<span name="rowIndex">rowIndex: <span class="extype" name="scala.Int">Int</span></span>, <span name="columnIndex">columnIndex: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="com.jidesoft.grid.CellStyle">CellStyle</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getCellStyleAt(rowIndex:Int,columnIndex:Int):com.jidesoft.grid.CellStyle" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a> → StyleModel</dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel#getColumnClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getColumnClass(columnIndex:Int):Class[_]"></a>
+      <a id="getColumnClass(Int):Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getColumnClass</span><span class="params">(<span name="columnIndex">columnIndex: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getColumnClass(columnIndex:Int):Class[_]" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel">AbstractHierarchicalDisposableTableModel</a> → AbstractTableModel → TableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#getColumnCount" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getColumnCount():Int"></a>
+      <a id="getColumnCount():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getColumnCount</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getColumnCount():Int" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel → TableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#getColumnName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getColumnName(x$1:Int):String"></a>
+      <a id="getColumnName(Int):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getColumnName</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getColumnName(x$1:Int):String" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel → AbstractTableModel → TableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#getDataVector" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getDataVector():java.util.Vector"></a>
+      <a id="getDataVector():Vector"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getDataVector</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.Vector">Vector</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getDataVector():java.util.Vector" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#getListeners" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getListeners[T&lt;:java.util.EventListener](x$1:Class[T]):Array[T]"></a>
+      <a id="getListeners[T&lt;:EventListener](Class[T]):Array[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getListeners</span><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="java.util.EventListener">EventListener</span></span>]</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.Class">Class</span>[<span class="extype" name="javax.swing.table.AbstractTableModel.getListeners.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="javax.swing.table.AbstractTableModel.getListeners.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getListeners[T&lt;:java.util.EventListener](x$1:Class[T]):Array[T]" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#getRowCount" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getRowCount():Int"></a>
+      <a id="getRowCount():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getRowCount</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getRowCount():Int" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel → TableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#getTableModelListeners" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getTableModelListeners():Array[javax.swing.event.TableModelListener]"></a>
+      <a id="getTableModelListeners():Array[TableModelListener]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getTableModelListeners</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="javax.swing.event.TableModelListener">TableModelListener</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getTableModelListeners():Array[javax.swing.event.TableModelListener]" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#getValueAt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getValueAt(x$1:Int,x$2:Int):Object"></a>
+      <a id="getValueAt(Int,Int):AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getValueAt</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@getValueAt(x$1:Int,x$2:Int):Object" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel → TableModel</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel#hasChild" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hasChild(row:Int):Boolean"></a>
+      <a id="hasChild(Int):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hasChild</span><span class="params">(<span name="row">row: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@hasChild(row:Int):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel">AbstractHierarchicalDisposableTableModel</a> → HierarchicalTableModel</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#insertRow" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="insertRow(x$1:Int,x$2:Array[Object]):Unit"></a>
+      <a id="insertRow(Int,Array[AnyRef]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">insertRow</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.AnyRef">AnyRef</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@insertRow(x$1:Int,x$2:Array[Object]):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#insertRow" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="insertRow(x$1:Int,x$2:java.util.Vector):Unit"></a>
+      <a id="insertRow(Int,Vector):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">insertRow</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg1">arg1: <span class="extype" name="java.util.Vector">Vector</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@insertRow(x$1:Int,x$2:java.util.Vector):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel#isCellEditable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isCellEditable(row:Int,column:Int):Boolean"></a>
+      <a id="isCellEditable(Int,Int):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isCellEditable</span><span class="params">(<span name="row">row: <span class="extype" name="scala.Int">Int</span></span>, <span name="column">column: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@isCellEditable(row:Int,column:Int):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel">AbstractHierarchicalDisposableTableModel</a> → DefaultTableModel → AbstractTableModel → TableModel</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel#isCellStyleOn" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isCellStyleOn():Boolean"></a>
+      <a id="isCellStyleOn():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isCellStyleOn</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@isCellStyleOn():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a> → StyleModel</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel#isExpandable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isExpandable(row:Int):Boolean"></a>
+      <a id="isExpandable(Int):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isExpandable</span><span class="params">(<span name="row">row: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@isExpandable(row:Int):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel">AbstractHierarchicalDisposableTableModel</a> → HierarchicalTableModel</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel#isHierarchical" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isHierarchical(row:Int):Boolean"></a>
+      <a id="isHierarchical(Int):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isHierarchical</span><span class="params">(<span name="row">row: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@isHierarchical(row:Int):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel">AbstractHierarchicalDisposableTableModel</a> → HierarchicalTableModel</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#moveRow" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="moveRow(x$1:Int,x$2:Int,x$3:Int):Unit"></a>
+      <a id="moveRow(Int,Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">moveRow</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg2">arg2: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@moveRow(x$1:Int,x$2:Int,x$3:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#newDataAvailable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newDataAvailable(x$1:javax.swing.event.TableModelEvent):Unit"></a>
+      <a id="newDataAvailable(TableModelEvent):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newDataAvailable</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.event.TableModelEvent">TableModelEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@newDataAvailable(x$1:javax.swing.event.TableModelEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#newRowsAdded" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newRowsAdded(x$1:javax.swing.event.TableModelEvent):Unit"></a>
+      <a id="newRowsAdded(TableModelEvent):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newRowsAdded</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.event.TableModelEvent">TableModelEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@newRowsAdded(x$1:javax.swing.event.TableModelEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#removeRow" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeRow(x$1:Int):Unit"></a>
+      <a id="removeRow(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeRow</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@removeRow(x$1:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.AbstractTableModel#removeTableModelListener" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeTableModelListener(x$1:javax.swing.event.TableModelListener):Unit"></a>
+      <a id="removeTableModelListener(TableModelListener):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeTableModelListener</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.event.TableModelListener">TableModelListener</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@removeTableModelListener(x$1:javax.swing.event.TableModelListener):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractTableModel → TableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#rowsRemoved" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="rowsRemoved(x$1:javax.swing.event.TableModelEvent):Unit"></a>
+      <a id="rowsRemoved(TableModelEvent):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rowsRemoved</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.event.TableModelEvent">TableModelEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@rowsRemoved(x$1:javax.swing.event.TableModelEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#setColumnCount" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setColumnCount(x$1:Int):Unit"></a>
+      <a id="setColumnCount(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setColumnCount</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@setColumnCount(x$1:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#setColumnIdentifiers" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setColumnIdentifiers(x$1:Array[Object]):Unit"></a>
+      <a id="setColumnIdentifiers(Array[AnyRef]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setColumnIdentifiers</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.AnyRef">AnyRef</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@setColumnIdentifiers(x$1:Array[Object]):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#setColumnIdentifiers" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setColumnIdentifiers(x$1:java.util.Vector):Unit"></a>
+      <a id="setColumnIdentifiers(Vector):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setColumnIdentifiers</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.util.Vector">Vector</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@setColumnIdentifiers(x$1:java.util.Vector):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#setDataVector" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setDataVector(x$1:Array[Array[Object]],x$2:Array[Object]):Unit"></a>
+      <a id="setDataVector(Array[Array[AnyRef]],Array[AnyRef]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setDataVector</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.AnyRef">AnyRef</span>]]</span>, <span name="arg1">arg1: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.AnyRef">AnyRef</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@setDataVector(x$1:Array[Array[Object]],x$2:Array[Object]):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#setDataVector" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setDataVector(x$1:java.util.Vector,x$2:java.util.Vector):Unit"></a>
+      <a id="setDataVector(Vector,Vector):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setDataVector</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.util.Vector">Vector</span></span>, <span name="arg1">arg1: <span class="extype" name="java.util.Vector">Vector</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@setDataVector(x$1:java.util.Vector,x$2:java.util.Vector):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#setNumRows" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setNumRows(x$1:Int):Unit"></a>
+      <a id="setNumRows(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setNumRows</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@setNumRows(x$1:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#setRowCount" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setRowCount(x$1:Int):Unit"></a>
+      <a id="setRowCount(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setRowCount</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@setRowCount(x$1:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel</dd></dl></div>
+    </li><li name="javax.swing.table.DefaultTableModel#setValueAt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setValueAt(x$1:Any,x$2:Int,x$3:Int):Unit"></a>
+      <a id="setValueAt(Any,Int,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setValueAt</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg2">arg2: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@setValueAt(x$1:Any,x$2:Int,x$3:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultTableModel → AbstractTableModel → TableModel</dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel#table" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="table:java.util.Vector[java.util.Vector[String]]"></a>
+      <a id="table:Vector[Vector[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">table</span><span class="result">: <span class="extype" name="java.util.Vector">Vector</span>[<span class="extype" name="java.util.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@table:java.util.Vector[java.util.Vector[String]]" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel">AbstractHierarchicalDisposableTableModel</a> → <a href="AbstractDefaultDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDefaultDisposableTableModel">AbstractDefaultDisposableTableModel</a></dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@toString():String" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractHierarchicalDisposableTableModel@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="com.jidesoft.grid.HierarchicalTableModel">
+              <h3>Inherited from <span class="extype" name="com.jidesoft.grid.HierarchicalTableModel">HierarchicalTableModel</span></h3>
+            </div><div class="parent" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDefaultDisposableTableModel">
+              <h3>Inherited from <a href="AbstractDefaultDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDefaultDisposableTableModel">AbstractDefaultDisposableTableModel</a></h3>
+            </div><div class="parent" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">
+              <h3>Inherited from <a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a></h3>
+            </div><div class="parent" name="com.jidesoft.grid.StyleModel">
+              <h3>Inherited from <span class="extype" name="com.jidesoft.grid.StyleModel">StyleModel</span></h3>
+            </div><div class="parent" name="java.lang.Comparable">
+              <h3>Inherited from <span class="extype" name="java.lang.Comparable">Comparable</span>[<a href="AbstractDisposableTableModel.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables.AbstractDisposableTableModel">AbstractDisposableTableModel</a>]</h3>
+            </div><div class="parent" name="javax.swing.table.DefaultTableModel">
+              <h3>Inherited from <span class="extype" name="javax.swing.table.DefaultTableModel">DefaultTableModel</span></h3>
+            </div><div class="parent" name="javax.swing.table.AbstractTableModel">
+              <h3>Inherited from <span class="extype" name="javax.swing.table.AbstractTableModel">AbstractTableModel</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="javax.swing.table.TableModel">
+              <h3>Inherited from <span class="extype" name="javax.swing.table.TableModel">TableModel</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

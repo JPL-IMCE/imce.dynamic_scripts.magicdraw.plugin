@@ -1,0 +1,1423 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>DynamicDiagramContextMenuActionForMultipleSelection - gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection</title>
+          <meta name="description" content="DynamicDiagramContextMenuActionForMultipleSelection - gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection" />
+          <meta name="keywords" content="DynamicDiagramContextMenuActionForMultipleSelection gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../../index.html';
+            var hash = 'gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img alt="Class" src="../../../../../../lib/class_big.png" />
+        <p id="owner"><a href="../../../../../package.html" class="extype" name="gov">gov</a>.<a href="../../../../package.html" class="extype" name="gov.nasa">nasa</a>.<a href="../../../package.html" class="extype" name="gov.nasa.jpl">jpl</a>.<a href="../../package.html" class="extype" name="gov.nasa.jpl.dynamicScripts">dynamicScripts</a>.<a href="../package.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw">magicdraw</a>.<a href="package.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.actions">actions</a></p>
+        <h1>DynamicDiagramContextMenuActionForMultipleSelection</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.actions">package actions</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DynamicDiagramContextMenuActionForMultipleSelection</span><span class="params">(<span name="project">project: <span class="extype" name="com.nomagic.magicdraw.core.Project">Project</span></span>, <span name="diagram">diagram: <span class="extype" name="com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement">DiagramPresentationElement</span></span>, <span name="selected">selected: <span class="extype" name="java.util.Collection">Collection</span>[<span class="extype" name="com.nomagic.magicdraw.uml.symbols.PresentationElement">PresentationElement</span>]</span>, <span name="menuAction">menuAction: <span class="extype" name="gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction">DiagramContextMenuAction</span></span>, <span name="key">key: <span class="extype" name="javax.swing.KeyStroke">KeyStroke</span></span>, <span name="group">group: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="com.nomagic.magicdraw.ui.actions.DefaultDiagramAction">DefaultDiagramAction</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="com.nomagic.magicdraw.ui.actions.DefaultDiagramAction">DefaultDiagramAction</span>, <span class="extype" name="com.nomagic.magicdraw.actions.DiagramAction">DiagramAction</span>, <span class="extype" name="com.nomagic.magicdraw.actions.MDAction">MDAction</span>, <span class="extype" name="com.nomagic.actions.NMAction">NMAction</span>, <span class="extype" name="java.lang.Comparable">Comparable</span>[<span class="extype" name="java.lang.Comparable.T">T</span>], <span class="extype" name="javax.swing.AbstractAction">AbstractAction</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="java.lang.Cloneable">Cloneable</span>, <span class="extype" name="javax.swing.Action">Action</span>, <span class="extype" name="java.awt.event.ActionListener">ActionListener</span>, <span class="extype" name="java.util.EventListener">EventListener</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection"><span>DynamicDiagramContextMenuActionForMultipleSelection</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.nomagic.magicdraw.ui.actions.DefaultDiagramAction"><span>DefaultDiagramAction</span></li><li class="in" name="com.nomagic.magicdraw.actions.DiagramAction"><span>DiagramAction</span></li><li class="in" name="com.nomagic.magicdraw.actions.MDAction"><span>MDAction</span></li><li class="in" name="com.nomagic.actions.NMAction"><span>NMAction</span></li><li class="in" name="java.lang.Comparable"><span>Comparable</span></li><li class="in" name="javax.swing.AbstractAction"><span>AbstractAction</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="java.lang.Cloneable"><span>Cloneable</span></li><li class="in" name="javax.swing.Action"><span>Action</span></li><li class="in" name="java.awt.event.ActionListener"><span>ActionListener</span></li><li class="in" name="java.util.EventListener"><span>EventListener</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(project:com.nomagic.magicdraw.core.Project,diagram:com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement,selected:java.util.Collection[com.nomagic.magicdraw.uml.symbols.PresentationElement],menuAction:gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction,key:javax.swing.KeyStroke,group:String):gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection"></a>
+      <a id="&lt;init&gt;:DynamicDiagramContextMenuActionForMultipleSelection"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DynamicDiagramContextMenuActionForMultipleSelection</span><span class="params">(<span name="project">project: <span class="extype" name="com.nomagic.magicdraw.core.Project">Project</span></span>, <span name="diagram">diagram: <span class="extype" name="com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement">DiagramPresentationElement</span></span>, <span name="selected">selected: <span class="extype" name="java.util.Collection">Collection</span>[<span class="extype" name="com.nomagic.magicdraw.uml.symbols.PresentationElement">PresentationElement</span>]</span>, <span name="menuAction">menuAction: <span class="extype" name="gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction">DiagramContextMenuAction</span></span>, <span name="key">key: <span class="extype" name="javax.swing.KeyStroke">KeyStroke</span></span>, <span name="group">group: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@&lt;init&gt;(project:com.nomagic.magicdraw.core.Project,diagram:com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement,selected:java.util.Collection[com.nomagic.magicdraw.uml.symbols.PresentationElement],menuAction:gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction,key:javax.swing.KeyStroke,group:String):gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="java.lang.Comparable#compareTo" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="compareTo(x$1:T):Int"></a>
+      <a id="compareTo(T):Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compareTo</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.Comparable.T">T</span></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@compareTo(x$1:T):Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Comparable</dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Concrete Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@##():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#accept" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="accept(x$1:com.nomagic.actions.ActionsVisitor):Unit"></a>
+      <a id="accept(ActionsVisitor):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">accept</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.actions.ActionsVisitor">ActionsVisitor</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@accept(x$1:com.nomagic.actions.ActionsVisitor):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#actionPerformed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="actionPerformed(ev:java.awt.event.ActionEvent):Unit"></a>
+      <a id="actionPerformed(ActionEvent):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">actionPerformed</span><span class="params">(<span name="ev">ev: <span class="extype" name="java.awt.event.ActionEvent">ActionEvent</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@actionPerformed(ev:java.awt.event.ActionEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection">DynamicDiagramContextMenuActionForMultipleSelection</a> → MDAction → NMAction → ActionListener</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#addAction" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addAction(x$1:com.nomagic.actions.NMAction):Unit"></a>
+      <a id="addAction(NMAction):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addAction</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.actions.NMAction">NMAction</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@addAction(x$1:com.nomagic.actions.NMAction):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#addPropertyChangeListener" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addPropertyChangeListener(x$1:java.beans.PropertyChangeListener):Unit"></a>
+      <a id="addPropertyChangeListener(PropertyChangeListener):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addPropertyChangeListener</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.beans.PropertyChangeListener">PropertyChangeListener</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@addPropertyChangeListener(x$1:java.beans.PropertyChangeListener):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction → AbstractAction → Action</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#addShotcut" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addShotcut(x$1:javax.swing.KeyStroke):Unit"></a>
+      <a id="addShotcut(KeyStroke):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addShotcut</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.KeyStroke">KeyStroke</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@addShotcut(x$1:javax.swing.KeyStroke):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#addWeakPropertyChangeListener" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addWeakPropertyChangeListener(x$1:java.beans.PropertyChangeListener):Unit"></a>
+      <a id="addWeakPropertyChangeListener(PropertyChangeListener):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addWeakPropertyChangeListener</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.beans.PropertyChangeListener">PropertyChangeListener</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@addWeakPropertyChangeListener(x$1:java.beans.PropertyChangeListener):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#clone" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction → AbstractAction → AnyRef</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#compareTo" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="compareTo(x$1:Any):Int"></a>
+      <a id="compareTo(Any):Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">compareTo</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@compareTo(x$1:Any):Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#createMenuItem" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="createMenuItem(x$1:com.nomagic.actions.c):javax.swing.JMenuItem"></a>
+      <a id="createMenuItem(c):JMenuItem"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">createMenuItem</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.actions.c">c</span></span>)</span><span class="result">: <span class="extype" name="javax.swing.JMenuItem">JMenuItem</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@createMenuItem(x$1:com.nomagic.actions.c):javax.swing.JMenuItem" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#diagram" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="diagram:com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement"></a>
+      <a id="diagram:DiagramPresentationElement"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">diagram</span><span class="result">: <span class="extype" name="com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement">DiagramPresentationElement</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@diagram:com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction → AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#firePropertyChange" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="firePropertyChange(x$1:String,x$2:Any,x$3:Any):Unit"></a>
+      <a id="firePropertyChange(String,Any,Any):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">firePropertyChange</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Any">Any</span></span>, <span name="arg2">arg2: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@firePropertyChange(x$1:String,x$2:Any,x$3:Any):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../com$nomagic$actions.html" class="extype" name="com.nomagic.actions">com.nomagic.actions</a>] </dd><dt>Definition Classes</dt><dd>NMAction → AbstractAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getActions" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getActions():java.util.List[com.nomagic.actions.NMAction]"></a>
+      <a id="getActions():List[NMAction]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getActions</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="com.nomagic.actions.NMAction">NMAction</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getActions():java.util.List[com.nomagic.actions.NMAction]" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getCommandKey" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getCommandKey():javax.swing.KeyStroke"></a>
+      <a id="getCommandKey():KeyStroke"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getCommandKey</span><span class="params">()</span><span class="result">: <span class="extype" name="javax.swing.KeyStroke">KeyStroke</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getCommandKey():javax.swing.KeyStroke" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#getDescription" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getDescription():String"></a>
+      <a id="getDescription():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getDescription</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getDescription():String" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection">DynamicDiagramContextMenuActionForMultipleSelection</a> → NMAction</dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.ui.actions.DefaultDiagramAction#getDiagram" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getDiagram():com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement"></a>
+      <a id="getDiagram():DiagramPresentationElement"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getDiagram</span><span class="params">()</span><span class="result">: <span class="extype" name="com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement">DiagramPresentationElement</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getDiagram():com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultDiagramAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.ui.actions.DefaultDiagramAction#getFirstSelected" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getFirstSelected():com.nomagic.magicdraw.uml.symbols.PresentationElement"></a>
+      <a id="getFirstSelected():PresentationElement"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getFirstSelected</span><span class="params">()</span><span class="result">: <span class="extype" name="com.nomagic.magicdraw.uml.symbols.PresentationElement">PresentationElement</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getFirstSelected():com.nomagic.magicdraw.uml.symbols.PresentationElement" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../com$nomagic$magicdraw$ui$actions.html" class="extype" name="com.nomagic.magicdraw.ui.actions">com.nomagic.magicdraw.ui.actions</a>] </dd><dt>Definition Classes</dt><dd>DefaultDiagramAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getGroup" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getGroup():String"></a>
+      <a id="getGroup():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getGroup</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getGroup():String" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getID" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getID():String"></a>
+      <a id="getID():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getID</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getID():String" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getIcon():javax.swing.Icon"></a>
+      <a id="getIcon():Icon"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getIcon</span><span class="params">()</span><span class="result">: <span class="extype" name="javax.swing.Icon">Icon</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getIcon():javax.swing.Icon" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="javax.swing.AbstractAction#getKeys" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getKeys():Array[Object]"></a>
+      <a id="getKeys():Array[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getKeys</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.AnyRef">AnyRef</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getKeys():Array[Object]" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getLargeIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getLargeIcon():javax.swing.Icon"></a>
+      <a id="getLargeIcon():Icon"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getLargeIcon</span><span class="params">()</span><span class="result">: <span class="extype" name="javax.swing.Icon">Icon</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getLargeIcon():javax.swing.Icon" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getMnemonicKey" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getMnemonicKey():Int"></a>
+      <a id="getMnemonicKey():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getMnemonicKey</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getMnemonicKey():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getName():String"></a>
+      <a id="getName():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getName</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getName():String" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getPropertyChangeListeners" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getPropertyChangeListeners():Array[java.beans.PropertyChangeListener]"></a>
+      <a id="getPropertyChangeListeners():Array[PropertyChangeListener]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getPropertyChangeListeners</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="java.beans.PropertyChangeListener">PropertyChangeListener</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getPropertyChangeListeners():Array[java.beans.PropertyChangeListener]" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction → AbstractAction</dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.ui.actions.DefaultDiagramAction#getSelected" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getSelected():java.util.List[com.nomagic.magicdraw.uml.symbols.PresentationElement]"></a>
+      <a id="getSelected():List[PresentationElement]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getSelected</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="com.nomagic.magicdraw.uml.symbols.PresentationElement">PresentationElement</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getSelected():java.util.List[com.nomagic.magicdraw.uml.symbols.PresentationElement]" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../com$nomagic$magicdraw$ui$actions.html" class="extype" name="com.nomagic.magicdraw.ui.actions">com.nomagic.magicdraw.ui.actions</a>] </dd><dt>Definition Classes</dt><dd>DefaultDiagramAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@Nonnull</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getShortcuts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getShortcuts():java.util.List[javax.swing.KeyStroke]"></a>
+      <a id="getShortcuts():List[KeyStroke]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getShortcuts</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="javax.swing.KeyStroke">KeyStroke</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getShortcuts():java.util.List[javax.swing.KeyStroke]" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getSmallIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getSmallIcon():javax.swing.Icon"></a>
+      <a id="getSmallIcon():Icon"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getSmallIcon</span><span class="params">()</span><span class="result">: <span class="extype" name="javax.swing.Icon">Icon</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getSmallIcon():javax.swing.Icon" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="javax.swing.AbstractAction#getValue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getValue(x$1:String):Object"></a>
+      <a id="getValue(String):AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getValue</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@getValue(x$1:String):Object" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractAction → Action</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#group" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="group:String"></a>
+      <a id="group:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">group</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@group:String" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.nomagic.actions.NMAction#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction → AnyRef → Any</dd></dl></div>
+    </li><li name="javax.swing.AbstractAction#isEnabled" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isEnabled():Boolean"></a>
+      <a id="isEnabled():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isEnabled</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@isEnabled():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractAction → Action</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#isIDGenerated" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isIDGenerated():Boolean"></a>
+      <a id="isIDGenerated():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isIDGenerated</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@isIDGenerated():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#key" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="key:javax.swing.KeyStroke"></a>
+      <a id="key:KeyStroke"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">key</span><span class="result">: <span class="extype" name="javax.swing.KeyStroke">KeyStroke</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@key:javax.swing.KeyStroke" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#menuAction" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="menuAction:gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction"></a>
+      <a id="menuAction:DiagramContextMenuAction"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">menuAction</span><span class="result">: <span class="extype" name="gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction">DiagramContextMenuAction</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@menuAction:gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DiagramContextMenuAction" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#project" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="project:com.nomagic.magicdraw.core.Project"></a>
+      <a id="project:Project"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">project</span><span class="result">: <span class="extype" name="com.nomagic.magicdraw.core.Project">Project</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@project:com.nomagic.magicdraw.core.Project" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="javax.swing.AbstractAction#putValue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="putValue(x$1:String,x$2:Any):Unit"></a>
+      <a id="putValue(String,Any):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">putValue</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@putValue(x$1:String,x$2:Any):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractAction → Action</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#removeAction" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeAction(x$1:com.nomagic.actions.NMAction):Unit"></a>
+      <a id="removeAction(NMAction):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeAction</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.actions.NMAction">NMAction</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@removeAction(x$1:com.nomagic.actions.NMAction):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#removePropertyChangeListener" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removePropertyChangeListener(x$1:java.beans.PropertyChangeListener):Unit"></a>
+      <a id="removePropertyChangeListener(PropertyChangeListener):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removePropertyChangeListener</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.beans.PropertyChangeListener">PropertyChangeListener</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@removePropertyChangeListener(x$1:java.beans.PropertyChangeListener):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction → AbstractAction → Action</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#removeShortcut" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeShortcut(x$1:javax.swing.KeyStroke):Unit"></a>
+      <a id="removeShortcut(KeyStroke):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeShortcut</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.KeyStroke">KeyStroke</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@removeShortcut(x$1:javax.swing.KeyStroke):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#removeWeakPropertyChangeListener" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeWeakPropertyChangeListener(x$1:java.beans.PropertyChangeListener):Unit"></a>
+      <a id="removeWeakPropertyChangeListener(PropertyChangeListener):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeWeakPropertyChangeListener</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.beans.PropertyChangeListener">PropertyChangeListener</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@removeWeakPropertyChangeListener(x$1:java.beans.PropertyChangeListener):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#selected" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="selected:java.util.Collection[com.nomagic.magicdraw.uml.symbols.PresentationElement]"></a>
+      <a id="selected:Collection[PresentationElement]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">selected</span><span class="result">: <span class="extype" name="java.util.Collection">Collection</span>[<span class="extype" name="com.nomagic.magicdraw.uml.symbols.PresentationElement">PresentationElement</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@selected:java.util.Collection[com.nomagic.magicdraw.uml.symbols.PresentationElement]" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.nomagic.actions.NMAction#setActions" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setActions(x$1:java.util.List[_&lt;:com.nomagic.actions.NMAction]):Unit"></a>
+      <a id="setActions(List[_&lt;:NMAction]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setActions</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.util.List">List</span>[_ &lt;: <span class="extype" name="com.nomagic.actions.NMAction">NMAction</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@setActions(x$1:java.util.List[_&lt;:com.nomagic.actions.NMAction]):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#setDescription" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setDescription(x$1:String):Unit"></a>
+      <a id="setDescription(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setDescription</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@setDescription(x$1:String):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.ui.actions.DefaultDiagramAction#setDiagram" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setDiagram(x$1:com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement):Unit"></a>
+      <a id="setDiagram(DiagramPresentationElement):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setDiagram</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement">DiagramPresentationElement</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@setDiagram(x$1:com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultDiagramAction → DiagramAction</dd></dl></div>
+    </li><li name="javax.swing.AbstractAction#setEnabled" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setEnabled(x$1:Boolean):Unit"></a>
+      <a id="setEnabled(Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setEnabled</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@setEnabled(x$1:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractAction → Action</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#setGroup" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setGroup(x$1:String):Unit"></a>
+      <a id="setGroup(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setGroup</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@setGroup(x$1:String):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../com$nomagic$actions.html" class="extype" name="com.nomagic.actions">com.nomagic.actions</a>] </dd><dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#setLargeIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setLargeIcon(x$1:javax.swing.Icon):Unit"></a>
+      <a id="setLargeIcon(Icon):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setLargeIcon</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.Icon">Icon</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@setLargeIcon(x$1:javax.swing.Icon):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#setMnemonicKey" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setMnemonicKey(x$1:Int):Unit"></a>
+      <a id="setMnemonicKey(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setMnemonicKey</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@setMnemonicKey(x$1:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#setName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setName(x$1:String):Unit"></a>
+      <a id="setName(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setName</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@setName(x$1:String):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#setShortcuts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setShortcuts(x$1:java.util.List[javax.swing.KeyStroke]):Unit"></a>
+      <a id="setShortcuts(List[KeyStroke]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setShortcuts</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="javax.swing.KeyStroke">KeyStroke</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@setShortcuts(x$1:java.util.List[javax.swing.KeyStroke]):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#setSmallIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setSmallIcon(x$1:javax.swing.Icon):Unit"></a>
+      <a id="setSmallIcon(Icon):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setSmallIcon</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.Icon">Icon</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@setSmallIcon(x$1:javax.swing.Icon):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#shallowClone" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shallowClone():Object"></a>
+      <a id="shallowClone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shallowClone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@shallowClone():Object" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@toString():String" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection">DynamicDiagramContextMenuActionForMultipleSelection</a> → NMAction → AnyRef → Any</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection#updateState" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="updateState():Unit"></a>
+      <a id="updateState():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">updateState</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@updateState():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection">DynamicDiagramContextMenuActionForMultipleSelection</a> → MDAction → NMAction</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.actions.DynamicDiagramContextMenuActionForMultipleSelection@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="com.nomagic.magicdraw.ui.actions.DefaultDiagramAction">
+              <h3>Inherited from <span class="extype" name="com.nomagic.magicdraw.ui.actions.DefaultDiagramAction">DefaultDiagramAction</span></h3>
+            </div><div class="parent" name="com.nomagic.magicdraw.actions.DiagramAction">
+              <h3>Inherited from <span class="extype" name="com.nomagic.magicdraw.actions.DiagramAction">DiagramAction</span></h3>
+            </div><div class="parent" name="com.nomagic.magicdraw.actions.MDAction">
+              <h3>Inherited from <span class="extype" name="com.nomagic.magicdraw.actions.MDAction">MDAction</span></h3>
+            </div><div class="parent" name="com.nomagic.actions.NMAction">
+              <h3>Inherited from <span class="extype" name="com.nomagic.actions.NMAction">NMAction</span></h3>
+            </div><div class="parent" name="java.lang.Comparable">
+              <h3>Inherited from <span class="extype" name="java.lang.Comparable">Comparable</span>[<span class="extype" name="java.lang.Comparable.T">T</span>]</h3>
+            </div><div class="parent" name="javax.swing.AbstractAction">
+              <h3>Inherited from <span class="extype" name="javax.swing.AbstractAction">AbstractAction</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.lang.Cloneable">
+              <h3>Inherited from <span class="extype" name="java.lang.Cloneable">Cloneable</span></h3>
+            </div><div class="parent" name="javax.swing.Action">
+              <h3>Inherited from <span class="extype" name="javax.swing.Action">Action</span></h3>
+            </div><div class="parent" name="java.awt.event.ActionListener">
+              <h3>Inherited from <span class="extype" name="java.awt.event.ActionListener">ActionListener</span></h3>
+            </div><div class="parent" name="java.util.EventListener">
+              <h3>Inherited from <span class="extype" name="java.util.EventListener">EventListener</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>
