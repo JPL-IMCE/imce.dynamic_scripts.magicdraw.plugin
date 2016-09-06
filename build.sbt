@@ -94,7 +94,12 @@ shellPrompt in ThisBuild := { state => Project.extract(state).currentRef.project
 
 lazy val thisVersion = SettingKey[String]("this-version", "This Module's version")
 
-cleanFiles <+= baseDirectory { base => base / "md.package" }
+lazy val mdInstallDirectory = SettingKey[File]("md-install-directory", "MagicDraw Installation Directory")
+
+mdInstallDirectory in ThisBuild :=
+  (baseDirectory in ThisBuild).value / "target" / "md.package"
+
+cleanFiles += (mdInstallDirectory in ThisBuild).value
 
 lazy val artifactZipFile = taskKey[File]("Location of the zip artifact file")
 
@@ -166,35 +171,45 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
     ),
 
-    extractArchives <<= (baseDirectory, update, streams) map {
-      (base, up, s) =>
-
-        val mdInstallDir = base / "target" / "md.package"
+    extractArchives <<= (baseDirectory, update, streams, mdInstallDirectory in ThisBuild) map {
+      (base, up, s, mdInstallDir) =>
 
         if (!mdInstallDir.exists) {
 
-          val zfilter: DependencyFilter = new DependencyFilter {
-            def apply(c: String, m: ModuleID, a: Artifact): Boolean = {
-              a.`type` == "zip" && a.extension == "zip" &&
-                (a.name.startsWith(Versions.md_version) || a.name.startsWith("cae_"+Versions.md_version))
-            }
-          }
-          val zs: Seq[File] = up.matching(zfilter).to[Seq]
-          zs.foreach { zip =>
-            val files = IO.unzip(zip, mdInstallDir)
-            s.log.info(
-              s"=> created md.install.dir=$mdInstallDir with ${files.size} " +
-                s"files extracted from zip: ${zip.getName}")
-          }
+          val parts = (for {
+            cReport <- up.configurations
+            if cReport.configuration == "compile"
+            mReport <- cReport.modules
+            if mReport.module.organization == "org.omg.tiwg.vendor.nomagic"
+            (artifact, archive) <- mReport.artifacts
+          } yield archive).sorted
 
-          val mdBinFolder = mdInstallDir / "bin"
-          require(mdBinFolder.exists, "md bin: $mdBinFolder")
+          s.log.info(s"Extracting MagicDraw from ${parts.size} parts:")
+          parts.foreach { p => s.log.info(p.getAbsolutePath) }
 
-        } else {
+          val merged = File.createTempFile("md_merged", ".zip")
+          println(s"merged: ${merged.getAbsolutePath}")
+
+          val zip = File.createTempFile("md_no_install", ".zip")
+          println(s"zip: ${zip.getAbsolutePath}")
+
+          val script = File.createTempFile("unzip_md", ".sh")
+          println(s"script: ${script.getAbsolutePath}")
+
+          val out = new java.io.PrintWriter(new java.io.FileOutputStream(script))
+          out.println("#!/bin/bash")
+          out.println(parts.map(_.getAbsolutePath).mkString("cat ", " ", s" > ${merged.getAbsolutePath}"))
+          out.println(s"zip -FF ${merged.getAbsolutePath} --out ${zip.getAbsolutePath}")
+          out.println(s"unzip -q ${zip.getAbsolutePath} -d ${mdInstallDir.getAbsolutePath}")
+          out.close()
+
+          val result = sbt.Process(command="/bin/bash", arguments=Seq[String](script.getAbsolutePath)).!
+
+          require(0 <= result && result <= 2, s"Failed to execute script (exit=$result): ${script.getAbsolutePath}")
+
+        } else
           s.log.info(
             s"=> use existing md.install.dir=$mdInstallDir")
-        }
-
     },
 
     unmanagedJars in Compile <++= (baseDirectory, update, streams, extractArchives) map {
