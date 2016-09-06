@@ -1,5 +1,6 @@
 # IMCE Dynamic Scripts plugin for MagicDraw 18
 
+[![Build Status](https://travis-ci.org/JPL-IMCE/imce.dynamic_scripts.magicdraw.plugin.svg?branch=master)](https://travis-ci.org/JPL-IMCE/imce.dynamic_scripts.magicdraw.plugin)
 [ ![Download](https://api.bintray.com/packages/jpl-imce/gov.nasa.jpl.imce/imce.dynamic_scripts.magicdraw.plugin/images/download.svg) ](https://bintray.com/jpl-imce/gov.nasa.jpl.imce/imce.dynamic_scripts.magicdraw.plugin/_latestVersion)
  
 The IMCE Dynamic Scripts plugin is compatible with any edition of MagicDraw 18.0.
