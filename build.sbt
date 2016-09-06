@@ -327,10 +327,10 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
                 IO.copyFile(fs, root / "lib.sources" / group / fs.name)
 
               }
-              val fd = f.getParentFile.getParentFile / "docs" / (f.name.stripSuffix(".jar") + "-javadoc.jar")
-              if (fd.exists && fd.canRead) {
-                IO.copyFile(fd, root / "lib.javadoc" / group / fd.name)
-              }
+//              val fd = f.getParentFile.getParentFile / "docs" / (f.name.stripSuffix(".jar") + "-javadoc.jar")
+//              if (fd.exists && fd.canRead) {
+//                IO.copyFile(fd, root / "lib.javadoc" / group / fd.name)
+//              }
             }
             r -> files
           }
@@ -355,7 +355,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
           val jarArtifacts = fileArtifactsByType("jar").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
           val srcArtifacts = fileArtifactsByType("sources").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
-          val docArtifacts = fileArtifactsByType("javadoc").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
+//          val docArtifacts = fileArtifactsByType("javadoc").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
 
           val jars = {
             val libs = jarArtifacts.map { case (o, jar) =>
@@ -432,11 +432,11 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
             "lib.sources/" + o + "/" + jar.name
           }
 
-          docArtifacts.foreach { case (o, jar) =>
-            s.log.info(s"* copying javadoc: $o/${jar.name}")
-            IO.copyFile(jar, root / "lib.javadoc" / o / jar.name)
-            "lib.javadoc/" + o + "/" + jar.name
-          }
+//          docArtifacts.foreach { case (o, jar) =>
+//            s.log.info(s"* copying javadoc: $o/${jar.name}")
+//            IO.copyFile(jar, root / "lib.javadoc" / o / jar.name)
+//            "lib.javadoc/" + o + "/" + jar.name
+//          }
 
           val md_imce_script = root / "bin" / "magicdraw.imce"
           IO.copyFile(
