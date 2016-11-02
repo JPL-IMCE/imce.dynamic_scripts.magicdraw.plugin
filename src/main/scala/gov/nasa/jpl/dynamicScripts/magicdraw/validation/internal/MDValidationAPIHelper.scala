@@ -62,7 +62,7 @@ import scala.{AnyVal, Boolean, Option, None, Ordering, Some, StringContext, Unit
 import scala.Predef.{classOf, require, String}
 
 @scala.deprecated("", "")
-class MDValidationAPIHelper(val p: Project) extends AnyVal {
+class MDValidationAPIHelper(@scala.transient val p: Project) extends AnyVal {
 
   def getValidationSuiteHelper
   : ValidationSuiteHelper

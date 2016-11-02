@@ -44,7 +44,7 @@ import scala.{AnyVal, Boolean, StringContext}
 import scala.Predef.{???, classOf}
 
 @scala.deprecated("", "")
-class ElementPathFactory(val e: Element) extends AnyVal {
+class ElementPathFactory(@scala.transient val e: Element) extends AnyVal {
 
   def createPathElement
   : PathElement = {

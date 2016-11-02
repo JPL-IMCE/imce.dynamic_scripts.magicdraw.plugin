@@ -334,8 +334,8 @@ object ClassLoaderHelper {
     }
     catch {
       case ex: InvocationTargetException =>
-        cancelSessionIfNeeded()
         val (t, tMessage) = describeException(Option.apply(ex.getTargetException).getOrElse(ex))
+        cancelSessionIfNeeded()
         ClassLoaderHelper.reportError( cm.s, tMessage, t )
         Failure( ReportedException( t ) )
 

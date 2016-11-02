@@ -85,7 +85,7 @@ import scala.{AnyVal, Boolean, Int, Option, None, Some, StringContext, Unit}
 import scala.Predef.{Map => _, Set => _, _}
 
 @scala.deprecated("", "")
-class ImageMapHelper(val dsPlugin: DynamicScriptsPlugin) extends AnyVal {
+class ImageMapHelper(@scala.transient val dsPlugin: DynamicScriptsPlugin) extends AnyVal {
 
   def linkImage(): ResizableIcon =
     ImageMap16.LINK

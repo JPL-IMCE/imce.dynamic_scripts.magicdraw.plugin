@@ -31,7 +31,7 @@ import scala.{AnyVal, Unit}
 import scala.Predef.{ArrowAssoc, String}
 
 @scala.deprecated("", "")
-class MDGUILogHelper(val guiLog: GUILog) extends AnyVal {
+class MDGUILogHelper(@scala.transient val guiLog: GUILog) extends AnyVal {
 
   def getMDPluginsLog: Logger = MDLog.getPluginsLog
 

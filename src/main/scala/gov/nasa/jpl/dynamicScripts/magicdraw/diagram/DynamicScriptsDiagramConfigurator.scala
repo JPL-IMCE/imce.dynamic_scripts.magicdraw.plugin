@@ -71,7 +71,7 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.actions.shapes._
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 
 @scala.deprecated("", "")
-class MDDiagramHelper(val d: DiagramPresentationElement) extends AnyVal {
+class MDDiagramHelper(@scala.transient val d: DiagramPresentationElement) extends AnyVal {
 
   def hasTrigger: Option[PresentationElement] =
     d.getDiagramSurface match {

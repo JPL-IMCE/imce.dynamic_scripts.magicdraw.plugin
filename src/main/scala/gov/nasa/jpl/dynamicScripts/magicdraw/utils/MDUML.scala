@@ -68,7 +68,7 @@ case class BrowserTreeSelectionInfo
   selection: List[BrowserNodeElementInfo] )
 
 @scala.deprecated("", "")
-class MDUML(val p: Project) extends AnyVal {
+class MDUML(@scala.transient val p: Project) extends AnyVal {
 
   def enableResettingIDs(): Boolean = {
     val mdCounter = p.getCounter
