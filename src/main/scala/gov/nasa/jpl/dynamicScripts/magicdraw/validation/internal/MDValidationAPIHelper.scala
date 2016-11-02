@@ -56,9 +56,8 @@ import scala.collection.JavaConversions.asJavaCollection
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.language.implicitConversions
-import scala.util.Failure
-import scala.util.Success
-import scala.util.Try
+import scala.util.control.Exception._
+import scala.util.{Failure,Success,Try}
 import scala.{AnyVal, Boolean, Option, None, Ordering, Some, StringContext, Unit}
 import scala.Predef.{classOf, require, String}
 
@@ -66,34 +65,36 @@ import scala.Predef.{classOf, require, String}
 class MDValidationAPIHelper(val p: Project) extends AnyVal {
 
   def getValidationSuiteHelper
-  : ValidationSuiteHelper =
-    ValidationSuiteHelper.getInstance(p)
+  : ValidationSuiteHelper
+  = ValidationSuiteHelper.getInstance(p)
 
   def getValidationSeverityLevel
   (severityLevel: String)
-  : EnumerationLiteral =
-    getValidationSuiteHelper.getSeverityLevel(severityLevel)
+  : EnumerationLiteral
+  = getValidationSuiteHelper.getSeverityLevel(severityLevel)
 
-  def isValidationSeverityHigherOrEqual( level1: EnumerationLiteral, level2: EnumerationLiteral ): Boolean =
-    ValidationSuiteHelper.isSeverityHigherOrEqual( level1, level2 )
+  def isValidationSeverityHigherOrEqual( level1: EnumerationLiteral, level2: EnumerationLiteral )
+  : Boolean
+  = ValidationSuiteHelper.isSeverityHigherOrEqual( level1, level2 )
 
   def lookupValidationSuite
   (suiteQualifiedName: String)
-  : Option[Package] =
-    getValidationSuiteHelper.getValidationSuites.find { s =>
+  : Option[Package]
+  = getValidationSuiteHelper.getValidationSuites.find { s =>
       wildCardMatch(s.getQualifiedName, suiteQualifiedName)
     }
 
   def lookupValidationConstraint
   (vSuite: Package, constraintQualifiedName: String)
-  : Option[Constraint] =
-    getValidationSuiteHelper.getValidationRules(vSuite) find { c =>
+  : Option[Constraint]
+  = getValidationSuiteHelper.getValidationRules(vSuite) find { c =>
       wildCardMatch(c.getQualifiedName, constraintQualifiedName)
     }
 
   def getValidationSuiteOfResult
   (r: RuleViolationResult)
-  : Package = {
+  : Package
+  = {
     val c = r.getRule
     getValidationSuiteHelper.getValidationSuites.find { p =>
       getValidationSuiteHelper.getValidationRules(p) contains c
@@ -107,8 +108,8 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
 
   def getRuleRawMessage
   ( c: Constraint )
-  : Option[String] =
-    getValidationSuiteHelper.getRuleRawMessage(c) match {
+  : Option[String]
+  = getValidationSuiteHelper.getRuleRawMessage(c) match {
       case null => None
       case "" => None
       case s => Some(s)
@@ -116,13 +117,14 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
 
   def getRuleSeverityLevel
   ( c: Constraint )
-  : Option[EnumerationLiteral] =
-    Option(getValidationSuiteHelper.getRuleSeverityLevel(c))
+  : Option[EnumerationLiteral]
+  = Option(getValidationSuiteHelper.getRuleSeverityLevel(c))
 
   def updateValidationResultsWindow
   (title: String,
    d: MagicDrawValidationDataResults)
-  : Unit = {
+  : Unit
+  = {
     ValidationResultsWindowManager.updateValidationResultsWindow(
       title,
       d.title,
@@ -139,8 +141,8 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
     */
   def showMDValidationDataResults
   ( d: MagicDrawValidationDataResults )
-  : Unit =
-    if ( d.results.nonEmpty )
+  : Unit
+  = if ( d.results.nonEmpty )
       Utilities.invokeAndWaitOnDispatcher( new Runnable() {
         override def run: Unit = {
           val windowTitle = d.title + System.currentTimeMillis().toString
@@ -229,7 +231,8 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
 
   def doPostSessionActions
   ( message: String, data: MagicDrawValidationDataResults )
-  : Try[Unit] = {
+  : Try[Unit]
+  = {
     if (data.postSessionActions.isEmpty) {
       Success(())
     } else {
@@ -287,37 +290,47 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
 
   def showMDValidationDataResultsAndExecutePostSessionActions
   ( sm: SessionManager, r: MagicDrawValidationDataResults, message: String )
-  : Try[Unit] =
-    try {
-      if (sm.isSessionCreated(p)) {
-        sm.closeSession(p)
+  : Try[Unit]
+  = {
+    val shown
+    : Try[Unit]
+    = nonFatalCatch[Try[Unit]]
+      .withApply { (cause: java.lang.Throwable) =>
+        Failure(cause)
       }
-      showMDValidationDataResults(r)
-      Success(())
-    }
-    finally {
-      doPostSessionActions(message, r) match {
-        case Failure(t) =>
-          return Failure(t)
-        case _ =>
-          ()
+      .apply {
+        if (sm.isSessionCreated(p)) {
+          sm.closeSession(p)
+        }
+
+        showMDValidationDataResults(r)
+
+        Success(())
       }
+
+    doPostSessionActions(message, r) match {
+      case Failure(t) =>
+        // Consider reporting a combination of shown + t
+        Failure(t)
+      case _ =>
+        shown
     }
+  }
 
   def showMDValidationDataResultsIfAny
   ( data: Option[MagicDrawValidationDataResults] )
-  : Unit =
-    data match {
-      case None      =>
-        ()
-      case Some( d ) =>
-        showMDValidationDataResults( d )
-    }
+  : Unit
+  = data match {
+    case None =>
+      ()
+    case Some(d) =>
+      showMDValidationDataResults(d)
+  }
 
   def getMDValidationProfileAndConstraint
   ( validationSuiteQName: String, validationConstraintQName: String )
-  : Option[( Package, Constraint )] =
-    lookupValidationSuite( validationSuiteQName ) match {
+  : Option[( Package, Constraint )]
+  = lookupValidationSuite( validationSuiteQName ) match {
       case None =>
         None
       case Some( vSuite ) =>
@@ -332,7 +345,6 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
   /**
     * Creates a `MagicDrawValidationDataResultsException` for elements, optionally with validation annotation actions
     *
-    * @param p the active MagicDraw project
     * @param validationMessage to be shown as the title of MagicDraw's Validation results window
     * @param elementMessages maps elements to a pair of a validation message and validation annotation actions
     * @param validationSuiteQName the qualified name of a MagicDraw validation suite profile,
@@ -345,40 +357,41 @@ class MDValidationAPIHelper(val p: Project) extends AnyVal {
     elementMessages: Map[Element, ( String, List[NMAction] )],
     validationSuiteQName: String = MDValidationAPIHelper.mdValidationProfileQName,
     validationConstraintQName: String = MDValidationAPIHelper.mdValidationConstraintQName )
-  : MagicDrawValidationDataResultsException =
-    getMDValidationProfileAndConstraint( validationSuiteQName, validationConstraintQName ) match {
-      case None =>
+  : MagicDrawValidationDataResultsException
+  = getMDValidationProfileAndConstraint( validationSuiteQName, validationConstraintQName ) match {
+    case None =>
+      throw new IllegalArgumentException(
+        s"Failed to find MD's Validation Profile " +
+          s"'$validationSuiteQName' & Constraint '$validationConstraintQName'")
+    case Some((vSuite, c)) =>
+      getRuleSeverityLevel(c).fold[MagicDrawValidationDataResultsException](
         throw new IllegalArgumentException(
-          s"Failed to find MD's Validation Profile "+
-            s"'$validationSuiteQName' & Constraint '$validationConstraintQName'" )
-      case Some( ( vSuite, c ) ) =>
-        getRuleSeverityLevel( c ).fold[MagicDrawValidationDataResultsException](
-          throw new IllegalArgumentException(
-            s"Failed to find MD's Validation Security Level "+
-              s"'$validationSuiteQName' & Constraint '$validationConstraintQName'" )
-        ) { level =>
-          val runData = new ValidationRunData(vSuite, false, elementMessages.keys, level)
-          val results =
-            new java.util.ArrayList[RuleViolationResult](
-              elementMessages
-                .map {
-                  case (element, (message, actions)) =>
-                    new RuleViolationResult(new Annotation(element, c, message, actions), c)
-                })
-          MagicDrawValidationDataResultsException(
-            MagicDrawValidationDataResults(
-              validationMessage,
-              runData,
-              results,
-              List[RunnableWithProgress]()))
-        }
-    }
+          s"Failed to find MD's Validation Security Level " +
+            s"'$validationSuiteQName' & Constraint '$validationConstraintQName'")
+      ) { level =>
+        val runData = new ValidationRunData(vSuite, false, elementMessages.keys, level)
+        val results =
+          new java.util.ArrayList[RuleViolationResult](
+            elementMessages
+              .map {
+                case (element, (message, actions)) =>
+                  new RuleViolationResult(new Annotation(element, c, message, actions), c)
+              })
+        MagicDrawValidationDataResultsException(
+          MagicDrawValidationDataResults(
+            validationMessage,
+            runData,
+            results,
+            List[RunnableWithProgress]()))
+      }
+  }
 }
 
 object MDValidationAPIHelper {
 
-  implicit def toMDValidationAPIHelper(p: Project): MDValidationAPIHelper =
-    new MDValidationAPIHelper(p)
+  implicit def toMDValidationAPIHelper(p: Project)
+  : MDValidationAPIHelper
+  = new MDValidationAPIHelper(p)
 
   val mdValidationProfileQName =
     "UML Standard Profile::Validation Profile::Composition Integrity"

@@ -18,12 +18,13 @@
 
 package gov.nasa.jpl.dynamicScripts.magicdraw.specificationDialog
 
-import java.lang.{System, Throwable}
+import java.lang.System
 
 import scala.collection.immutable._
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.immutable.SortedSet
+import scala.util.control.Exception._
 import scala.{Option, None, Some, StringContext, Unit}
 import scala.Predef.String
 
@@ -46,9 +47,6 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.designations.MagicDrawElementKindDe
 import gov.nasa.jpl.dynamicScripts.magicdraw.ui.tables._
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDGUILogHelper
 
-/**
- * @author Nicolas.F.Rouquette@jpl.nasa.gov
- */
 class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecificationNodeConfigurator {
 
   override def configure( node: IConfigurableNode, e: Element ): Unit = {
@@ -143,29 +141,31 @@ class SpecificationNodeConfiguratorForApplicableDynamicScripts extends ISpecific
     }
   }
 
-  def computedFeatureToInfo(
-    cs: DynamicScriptsTypes.ComputedCharacterization,
+  def computedFeatureToInfo
+  ( cs: DynamicScriptsTypes.ComputedCharacterization,
     e: Element,
     ek: MagicDrawElementKindDesignation,
-    computedDerivedFeature: ComputedDerivedFeature ): Option[AbstractDisposableTableModel] =
-    try {
-      Some( computedDerivedFeature match {
+    computedDerivedFeature: ComputedDerivedFeature )
+  : Option[AbstractDisposableTableModel]
+  = nonFatalCatch[Option[AbstractDisposableTableModel]]
+    .withApply { (cause: java.lang.Throwable) =>
+      import MDGUILogHelper._
+      val guiLog = getGUILog
+      val log = guiLog.getMDPluginsLog
+      log.error(s"Cannot create computed derived feature for '$computedDerivedFeature' because of an error", cause)
+      None
+    }
+    .apply {
+      Some(computedDerivedFeature match {
         case f: DynamicScriptsTypes.ComputedDerivedProperty =>
-          DerivedPropertyComputedRowInfo( cs, e, ek, f )
+          DerivedPropertyComputedRowInfo(cs, e, ek, f)
         case f: DynamicScriptsTypes.ComputedDerivedTable =>
-          DerivedPropertyComputedTableInfo( cs, e, ek, f )
+          DerivedPropertyComputedTableInfo(cs, e, ek, f)
         case f: DynamicScriptsTypes.ComputedDerivedTree =>
-          DerivedPropertyComputedTreeInfo( cs, e, ek, f )
+          DerivedPropertyComputedTreeInfo(cs, e, ek, f)
         case f: DynamicScriptsTypes.ComputedDerivedWidget =>
-          DerivedPropertyComputedWidget( cs, e, ek, f )
-      } )
-    } catch {
-      case t: Throwable =>
-        import MDGUILogHelper._
-        val guiLog = getGUILog
-        val log = guiLog.getMDPluginsLog
-        log.error(s"Cannot create computed derived feature for '$computedDerivedFeature' because of an error", t)
-        None
+          DerivedPropertyComputedWidget(cs, e, ek, f)
+      })
     }
 
 }

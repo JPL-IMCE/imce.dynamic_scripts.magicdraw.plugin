@@ -98,9 +98,6 @@ object ImageMapHelper {
     new ImageMapHelper(dsPlugin)
 }
 
-/**
- * @author Nicolas.F.Rouquette@jpl.nasa.gov
- */
 class DynamicScriptsPlugin
   extends Plugin
     with ResourceDependentPlugin
@@ -407,7 +404,7 @@ class DynamicScriptsPlugin
           new ImageIcon( iconURL )
         }
         catch {
-          case e: MalformedURLException =>
+          case _: MalformedURLException =>
             getJPLCustomLinkIcon
         }
     }

@@ -20,7 +20,6 @@ package gov.nasa.jpl.dynamicScripts.magicdraw.commands
 
 import java.io.File
 import java.io.FilenameFilter
-import java.lang.Throwable
 import java.nio.file.Paths
 
 import com.nomagic.task.RunnableWithProgress
@@ -31,6 +30,7 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.{MDUML, TraversePath}
 
 import scala.collection.immutable._
+import scala.util.control.Exception._
 import scala.{Boolean, None, Some, StringContext, Unit}
 import scala.Predef.String
 
@@ -48,50 +48,51 @@ class LoadDynamicScriptFilesCommand( refresh: () => Unit ) extends RunnableWithP
     val p = DynamicScriptsPlugin.getInstance()
     val files = p.getDynamicScriptsOptions.getDynamicScriptConfigurationFiles
     val guiLog = Application.getInstance().getGUILog
-    try {
-      val installRoot = Paths.get( MDUML.getInstallRoot )
-      val configPaths: List[String] = for {
-        file <- files
-        path = Paths.get( file )
-        dsPath = if ( path.isAbsolute ) path else installRoot.resolve( path )
-      } yield dsPath.toFile.getAbsolutePath
-
-      val dsPath = installRoot.resolve("dynamicScripts")
-      val dsRoot = dsPath.toFile
-      val dsFilenameFilter = new FilenameFilter() {
-        override def accept( file: File, name: String ): Boolean =
-          file.isDirectory &&
-            !LoadDynamicScriptFilesCommand.exclude_parent_folder_names.contains(file.getName) &&
-            name.toLowerCase.endsWith(".dynamicscripts") &&
-            new File(file, name).isFile
+    nonFatalCatch[Unit]
+      .withApply { (cause: java.lang.Throwable) =>
+        guiLog.showError(s"Failed to load dynamicScript file", cause)
       }
+      .apply {
+        val installRoot = Paths.get(MDUML.getInstallRoot)
+        val configPaths: List[String] = for {
+          file <- files
+          path = Paths.get(file)
+          dsPath = if (path.isAbsolute) path else installRoot.resolve(path)
+        } yield dsPath.toFile.getAbsolutePath
 
-      val dsPaths: List[String] =
-        if ( dsRoot.exists() && dsRoot.canRead )
-          TraversePath.listFilesRecursively( dsRoot, dsFilenameFilter ).map { file =>
-            dsPath.resolve(file.toPath).toString
-          }
-        else
-          List()
+        val dsPath = installRoot.resolve("dynamicScripts")
+        val dsRoot = dsPath.toFile
+        val dsFilenameFilter = new FilenameFilter() {
+          override def accept(file: File, name: String): Boolean =
+            file.isDirectory &&
+              !LoadDynamicScriptFilesCommand.exclude_parent_folder_names.contains(file.getName) &&
+              name.toLowerCase.endsWith(".dynamicscripts") &&
+              new File(file, name).isFile
+        }
 
-      val paths = (configPaths ::: dsPaths).sorted
+        val dsPaths: List[String] =
+          if (dsRoot.exists() && dsRoot.canRead)
+            TraversePath.listFilesRecursively(dsRoot, dsFilenameFilter).map { file =>
+              dsPath.resolve(file.toPath).toString
+            }
+          else
+            List()
 
-      val message = p.updateRegistryForConfigurationFiles( paths ) match {
-        case None =>
-          refresh()
-          "\nSuccess"
-        case Some( m ) =>
-          "\n"+m
+        val paths = (configPaths ::: dsPaths).sorted
+
+        val message = p.updateRegistryForConfigurationFiles(paths) match {
+          case None =>
+            refresh()
+            "\nSuccess"
+          case Some(m) =>
+            "\n" + m
+        }
+
+        guiLog.log("=============================")
+        guiLog.log(s"Reloaded ${paths.size} dynamic script files:")
+        paths.foreach { f => guiLog.log("\n => " + f) }
+        guiLog.log(message)
+        guiLog.log("=============================")
       }
-
-      guiLog.log( "=============================" )
-      guiLog.log( s"Reloaded ${paths.size} dynamic script files:" )
-      paths.foreach { f => guiLog.log( "\n => "+f ) }
-      guiLog.log( message )
-      guiLog.log( "=============================" )
-    } catch {
-      case t: Throwable =>
-        guiLog.showError( s"Failed to load dynamicScript file", t )
-    }
   }
 }

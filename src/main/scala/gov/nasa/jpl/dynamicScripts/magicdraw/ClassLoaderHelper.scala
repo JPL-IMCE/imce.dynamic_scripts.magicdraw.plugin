@@ -54,9 +54,6 @@ import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 import scala.Predef.{String, augmentString, classOf, refArrayOps, require}
 
-/**
- * @author Nicolas.F.Rouquette@jpl.nasa.gov
- */
 object ClassLoaderHelper {
 
   def reportError
@@ -96,7 +93,7 @@ object ClassLoaderHelper {
   ( t: Throwable, clazz: java.lang.Class[_], action: DynamicScriptInfo, argumentTypes: java.lang.Class[_]* )
   : String =
     s"""|Script method: '${action.methodName.sname}' failed
-        |Argument types:${( argumentTypes map { t => t.getName } ) mkString ( "\n  ", "\n  ", "" )}
+        |Argument types:${( argumentTypes map { at => at.getName } ) mkString ( "\n  ", "\n  ", "" )}
         |Exception: ${t.getClass.getName}
         |Exception message: ${t.getMessage}
         |(do not submit!)""".stripMargin
@@ -394,7 +391,8 @@ object ClassLoaderHelper {
 
   private var dynamicScriptsRootPath: String = null
 
-  def getDynamicScriptsRootPath: String = {
+  def getDynamicScriptsRootPath: String
+  = synchronized {
     if ( dynamicScriptsRootPath == null ) {
       dynamicScriptsRootPath = MDUML.getInstallRoot + File.separator + "dynamicScripts"
     }
