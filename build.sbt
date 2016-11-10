@@ -426,7 +426,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
            |IMCE_CONFIG_DIR="-imce-$ver"
            |
            |IMCE_JAVA_ARGS_PREFIX="\\
-           |-javaagent:$weaverJar\\
+           |-javaagent:$weaverJar \\
            |-Daj.weaving.verbose\\\\\\\\=true \\
            |-Dorg.aspectj.weaver.showWeaveInfo\\\\\\\\=true \\
            |-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
