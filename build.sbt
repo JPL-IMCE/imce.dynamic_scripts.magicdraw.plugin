@@ -71,7 +71,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
     resourceDirectory in Compile := baseDirectory.value / "resources",
 
-    unmanagedClasspath in Compile <++= unmanagedJars in Compile,
+    unmanagedClasspath in Compile ++= (unmanagedJars in Compile).value,
 
     resolvers += Resolver.bintrayRepo("jpl-imce", "gov.nasa.jpl.imce"),
     resolvers += Resolver.bintrayRepo("tiwg", "org.omg.tiwg"),
@@ -159,13 +159,30 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       mdJars
     },
 
-    compile <<= (compile in Compile) dependsOn extractArchives,
+    compile in Compile := {
+      val _ = extractArchives.value
+      (compile in Compile).value
+    },
 
-    publish <<= publish dependsOn zipInstall,
-    PgpKeys.publishSigned <<= PgpKeys.publishSigned dependsOn zipInstall,
+    publish := {
+      val _ = zipInstall.value
+      publish.value
+    },
 
-    publishM2 <<= publishM2 dependsOn zipInstall,
-    PgpKeys.publishLocalSigned <<= PgpKeys.publishLocalSigned dependsOn zipInstall,
+    PgpKeys.publishSigned := {
+      val _ = zipInstall.value
+      PgpKeys.publishSigned.value
+    },
+
+    publishM2 := {
+      val _ = zipInstall.value
+      publishM2.value
+    },
+
+    PgpKeys.publishLocalSigned := {
+      val _ = zipInstall.value
+      PgpKeys.publishLocalSigned.value
+    },
 
     zipInstall := {
       val base = baseDirectory.value
