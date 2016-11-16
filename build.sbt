@@ -31,9 +31,13 @@ mdInstallDirectory in ThisBuild :=
 
 cleanFiles += (mdInstallDirectory in ThisBuild).value
 
-lazy val artifactZipFile = taskKey[File]("Location of the zip artifact file")
+lazy val artifactZipFile = taskKey[File]("Location of the aggregate zip artifact file")
 
-lazy val zipInstall = TaskKey[File]("zip-install", "Zip the MD Installation directory")
+lazy val artifactZip1File = taskKey[File]("Location of the part1 zip artifact file")
+
+lazy val artifactZip2File = taskKey[File]("Location of the part2 zip artifact file")
+
+lazy val zipInstall = TaskKey[Unit]("zip-install", "Zip the MD Installation directory")
 
 lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-magicdraw-plugin", file("."))
   .enablePlugins(IMCEGitPlugin)
@@ -59,15 +63,19 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
         "artifact.kind" -> "magicdraw.resource.plugin")
     },
 
-    artifactZipFile := {
-      baseDirectory.value /
-        "target" /
-        s"imce_${Versions.md_version}_dynamic-scripts_resource_${scalaBinaryVersion.value}-${version.value}.zip"
-    },
+    artifactZipFile := baseDirectory.value / "target" / "aggregate.zip",
+
+    artifactZip1File := baseDirectory.value / "target" / "aggregate_1.zip",
+
+    artifactZip2File := baseDirectory.value / "target" / "aggregate_2.zip",
 
     addArtifact(
-      Artifact(s"imce_${Versions.md_version}_dynamic-scripts", "zip", "zip", Some("resource"), Seq(), None, Map()),
-      artifactZipFile),
+      Artifact(s"imce_${Versions.md_version}_dynamic-scripts", "zip", "zip", Some("part1"), Seq(), None, Map()),
+      artifactZip1File),
+
+    addArtifact(
+      Artifact(s"imce_${Versions.md_version}_dynamic-scripts", "zip", "zip", Some("part2"), Seq(), None, Map()),
+      artifactZip2File),
 
     resourceDirectory in Compile := baseDirectory.value / "resources",
 
@@ -175,8 +183,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     },
 
     publishM2 := {
-      val zip = zipInstall.value
-      require(zip.exists(), "publishM2: zip should exist:\n"+zip)
+      val _ = zipInstall.value
       publishM2.value
     },
 
@@ -191,6 +198,8 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       val s = streams.value
       val ver = version.value
       val zip = artifactZipFile.value
+      val zip1 = artifactZip1File.value
+      val zip2 = artifactZip2File.value
       val libJar = (packageBin in Compile).value
       val libSrc = (packageSrc in Compile).value
       val libDoc = (packageDoc in Compile).value
@@ -377,11 +386,11 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
         otherJars.sorted ++
         jars.sorted).mkString("", "\\\\\\\\:", "\\\\\\\\:")
 
-//      srcArtifacts.foreach { case (o, jar) =>
-//        s.log.info(s"* copying source: $o/${jar.name}")
-//        IO.copyFile(jar, root / "lib.sources" / o / jar.name)
-//        "lib.sources/" + o + "/" + jar.name
-//      }
+      srcArtifacts.foreach { case (o, jar) =>
+        s.log.info(s"* copying source: $o/${jar.name}")
+        IO.copyFile(jar, root / "lib.sources" / o / jar.name)
+        "lib.sources/" + o + "/" + jar.name
+      }
 
       //          docArtifacts.foreach { case (o, jar) =>
       //            s.log.info(s"* copying javadoc: $o/${jar.name}")
@@ -569,6 +578,17 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       ZipHelper.zip(fileMappings, zip)
 
       s.log.info(s"\n*** Created the zip: $zip")
-      zip
+
+      val result = sbt.Process(
+        command = "/usr/bin/zipsplit",
+        arguments = Seq[String](
+          "-n", "262144000",
+          "-b", zip1.getParent,
+          zip.getAbsolutePath
+        )).!
+
+      require(0 == result, s"Failed to execute zipsplit")
+
+      ()
     }
   )
