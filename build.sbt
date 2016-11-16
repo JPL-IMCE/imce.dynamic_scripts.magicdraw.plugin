@@ -181,7 +181,9 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
     AetherKeys.aetherDeploy := AetherKeys.aetherDeploy.dependsOn(zipInstall).value,
 
-    packagedArtifacts := (packagedArtifacts dependsOn zipInstall).value,
+    // See the imce.sbt.plugin dependency:
+    // https://github.com/JPL-IMCE/imce.sbt.plugin/blob/4.12.0/src/main/scala/gov/nasa/jpl/imce/sbt/IMCEPlugin.scala#L155
+    packagedArtifacts in Compile := (packagedArtifacts in Compile).dependsOn(zipInstall).value,
 
     zipInstall := {
       val base = baseDirectory.value
