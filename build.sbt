@@ -2,9 +2,9 @@ import better.files.{File => BFile, _}
 import java.io.File
 import java.nio.file.Files
 
+import aether.AetherKeys
 import sbt.Keys._
 import sbt._
-
 import net.virtualvoid.sbt.graph._
 import com.typesafe.sbt.pgp.PgpKeys
 import com.typesafe.sbt.SbtAspectj._
@@ -12,10 +12,8 @@ import com.typesafe.sbt.SbtAspectj.AspectjKeys._
 
 import scala.xml.{Node => XNode}
 import scala.xml.transform._
-
 import scala.collection.JavaConversions._
 import scala.collection.immutable._
-
 import gov.nasa.jpl.imce.sbt._
 
 updateOptions := updateOptions.value.withCachedResolution(true)
@@ -152,12 +150,13 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           s"=> use existing md.install.dir=$mdInstallDir")
     },
 
+    unmanagedJars in Compile := (unmanagedJars in Compile dependsOn extractArchives).value,
+
     unmanagedJars in Compile ++= {
       val base = baseDirectory.value
       val up = update.value
       val s = streams.value
       val mdInstallDir = (mdInstallDirectory in ThisBuild).value
-      val _ = extractArchives.value
 
       val libJars = ((mdInstallDir / "lib") ** "*.jar").get
       val mdJars = libJars.map { jar => Attributed.blank(jar) }
@@ -167,30 +166,9 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       mdJars
     },
 
-    compile in Compile := {
-      val _ = extractArchives.value
-      (compile in Compile).value
-    },
+    logLevel in AetherKeys.aetherDeploy := Level.Debug,
 
-    PgpKeys.publishSigned := {
-      val _ = zipInstall.taskValue
-      PgpKeys.publishSigned.value
-    },
-
-    publish := {
-      val t = zipInstall.taskValue
-      publish.value
-    },
-
-    publishM2 := {
-      val _ = zipInstall.taskValue
-      publishM2.value
-    },
-
-    PgpKeys.publishLocalSigned := {
-      val t = zipInstall.taskValue
-      PgpKeys.publishLocalSigned.value
-    },
+    packagedArtifacts := (packagedArtifacts dependsOn zipInstall).value,
 
     zipInstall := {
       val base = baseDirectory.value
