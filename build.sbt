@@ -175,7 +175,8 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     },
 
     publishM2 := {
-      val _ = zipInstall.value
+      val zip = zipInstall.value
+      require(zip.exists(), "publishM2: zip should exist:\n"+zip)
       publishM2.value
     },
 
@@ -196,7 +197,6 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       val pom = makePom.value
       val d = buildUTCDate.value
       val sbV = scalaBinaryVersion.value
-
 
       import com.typesafe.sbt.packager.universal._
       import java.nio.file.attribute.PosixFilePermission
@@ -377,11 +377,11 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
         otherJars.sorted ++
         jars.sorted).mkString("", "\\\\\\\\:", "\\\\\\\\:")
 
-      srcArtifacts.foreach { case (o, jar) =>
-        s.log.info(s"* copying source: $o/${jar.name}")
-        IO.copyFile(jar, root / "lib.sources" / o / jar.name)
-        "lib.sources/" + o + "/" + jar.name
-      }
+//      srcArtifacts.foreach { case (o, jar) =>
+//        s.log.info(s"* copying source: $o/${jar.name}")
+//        IO.copyFile(jar, root / "lib.sources" / o / jar.name)
+//        "lib.sources/" + o + "/" + jar.name
+//      }
 
       //          docArtifacts.foreach { case (o, jar) =>
       //            s.log.info(s"* copying javadoc: $o/${jar.name}")
