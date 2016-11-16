@@ -168,27 +168,22 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     },
 
     compile in Compile := {
-      val _ = extractArchives.value
+      val _ = extractArchives.taskValue
       (compile in Compile).value
     },
 
-    publish := {
-      val _ = zipInstall.value
-      publish.value
-    },
-
     PgpKeys.publishSigned := {
-      val _ = zipInstall.value
+      val _ = zipInstall.taskValue
       PgpKeys.publishSigned.value
     },
 
     publishM2 := {
-      val _ = zipInstall.value
+      val _ = zipInstall.taskValue
       publishM2.value
     },
 
     PgpKeys.publishLocalSigned := {
-      val _ = zipInstall.value
+      val _ = zipInstall.taskValue
       PgpKeys.publishLocalSigned.value
     },
 

@@ -44,12 +44,12 @@ target in preprocess := (target in makeSite).value
 ghpages.settings
 
 makeSite := {
-  val _ = dumpLicenseReport.value
+  val _ = dumpLicenseReport.taskValue
   makeSite.value
 }
 
 siteMappings := {
-  val _ = dumpLicenseReport.value
+  val _ = dumpLicenseReport.taskValue
   siteMappings.value
 }
 
