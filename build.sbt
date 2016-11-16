@@ -177,6 +177,8 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
     logLevel in AetherKeys.aetherDeploy := Level.Debug,
 
+    AetherKeys.aetherArtifact := AetherKeys.aetherArtifact.dependsOn(zipInstall).value,
+
     packagedArtifacts := (packagedArtifacts dependsOn zipInstall).value,
 
     zipInstall := {
