@@ -179,6 +179,8 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
     AetherKeys.aetherArtifact := AetherKeys.aetherArtifact.dependsOn(zipInstall).value,
 
+    AetherKeys.aetherDeploy := AetherKeys.aetherDeploy.dependsOn(zipInstall).value,
+
     packagedArtifacts := (packagedArtifacts dependsOn zipInstall).value,
 
     zipInstall := {
