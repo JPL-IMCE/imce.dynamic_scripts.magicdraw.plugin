@@ -150,13 +150,22 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           s"=> use existing md.install.dir=$mdInstallDir")
     },
 
-    unmanagedJars in Compile := (unmanagedJars in Compile dependsOn extractArchives).value,
+    compile in Compile := (compile in Compile).dependsOn(unmanagedJars in Compile).value,
+
+    compileIncremental in Compile := (compileIncremental in Compile).dependsOn(unmanagedJars in Compile).value,
+
+    doc in Compile := (doc in Compile).dependsOn(unmanagedJars in Compile).value,
+
+    unmanagedJars in Compile := ((unmanagedJars in Compile) dependsOn extractArchives).value,
 
     unmanagedJars in Compile ++= {
       val base = baseDirectory.value
       val up = update.value
       val s = streams.value
       val mdInstallDir = (mdInstallDirectory in ThisBuild).value
+
+      // this should be unecessary; however, without it, it is not executed early enough
+      val _ = extractArchives.value
 
       val libJars = ((mdInstallDir / "lib") ** "*.jar").get
       val mdJars = libJars.map { jar => Attributed.blank(jar) }
