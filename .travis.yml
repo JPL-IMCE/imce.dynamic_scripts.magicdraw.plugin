@@ -1,6 +1,13 @@
 # Use container-based infrastructure
 sudo: false
 
+# Oracle JDK 1.8.0_31 (the default) fails to handle SBT task dependencies properly (a dependent may start too early)
+# Oracle JDK 1.8.0_102 handles SBT task dependencies correctly.
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
 # These directories are cached to S3 at the end of the build
 cache:
   directories:

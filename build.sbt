@@ -172,33 +172,25 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       (compile in Compile).value
     },
 
-    PgpKeys.publishSigned <<= PgpKeys.publishSigned dependsOn zipInstall,
+    PgpKeys.publishSigned := {
+      val _ = zipInstall.taskValue
+      PgpKeys.publishSigned.value
+    },
 
-//    PgpKeys.publishSigned := {
-//      val _ = zipInstall.taskValue
-//      PgpKeys.publishSigned.value
-//    },
+    publish := {
+      val t = zipInstall.taskValue
+      publish.value
+    },
 
-    publish <<= publish dependsOn zipInstall,
+    publishM2 := {
+      val _ = zipInstall.taskValue
+      publishM2.value
+    },
 
-//    publish := {
-//      val t = zipInstall.taskValue
-//      publish.value
-//    },
-
-    publishM2 <<= publishM2 dependsOn zipInstall,
-
-//    publishM2 := {
-//      val _ = zipInstall.taskValue
-//      publishM2.value
-//    },
-
-    PgpKeys.publishLocalSigned <<=  PgpKeys.publishLocalSigned dependsOn zipInstall,
-
-//    PgpKeys.publishLocalSigned := {
-//      val t = zipInstall.taskValue
-//      PgpKeys.publishLocalSigned.value
-//    },
+    PgpKeys.publishLocalSigned := {
+      val t = zipInstall.taskValue
+      PgpKeys.publishLocalSigned.value
+    },
 
     zipInstall := {
       val base = baseDirectory.value
