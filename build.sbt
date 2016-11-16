@@ -63,11 +63,11 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
         "artifact.kind" -> "magicdraw.resource.plugin")
     },
 
-    artifactZipFile := baseDirectory.value / "target" / "aggregate.zip",
+    artifactZipFile := baseDirectory.value / "target" / "bundle.zip",
 
-    artifactZip1File := baseDirectory.value / "target" / "aggregate_1.zip",
+    artifactZip1File := baseDirectory.value / "target" / "bundle1.zip",
 
-    artifactZip2File := baseDirectory.value / "target" / "aggregate_2.zip",
+    artifactZip2File := baseDirectory.value / "target" / "bundle2.zip",
 
     addArtifact(
       Artifact(s"imce_${Versions.md_version}_dynamic-scripts", "zip", "zip", Some("part1"), Seq(), None, Map()),
