@@ -206,7 +206,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       if (zip.exists() && zip1.exists() && zip2.exists()) {
         s.log.warn(s"Zip file already created (${zip.length()} bytes)\n$zip")
         s.log.warn(s"Part1 file already created (${zip1.length()} bytes)\n$zip1")
-        s.log.warn(s"Part2 file already created (${zip1.length()} bytes)\n$zip1")
+        s.log.warn(s"Part2 file already created (${zip2.length()} bytes)\n$zip2")
 
       } else {
         val mdInstallDir = base / "target" / "md.package"
@@ -578,10 +578,11 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
         s.log.info(s"\n*** Created the zip: $zip")
 
+        // reduce the size to 240mb to force creating 2 zip files
         val result = sbt.Process(
           command = "/usr/bin/zipsplit",
           arguments = Seq[String](
-            "-n", "262144000",
+            "-n", "251658240",
             "-b", zip1.getParent,
             zip.getAbsolutePath
           )).!
@@ -590,7 +591,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
         s.log.warn(s"Zip created (${zip.length()} bytes)\n$zip")
         s.log.warn(s"Part1 created (${zip1.length()} bytes)\n$zip1")
-        s.log.warn(s"Part2 created (${zip1.length()} bytes)\n$zip1")
+        s.log.warn(s"Part2 created (${zip2.length()} bytes)\n$zip2")
 
         ()
       }
