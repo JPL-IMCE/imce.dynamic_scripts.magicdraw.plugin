@@ -403,7 +403,7 @@ object MDValidationAPIHelper {
   val SEVERITY_LEVEL_ORDERING = new Ordering[EnumerationLiteral]() {
 
     override def compare( level1: EnumerationLiteral, level2: EnumerationLiteral ) =
-      if ( level1.equals( level2 ) ) 0
+      if ( level1 == level2 ) 0
       else if ( ValidationSuiteHelper.isSeverityHigherOrEqual( level1, level2 ) ) -1
       else 1
 

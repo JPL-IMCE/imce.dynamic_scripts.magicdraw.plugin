@@ -82,6 +82,9 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     resolvers += Resolver.bintrayRepo("jpl-imce", "gov.nasa.jpl.imce"),
     resolvers += Resolver.bintrayRepo("tiwg", "org.omg.tiwg"),
 
+    resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases",
+    scalacOptions in (Compile, doc) += "-Xplugin-disable:artima-supersafe",
+
     libraryDependencies ++= Seq(
 
       "gov.nasa.jpl.imce" %% "imce.magicdraw.library.enhanced_api"
@@ -111,39 +114,15 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       val up = update.value
       val s = streams.value
       val mdInstallDir = (mdInstallDirectory in ThisBuild).value
+      val showDownloadProgress = true
 
       if (!mdInstallDir.exists) {
 
-        val parts = (for {
-          cReport <- up.configurations
-          if cReport.configuration == "compile"
-          mReport <- cReport.modules
-          if mReport.module.organization == "org.omg.tiwg.vendor.nomagic"
-          (artifact, archive) <- mReport.artifacts
-        } yield archive).sorted
-
-        s.log.info(s"Extracting MagicDraw from ${parts.size} parts:")
-        parts.foreach { p => s.log.info(p.getAbsolutePath) }
-
-        val merged = File.createTempFile("md_merged", ".zip")
-        println(s"merged: ${merged.getAbsolutePath}")
-
-        val zip = File.createTempFile("md_no_install", ".zip")
-        println(s"zip: ${zip.getAbsolutePath}")
-
-        val script = File.createTempFile("unzip_md", ".sh")
-        println(s"script: ${script.getAbsolutePath}")
-
-        val out = new java.io.PrintWriter(new java.io.FileOutputStream(script))
-        out.println("#!/bin/bash")
-        out.println(parts.map(_.getAbsolutePath).mkString("cat ", " ", s" > ${merged.getAbsolutePath}"))
-        out.println(s"zip -FF ${merged.getAbsolutePath} --out ${zip.getAbsolutePath}")
-        out.println(s"unzip -q ${zip.getAbsolutePath} -d ${mdInstallDir.getAbsolutePath}")
-        out.close()
-
-        val result = sbt.Process(command = "/bin/bash", arguments = Seq[String](script.getAbsolutePath)).!
-
-        require(0 <= result && result <= 2, s"Failed to execute script (exit=$result): ${script.getAbsolutePath}")
+        MagicDrawDownloader.fetchMagicDraw(
+          s.log, showDownloadProgress,
+          up,
+          credentials.value,
+          mdInstallDir, base / "target" / "no_install.zip")
 
       } else
         s.log.info(
@@ -164,7 +143,6 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       val s = streams.value
       val mdInstallDir = (mdInstallDirectory in ThisBuild).value
 
-      // this should be unecessary; however, without it, it is not executed early enough
       val _ = extractArchives.value
 
       val libJars = ((mdInstallDir / "lib") ** "*.jar").get

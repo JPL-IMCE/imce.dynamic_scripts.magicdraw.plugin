@@ -48,7 +48,7 @@ case class DoubleClickMouseListener[T](
   override def mouseClicked( ev: MouseEvent ): Unit =
     if ( ev.getClickCount() == 2 && ev.getButton() == MouseEvent.BUTTON1 ) {
       val source = ev.getSource()
-      require( _table.equals( source ) )
+      require( _table == source )
       val row = _table.rowAtPoint( ev.getPoint() )
       val col = _table.columnAtPoint( ev.getPoint() )
       _table.getModel.getValueAt( row, col ) match {
