@@ -148,7 +148,7 @@ object DrawPathDiagramActionHelper {
                   m
               }
 
-              val r = creatorHelper.invokeMethod(m, action, pe, point, e)
+              val r: java.lang.Object = creatorHelper.invokeMethod(m, action, pe, point, e)
 
               val currentTime = System.currentTimeMillis()
               log.info(s"$message took ${prettyDurationFromTo(previousTime, currentTime)}")

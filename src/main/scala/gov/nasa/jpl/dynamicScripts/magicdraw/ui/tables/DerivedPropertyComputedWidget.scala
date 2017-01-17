@@ -23,8 +23,8 @@ import java.awt.event.ActionEvent
 import java.lang.{Class, IllegalArgumentException, Object, System, Thread}
 
 import scala.collection.immutable._
-import scala.util.{Failure, Success}
-import scala.{Int, Option, None, Some, StringContext, Unit}
+import scala.util.{Failure, Success, Try}
+import scala.{Any, Int, Option, None, Some, StringContext, Unit}
 import scala.Predef.{classOf, require, String}
 
 import com.nomagic.magicdraw.core.Project
@@ -44,10 +44,10 @@ case class DerivedPropertyComputedWidget(
   computedDerivedWidget: ComputedDerivedWidget )
   extends DerivedPropertyComputedInfo( e, ek, computedDerivedWidget ) {
 
-  var value: Component = null
+  private var value: Component = null
 
   val defaultLabel: String = s"/${computedDerivedWidget.name.hname}"
-  var label: String = defaultLabel
+  private var label: String = defaultLabel
 
   override def dispose(): Unit = {
     value = null
@@ -86,10 +86,10 @@ case class DerivedPropertyComputedWidget(
         ClassLoaderHelper.createDynamicScriptClassLoader( computedDerivedWidget ) match {
           case Failure( t ) =>
             ClassLoaderHelper.reportError( computedDerivedWidget, message, t )
-            return Seq()
+            Seq()
 
           case Success( scriptCL ) => {
-            val localClassLoader = Thread.currentThread().getContextClassLoader()
+            val localClassLoader = Thread.currentThread().getContextClassLoader
             Thread.currentThread().setContextClassLoader( scriptCL )
 
             try {
@@ -98,25 +98,27 @@ case class DerivedPropertyComputedWidget(
                 classOf[MagicDrawElementKindDesignation], classOf[Element] ) match {
                   case Failure( t ) =>
                     ClassLoaderHelper.reportError( computedDerivedWidget, message, t )
-                    return Seq()
+                    Seq()
 
                   case Success( cm ) =>
-                    val result = ClassLoaderHelper.invokeAndReport( previousTime, Project.getProject( e ), null, cm, ek, e )
+                    val result
+                    : Try[Any]
+                    = ClassLoaderHelper.invokeAndReport( previousTime, Project.getProject( e ), null, cm, ek, e )
                     result match {
                       case Failure( t ) =>
-                        return Seq()
+                        Seq()
                       case Success( ( component: Component, rs: Seq[_] ) ) =>
                         DerivedPropertyComputedWidget.asSeqOfValidationAnnotation( rs ) match {
                           case None =>
                             ClassLoaderHelper.reportError( computedDerivedWidget, message, new IllegalArgumentException( s"Unrecognized result -- expected: Seq[ValidationAnnotation], got: ${rs.getClass.getName}" ) )
-                            return Seq()
+                            Seq()
                           case Some( annotations ) =>
                             value = component
                             annotations
                         }
                       case Success( x ) =>
                         ClassLoaderHelper.reportError( computedDerivedWidget, message, new IllegalArgumentException( s"Unrecognized result -- expected: ( java.awt.Component, Seq[ValidationAnnotation] ), got: ${x.getClass.getName}" ) )
-                        return Seq()
+                        Seq()
                     }
                 }
             } finally {
@@ -134,10 +136,11 @@ case class DerivedPropertyComputedWidget(
 object DerivedPropertyComputedWidget {
 
   def asSeqOfValidationAnnotation( rs: Seq[_] ): Option[Seq[ValidationAnnotation]] =
-    if ( rs.forall( _ match {
-      case ( _: ValidationAnnotation ) => true
-      case _                           => false
-    } ) )
+    if ( rs.forall {
+      case (_: ValidationAnnotation) => true
+      case _ => false
+    } )
       Some( rs.asInstanceOf[Seq[ValidationAnnotation]] )
-    else None
+    else
+      None
 }

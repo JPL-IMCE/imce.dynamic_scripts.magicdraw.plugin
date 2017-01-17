@@ -22,8 +22,8 @@ import java.awt.event.ActionEvent
 import java.lang.{Object, System, Thread}
 
 import scala.collection.immutable._
-import scala.util.{Failure, Success}
-import scala.{Int, None, Some, StringContext, Unit}
+import scala.util.{Failure, Success, Try}
+import scala.{Any, Int, None, Some, StringContext, Unit}
 import scala.Predef.{classOf, require, String}
 
 import com.nomagic.magicdraw.core.Project
@@ -38,23 +38,23 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-case class DerivedPropertyComputedRowInfo(
-  cs: ComputedCharacterization,
+case class DerivedPropertyComputedRowInfo
+( cs: ComputedCharacterization,
   e: Element,
   ek: MagicDrawElementKindDesignation,
   computedDerivedProperty: ComputedDerivedProperty )
   extends DerivedPropertyComputedInfo( e, ek, computedDerivedProperty ) {
 
-  var values: Seq[AbstractTreeNodeInfo] = null
+  private var values: Seq[AbstractTreeNodeInfo] = null
 
   override def dispose(): Unit = values = null
 
-  val defaultLabel: String = computedDerivedProperty.valueType match {
+  private val defaultLabel: String = computedDerivedProperty.valueType match {
     case None       => s"/${computedDerivedProperty.name.hname}"
     case Some( vt ) => s"/${computedDerivedProperty.name.hname}: ${vt.typeName.hname}"
   }
 
-  var label: String = defaultLabel
+  private var label: String = defaultLabel
 
   override def getLabel: String = label
 
@@ -84,10 +84,10 @@ case class DerivedPropertyComputedRowInfo(
         ClassLoaderHelper.createDynamicScriptClassLoader( computedDerivedProperty ) match {
           case Failure( t ) =>
             ClassLoaderHelper.reportError( computedDerivedProperty, message, t )
-            return Seq()
+            Seq()
 
           case Success( scriptCL ) => {
-            val localClassLoader = Thread.currentThread().getContextClassLoader()
+            val localClassLoader = Thread.currentThread().getContextClassLoader
             Thread.currentThread().setContextClassLoader( scriptCL )
 
             try {
@@ -96,19 +96,19 @@ case class DerivedPropertyComputedRowInfo(
                 classOf[MagicDrawElementKindDesignation], classOf[Element] ) match {
                   case Failure( t ) =>
                     ClassLoaderHelper.reportError( computedDerivedProperty, message, t )
-                    return Seq()
+                    Seq()
 
                   case Success( cm ) =>
-                    val result = ClassLoaderHelper.invokeAndReport(
+                    val result: Try[Any] = ClassLoaderHelper.invokeAndReport(
                       previousTime, Project.getProject( e ), null, cm, ek, e )
                     result match {
                       case Failure( t ) =>
-                        return Seq()
+                        Seq()
                       case Success( x ) =>
                         DerivedPropertyComputedInfo.anyToInfo( x ) match {
                           case Failure( t ) =>
                             ClassLoaderHelper.reportError( computedDerivedProperty, message, t )
-                            return Seq()
+                            Seq()
                           case Success( nodes ) =>
                             values = nodes
                             label = s"$defaultLabel => ${values.size} values"

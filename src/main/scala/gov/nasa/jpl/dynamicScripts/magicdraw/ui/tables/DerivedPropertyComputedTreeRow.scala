@@ -58,7 +58,7 @@ case class DerivedPropertyComputedTreeRow( info: AbstractTreeNodeInfo,
     }
 
   override def getCellClassAt( columnIndex: Int ): Class[_] = {
-    val value = getValueAt( columnIndex )
+    val value: Object = getValueAt( columnIndex )
     value match {
       case x: TreeNodeInfo =>
         classOf[DerivedPropertyComputedTreeRow]

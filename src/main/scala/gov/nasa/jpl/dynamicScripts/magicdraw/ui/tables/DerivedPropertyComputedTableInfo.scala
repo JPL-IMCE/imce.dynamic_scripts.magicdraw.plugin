@@ -22,8 +22,8 @@ import java.lang.{IllegalArgumentException, Object, System, Thread}
 import java.awt.event.ActionEvent
 
 import scala.collection.immutable._
-import scala.util.{Failure, Success}
-import scala.{Int, Option, None, Some, StringContext, Unit}
+import scala.util.{Failure, Success, Try}
+import scala.{Any, Int, Option, None, Some, StringContext, Unit}
 import scala.Predef.{classOf, require, String}
 
 import com.nomagic.magicdraw.core.Project
@@ -38,8 +38,8 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.utils.ValidationAnnotation
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-case class DerivedPropertyComputedTableInfo(
-  cs: ComputedCharacterization,
+case class DerivedPropertyComputedTableInfo
+( cs: ComputedCharacterization,
   e: Element,
   ek: MagicDrawElementKindDesignation,
   computedDerivedTable: ComputedDerivedTable )
@@ -50,10 +50,10 @@ case class DerivedPropertyComputedTableInfo(
 
   val columnValueTypes = computedDerivedTable.columnValueTypes.get
 
-  var values: Seq[Map[String, AbstractTreeNodeInfo]] = null
+  private var values: Seq[Map[String, AbstractTreeNodeInfo]] = null
 
   val defaultLabel: String = s"/${computedDerivedTable.name.hname}"
-  var label: String = defaultLabel
+  private var label: String = defaultLabel
 
   override def dispose(): Unit = values = null
 
@@ -94,10 +94,10 @@ case class DerivedPropertyComputedTableInfo(
         ClassLoaderHelper.createDynamicScriptClassLoader( computedDerivedTable ) match {
           case Failure( t ) =>
             ClassLoaderHelper.reportError( computedDerivedTable, message, t )
-            return Seq()
+            Seq()
 
           case Success( scriptCL ) => {
-            val localClassLoader = Thread.currentThread().getContextClassLoader()
+            val localClassLoader = Thread.currentThread().getContextClassLoader
             Thread.currentThread().setContextClassLoader( scriptCL )
 
             try {
@@ -106,19 +106,19 @@ case class DerivedPropertyComputedTableInfo(
                 classOf[MagicDrawElementKindDesignation], classOf[Element] ) match {
                   case Failure( t ) =>
                     ClassLoaderHelper.reportError( computedDerivedTable, message, t )
-                    return Seq()
+                    Seq()
 
                   case Success( cm ) =>
-                    val result = ClassLoaderHelper.invokeAndReport(
+                    val result: Try[Any] = ClassLoaderHelper.invokeAndReport(
                       previousTime, Project.getProject( e ), null, cm, ek, e )
                     result match {
                       case Failure( t ) =>
-                        return Seq()
+                        Seq()
                       case Success( rs: Seq[_] ) =>
                         DerivedPropertyComputedTableInfo.asSeqOfMapOfStringToAbstractTreeNodeInfo( rs ) match {
                           case None =>
                             ClassLoaderHelper.reportError( computedDerivedTable, message, new IllegalArgumentException( s"Unrecognized result -- expected: Seq[Map[String, Seq[AbstractTreeNodeInfo]]], got: ${rs.getClass.getName}" ) )
-                            return Seq()
+                            Seq()
                           case Some( rTable ) =>
                             values = rTable
                             label = s"$defaultLabel => ${values.size} values"
@@ -126,7 +126,7 @@ case class DerivedPropertyComputedTableInfo(
                         }
                       case Success( x ) =>
                         ClassLoaderHelper.reportError( computedDerivedTable, message, new IllegalArgumentException( s"Unrecognized result -- expected: Seq[Map[String, Seq[AbstractTreeNodeInfo]]], got: ${x.getClass.getName}" ) )
-                        return Seq()
+                        Seq()
                     }
                 }
             } finally {
@@ -147,15 +147,16 @@ object DerivedPropertyComputedTableInfo {
    * Seq[Map[String, AbstractTreeNodeInfo]]
    */
   def asSeqOfMapOfStringToAbstractTreeNodeInfo( rs: Seq[_] ): Option[Seq[Map[String, AbstractTreeNodeInfo]]] =
-    if ( rs.forall( _ match {
+    if ( rs.forall {
       case m: Map[_, _] =>
-        m.forall( _ match {
-          case ( _: String, _: AbstractTreeNodeInfo ) => true
-          case ( _, _ )                               => false
-        } )
+        m.forall {
+          case (_: String, _: AbstractTreeNodeInfo) => true
+          case (_, _) => false
+        }
       case _ =>
         false
-    } ) )
+    } )
       Some( rs.asInstanceOf[Seq[Map[String, AbstractTreeNodeInfo]]] )
-    else None
+    else
+      None
 }

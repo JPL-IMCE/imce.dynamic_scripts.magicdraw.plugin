@@ -292,7 +292,7 @@ object ClassLoaderHelper {
 
       import validation.internal.MDValidationAPIHelper._
 
-      val r = cm.m.invoke( null, actionAndArgumentValues: _* )
+      val r: java.lang.Object = cm.m.invoke( null, actionAndArgumentValues: _* )
 
       val currentTime = System.currentTimeMillis()
       log.info( s"$message took ${prettyDurationFromTo(previousTime, currentTime)}" )

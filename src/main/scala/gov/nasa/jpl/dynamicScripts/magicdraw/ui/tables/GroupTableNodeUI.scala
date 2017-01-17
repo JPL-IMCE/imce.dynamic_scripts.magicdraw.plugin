@@ -99,8 +99,8 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.validation.internal.MDValidationAPI
  * }}}
     * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
-case class GroupTableNodeUI(
-  derived: DynamicScriptsTypes.ComputedDerivedTree,
+case class GroupTableNodeUI
+( derived: DynamicScriptsTypes.ComputedDerivedTree,
   rows: Seq[Map[String, AbstractTreeNodeInfo]],
   columns: Seq[String] ) {
 
@@ -409,7 +409,7 @@ object GroupTableNodeUI {
       override def getCellClassAt( row: Int, column: Int ): Class[_] = getColumnClass( column )
 
       override def getValueAt( row: Int, column: Int ): Object = {
-        val value = super.getValueAt( row, column )
+        val value: java.lang.Object = super.getValueAt( row, column )
         value
       }
 

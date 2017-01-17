@@ -40,17 +40,18 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 /**
  * @author Nicolas.F.Rouquette@jpl.nasa.gov
  */
-case class DoubleClickMouseListener[T](
-  _table: JTable,
+case class DoubleClickMouseListener[T]
+( _table: JTable,
   callback: PartialFunction[( T, MouseEvent, Int, Int ), Unit] )( implicit tag: ClassTag[T] )
   extends MouseListener() {
 
-  override def mouseClicked( ev: MouseEvent ): Unit =
-    if ( ev.getClickCount() == 2 && ev.getButton() == MouseEvent.BUTTON1 ) {
-      val source = ev.getSource()
+  override def mouseClicked( ev: MouseEvent )
+  : Unit
+  = if ( ev.getClickCount == 2 && ev.getButton == MouseEvent.BUTTON1 ) {
+      val source: java.lang.Object = ev.getSource
       require( _table == source )
-      val row = _table.rowAtPoint( ev.getPoint() )
-      val col = _table.columnAtPoint( ev.getPoint() )
+      val row = _table.rowAtPoint( ev.getPoint )
+      val col = _table.columnAtPoint( ev.getPoint )
       _table.getModel.getValueAt( row, col ) match {
         case t: T =>
           callback.lift( Tuple4(t, ev, row, col ) )
@@ -68,8 +69,10 @@ case class DoubleClickMouseListener[T](
 
 object DoubleClickMouseListener {
 
-  def createAbstractTreeNodeInfoDoubleClickMouseListener( table: JideTable ): DoubleClickMouseListener[AbstractTreeNodeInfo] =
-    DoubleClickMouseListener[AbstractTreeNodeInfo](
+  def createAbstractTreeNodeInfoDoubleClickMouseListener
+  ( table: JideTable )
+  : DoubleClickMouseListener[AbstractTreeNodeInfo]
+  = DoubleClickMouseListener[AbstractTreeNodeInfo](
       table,
       {
         case ( n: AnnotationNodeInfo, ev: MouseEvent, row: Int, col: Int ) =>
@@ -80,7 +83,7 @@ object DoubleClickMouseListener {
                   s"${e.getHumanType}: '${e.getHumanName}' =>\n${n.getAnnotation.getText}",
                   n.getAnnotationKind,
                   n.getAnnotationMessageKind,
-                  DynamicScriptsPlugin.getInstance.getJPLSmallIcon )
+                  DynamicScriptsPlugin.getInstance().getJPLSmallIcon )
               }
               else {
                 SpecificationDialogManager.getManager.editSpecification( e )
@@ -96,10 +99,10 @@ object DoubleClickMouseListener {
             c <- 0 until table.getModel.getColumnCount
             v = table.getModel.getValueAt( row, c )
             av = v match {
-              case n: AnnotationNodeInfo if ( null != n.getAnnotation.getTarget ) => Some( n )
+              case n: AnnotationNodeInfo if null != n.getAnnotation.getTarget => Some( n )
               case _ => None
             }
-            if ( av.isDefined )
+            if av.isDefined
           } yield av.get ) toList match {
             case Nil => ()
             case n :: _ =>
@@ -110,7 +113,7 @@ object DoubleClickMouseListener {
                       s"${e.getHumanType}: '${e.getHumanName}' =>\n${n.getAnnotation.getText}",
                       n.getAnnotationKind,
                       n.getAnnotationMessageKind,
-                      DynamicScriptsPlugin.getInstance.getJPLSmallIcon )
+                      DynamicScriptsPlugin.getInstance().getJPLSmallIcon )
                   }
                   else {
                     SpecificationDialogManager.getManager.editSpecification( e )

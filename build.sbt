@@ -83,7 +83,10 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
     resolvers += Resolver.bintrayRepo("tiwg", "org.omg.tiwg"),
 
     resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases",
+    scalacOptions in (Compile, compile) += s"-P:artima-supersafe:config-file:${baseDirectory.value}/project/supersafe.cfg",
+    scalacOptions in (Test, compile) += s"-P:artima-supersafe:config-file:${baseDirectory.value}/project/supersafe.cfg",
     scalacOptions in (Compile, doc) += "-Xplugin-disable:artima-supersafe",
+    scalacOptions in (Test, doc) += "-Xplugin-disable:artima-supersafe",
 
     libraryDependencies ++= Seq(
 
@@ -135,7 +138,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
     doc in Compile := (doc in Compile).dependsOn(unmanagedJars in Compile).value,
 
-    unmanagedJars in Compile := ((unmanagedJars in Compile) dependsOn extractArchives).value,
+    unmanagedJars in Compile := (unmanagedJars in Compile).dependsOn(extractArchives).value,
 
     unmanagedJars in Compile ++= {
       val base = baseDirectory.value
@@ -292,15 +295,25 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
         val jarArtifacts = fileArtifactsByType("jar").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
         val srcArtifacts = fileArtifactsByType("sources").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
-        //          val docArtifacts = fileArtifactsByType("javadoc").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
+        val docArtifacts = fileArtifactsByType("javadoc").map { case (o, _, jar, _) => o -> jar }.to[Set].to[Seq].sortBy { case (o, jar) => s"$o/${jar.name}" }
 
-        val jars = {
-          val libs = jarArtifacts.map { case (o, jar) =>
-            s.log.info(s"* copying jar: $o/${jar.name}")
-            IO.copyFile(jar, root / "lib" / o / jar.name)
-            "lib/" + o + "/" + jar.name
-          }
-          libs
+        jarArtifacts.foreach { case (o, jar) =>
+          s.log.info(s"* copying jar: $o/${jar.name}")
+          IO.copyFile(jar, root / "lib" / o / jar.name)
+        }
+
+        srcArtifacts.foreach { case (o, jar) =>
+          s.log.info(s"* copying source: $o/${jar.name}")
+          IO.copyFile(jar, root / "lib.sources" / o / jar.name)
+        }
+
+        docArtifacts.foreach { case (o, jar) =>
+          s.log.info(s"* copying javadoc: $o/${jar.name}")
+          IO.copyFile(jar, root / "lib.javadoc" / o / jar.name)
+        }
+
+        val jars: Seq[File] = jarArtifacts.map { case (o, jar) =>
+          new File("lib") / o / jar.name
         }
 
         val weaverJar: File = {
@@ -358,22 +371,9 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
         val bootClasspathPrefix = bootJars.mkString("", "\\\\\\\\:", "\\\\\\\\:")
 
-        val classpathPrefix = (aspectjJars.sorted ++
-          scalaJars.sorted ++
-          otherJars.sorted ++
-          jars.sorted).mkString("", "\\\\\\\\:", "\\\\\\\\:")
-
-        srcArtifacts.foreach { case (o, jar) =>
-          s.log.info(s"* copying source: $o/${jar.name}")
-          IO.copyFile(jar, root / "lib.sources" / o / jar.name)
-          "lib.sources/" + o + "/" + jar.name
-        }
-
-        //          docArtifacts.foreach { case (o, jar) =>
-        //            s.log.info(s"* copying javadoc: $o/${jar.name}")
-        //            IO.copyFile(jar, root / "lib.javadoc" / o / jar.name)
-        //            "lib.javadoc/" + o + "/" + jar.name
-        //          }
+        val classpathPrefix =
+          (aspectjJars.sorted ++ scalaJars.sorted ++ otherJars.sorted ++ jars.sorted)
+            .mkString("", "\\\\\\\\:", "\\\\\\\\:")
 
         val md_imce_script = root / "bin" / "magicdraw.imce"
         IO.copyFile(
@@ -444,6 +444,8 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
              | | sed -e "s|BOOT_CLASSPATH=|BOOT_CLASSPATH=$${IMCE_BOOT_CLASSPATH_PREFIX}|" \\
              | | sed -e "s|^CLASSPATH=|CLASSPATH=$${IMCE_CLASSPATH_PREFIX}|" \\
              | > $$MD_IMCE_PROPERTIES
+             |
+             |chmod 755 $$MD_IMCE_PROPERTIES
              |
              |echo "Wrote $$MD_IMCE_PROPERTIES"
              |

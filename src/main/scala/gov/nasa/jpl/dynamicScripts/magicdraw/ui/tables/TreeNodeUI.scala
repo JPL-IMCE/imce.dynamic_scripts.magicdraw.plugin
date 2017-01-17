@@ -628,9 +628,9 @@ object TreeNodeUI {
         }
 
       override def getValueAt( row: Int, column: Int ): Object = {
-        val rowValue = super.getRowAt( row )
+        //val rowValue = super.getRowAt( row )
         //System.out.println(s"$label[$row]: $rowValue => ${(rowValue.row map { case (k,v) => s"$k=$v"}) mkString("\n - ","\n - ","\n")}")
-        val value = super.getValueAt( row, column )
+        val value: java.lang.Object = super.getValueAt( row, column )
         //System.out.println( s"$label[$row,$column]=$value")
         value
       }
@@ -704,18 +704,18 @@ object TreeNodeUI {
 
     initScrollPane()
 
-    def initScrollPane() = {
+    def initScrollPane(): Unit = {
       setBorder( BorderFactory.createLineBorder( Color.GRAY ) )
       setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED )
       setVerticalScrollBarPolicy( ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED )
       getViewport.getView.addComponentListener( this )
     }
 
-    override def componentMoved( e: ComponentEvent ) = ()
-    override def componentShown( e: ComponentEvent ) = ()
-    override def componentHidden( e: ComponentEvent ) = ()
+    override def componentMoved( e: ComponentEvent ): Unit = ()
+    override def componentShown( e: ComponentEvent ): Unit = ()
+    override def componentHidden( e: ComponentEvent ): Unit = ()
 
-    override def componentResized( e: ComponentEvent ) = {
+    override def componentResized( e: ComponentEvent ): Unit = {
       fitTreeTableToAncestorViewport( panel, treeTable, otherPanels: _* )
     }
 

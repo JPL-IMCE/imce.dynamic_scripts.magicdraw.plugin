@@ -22,9 +22,8 @@ import java.lang.{Class, IllegalArgumentException, Object, Runnable, Thread, Sys
 import java.awt.event.ActionEvent
 
 import scala.collection.immutable._
-import scala.util.Failure
-import scala.util.Success
-import scala.{Int, Option, None, Some, StringContext, Unit}
+import scala.util.{Failure,Success,Try}
+import scala.{Any, Int, Option, None, Some, StringContext, Unit}
 import scala.Predef.{classOf, require, ArrowAssoc, String}
 
 import com.jidesoft.grid.TreeTableModel
@@ -44,8 +43,8 @@ import gov.nasa.jpl.dynamicScripts.magicdraw.ui.nodes.TreeNodeInfo
 /**
  * @author nicolas.f.rouquette@jpl.nasa.gov
  */
-case class DerivedPropertyComputedTreeInfo(
-  cs: ComputedCharacterization,
+case class DerivedPropertyComputedTreeInfo
+( cs: ComputedCharacterization,
   e: Element,
   ek: MagicDrawElementKindDesignation,
   computedDerivedTree: ComputedDerivedTree )
@@ -76,12 +75,12 @@ case class DerivedPropertyComputedTreeInfo(
 
   val columnValueTypes = computedDerivedTree.columnValueTypes.get
 
-  var values: Seq[( AbstractTreeNodeInfo, Map[String, AbstractTreeNodeInfo] )] = null
+  private var values: Seq[( AbstractTreeNodeInfo, Map[String, AbstractTreeNodeInfo] )] = null
 
   val treeRows = scala.collection.mutable.HashMap[AbstractTreeNodeInfo, DerivedPropertyComputedTreeRow]()
 
   val defaultLabel: String = s"/${computedDerivedTree.name.hname}"
-  var label: String = defaultLabel
+  private var label: String = defaultLabel
 
   override def dispose(): Unit = {
     values = null
@@ -160,10 +159,10 @@ case class DerivedPropertyComputedTreeInfo(
         ClassLoaderHelper.createDynamicScriptClassLoader( computedDerivedTree ) match {
           case Failure( t ) =>
             ClassLoaderHelper.reportError( computedDerivedTree, message, t )
-            return Seq()
+            Seq()
 
           case Success( scriptCL ) => {
-            val localClassLoader = Thread.currentThread().getContextClassLoader()
+            val localClassLoader = Thread.currentThread().getContextClassLoader
             Thread.currentThread().setContextClassLoader( scriptCL )
 
             try {
@@ -172,14 +171,14 @@ case class DerivedPropertyComputedTreeInfo(
                 classOf[MagicDrawElementKindDesignation], derivedElementClassType ) match {
                   case Failure( t ) =>
                     ClassLoaderHelper.reportError( computedDerivedTree, message, t )
-                    return Seq()
+                    Seq()
 
                   case Success( cm ) =>
-                    val result = ClassLoaderHelper.invokeAndReport(
+                    val result: Try[Any] = ClassLoaderHelper.invokeAndReport(
                       previousTime, Project.getProject( e ), null, cm, ek, e )
                     result match {
                       case Failure( t ) =>
-                        return Seq()
+                        Seq()
                       case Success( rs: Seq[_] ) =>
                         DerivedPropertyComputedTreeInfo.asSeqOfMapOfStringToAbstractTreeNodeInfo( rs ) match {
                           case None =>
@@ -189,7 +188,7 @@ case class DerivedPropertyComputedTreeInfo(
                                 s"Unrecognized result -- expected: "+
                                 s"Seq[( AbstractTreeNodeInfo, Map[String, AbstractTreeNodeInfo] )], "+
                                 s"got: ${rs.getClass.getName}" ) )
-                            return Seq()
+                            Seq()
                           case Some( rTable ) =>
                             val annotations = scala.collection.mutable.Buffer[ValidationAnnotation]()
                             Utilities.invokeAndWaitOnDispatcher( new Runnable() {
@@ -214,7 +213,7 @@ case class DerivedPropertyComputedTreeInfo(
                             s"Unrecognized result -- expected: "+
                             s"Seq[Map[String, Seq[AbstractTreeNodeInfo]]], "+
                             s"got: ${x.getClass.getName}" ) )
-                        return Seq()
+                        Seq()
                     }
                 }
             } finally {
@@ -237,17 +236,18 @@ object DerivedPropertyComputedTreeInfo {
   def asSeqOfMapOfStringToAbstractTreeNodeInfo
   ( rs: Seq[_] )
   : Option[Seq[( AbstractTreeNodeInfo, Map[String, AbstractTreeNodeInfo] )]] =
-    if ( rs.forall( _ match {
-      case ( info: AbstractTreeNodeInfo, m: Map[_, _] ) =>
-        m.forall( _ match {
-          case ( _: String, _: AbstractTreeNodeInfo ) =>
+    if ( rs.forall {
+      case (info: AbstractTreeNodeInfo, m: Map[_, _]) =>
+        m.forall {
+          case (_: String, _: AbstractTreeNodeInfo) =>
             true
-          case ( _, _ )                               =>
+          case (_, _) =>
             false
-        } )
+        }
       case _ =>
         false
-    } ) )
+    } )
       Some( rs.asInstanceOf[Seq[( AbstractTreeNodeInfo, Map[String, AbstractTreeNodeInfo] )]] )
-    else None
+    else
+      None
 }
