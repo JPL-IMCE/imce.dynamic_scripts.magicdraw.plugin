@@ -562,7 +562,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
         val result = sbt.Process(
           command = "/usr/bin/zipsplit",
           arguments = Seq[String](
-            "-n", "251658240",
+            "-n", "200000000", // 200*10^6
             "-b", zip1.getParent,
             zip.getAbsolutePath
           )).!
