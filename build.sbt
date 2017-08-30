@@ -37,10 +37,10 @@ lazy val artifactZip2File = taskKey[File]("Location of the part2 zip artifact fi
 
 lazy val zipInstall = TaskKey[Unit]("zip-install", "Zip the MD Installation directory")
 
+val extractArchives: TaskKey[Unit] = TaskKey[Unit]("extract-archives", "Extracts ZIP files")
+
 lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-magicdraw-plugin", file("."))
   .enablePlugins(IMCEGitPlugin)
-  .enablePlugins(IMCEReleasePlugin)
-  .settings(IMCEReleasePlugin.libraryReleaseProcessSettings)
   .settings(IMCEPlugin.aspectJSettings)
   .settings(IMCEPlugin.strictScalacFatalWarningsSettings)
   .settings(
@@ -117,7 +117,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       val up = update.value
       val s = streams.value
       val mdInstallDir = (mdInstallDirectory in ThisBuild).value
-      val showDownloadProgress = true
+      val showDownloadProgress = "true" == System.getProperty("MagicDrawDownloader.progress", "true")
 
       if (!mdInstallDir.exists) {
 
