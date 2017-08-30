@@ -1,7 +1,7 @@
 object Versions {
   
   // this project
-  val version = "6.18.0"
+  val version = "7.0.0"
 
-  val md_version = "md18_0_sp6"
+  val md_version = "md18_5_sp2"
 }
