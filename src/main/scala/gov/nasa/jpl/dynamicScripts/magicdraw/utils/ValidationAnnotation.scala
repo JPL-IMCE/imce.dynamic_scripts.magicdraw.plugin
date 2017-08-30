@@ -31,7 +31,7 @@ import com.nomagic.magicdraw.annotation.Annotation
 import com.nomagic.magicdraw.validation.RuleViolationResult
 import com.nomagic.magicdraw.validation.ValidationRunData
 import com.nomagic.task.RunnableWithProgress
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.{Constraint, EnumerationLiteral, Package}
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.{Constraint, Element, EnumerationLiteral, Package}
 
 import gov.nasa.jpl.dynamicScripts.magicdraw.validation.internal.MDValidationAPIHelper
 import gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults
@@ -112,7 +112,11 @@ object ValidationAnnotation {
       val lowestValidation =
         validationSeverities.toList.sorted ( MDValidationAPIHelper.SEVERITY_LEVEL_ORDERING ).head
       val elements =
-        validationAnnotations.map ( _.annotation.getTarget )
+        validationAnnotations.flatMap ( _.annotation.getTarget match {
+          case e: Element => Some(e)
+          case _ => None
+        })
+
       val runData =
         new ValidationRunData( validationAnnotations.head.validationSuite, false, elements, lowestValidation )
       val ruleViolationResults =

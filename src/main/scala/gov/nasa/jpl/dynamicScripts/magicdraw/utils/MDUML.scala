@@ -19,8 +19,9 @@
 package gov.nasa.jpl.dynamicScripts.magicdraw.utils
 
 import java.io.File
-import java.lang.{Runnable,System}
-import java.nio.file.{Paths, Path}
+import java.lang.{Runnable, System}
+import java.net.URL
+import java.nio.file.{Path, Paths}
 import javax.swing.filechooser.FileFilter
 import javax.swing.{JFileChooser, SwingUtilities}
 
@@ -36,28 +37,27 @@ import com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.magicdraw.utils.MDLog
 import com.nomagic.task.ProgressStatus
-import com.nomagic.uml2.ext.jmi.helpers.ModelHelper
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Classifier
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.PackageImport
 import com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup
 import com.nomagic.magicdraw.core.ApplicationEnvironment
-
+import com.nomagic.ui.{ResizableIcon, SwingImageIcon}
+import com.nomagic.uml2.ext.jmi.helpers.ModelHelper
 import org.apache.log4j.Logger
-
 import org.eclipse.emf.common.util.URI
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ScopeAccess
 
-import scala.collection.JavaConversions.{asScalaBuffer, mapAsJavaMap, asJavaCollection}
+import scala.collection.JavaConversions.{asJavaCollection, mapAsJavaMap}
 import scala.collection.JavaConversions.collectionAsScalaIterable
 import scala.collection.Iterator
 import scala.collection.immutable._
 import scala.language.implicitConversions
 import scala.util.Try
-import scala.{AnyVal, Boolean, Int, Option, None, Some, Unit}
-import scala.Predef.{classOf, refArrayOps, require, String}
+import scala.{AnyVal, Boolean, Int, None, Option, Some, Unit}
+import scala.Predef.{String, classOf, refArrayOps, require}
+import scala.reflect.ClassTag
 
 case class BrowserNodeElementInfo
 ( n: Node, e: Element )
@@ -69,6 +69,7 @@ case class BrowserTreeSelectionInfo
 
 @scala.deprecated("", "")
 class MDUML(@scala.transient val p: Project) extends AnyVal {
+
 
   def enableResettingIDs(): Boolean = {
     val mdCounter = p.getCounter
@@ -82,7 +83,7 @@ class MDUML(@scala.transient val p: Project) extends AnyVal {
     old2newIDMap: Map[String, String],
     progressStatus: ProgressStatus )
   : Unit = {
-    ChangeElementID.resetIDS( p, elements, old2newIDMap, progressStatus )
+    ChangeElementID.resetIDS( p, elements, old2newIDMap, progressStatus, false )
   }
 
   def restoreResettingIDs(flag: Boolean): Unit = {
@@ -151,9 +152,21 @@ class MDUML(@scala.transient val p: Project) extends AnyVal {
         .toList
     } yield BrowserTreeSelectionInfo(p, tab, nodesWithElements)
 
+  def findElementWithPath[T <: Element : ClassTag](qname: String, metaclass: java.lang.Class[_ <: T]): Option[T]
+  = Option.apply(ModelHelper.findElementWithPath(p, qname, metaclass)) match {
+    case Some(e: T) =>
+      Some(e)
+    case _ =>
+      None
+  }
+
 }
 
 object MDUML {
+
+  def createResizableIconFromURL(url: URL): ResizableIcon = {
+    new SwingImageIcon( url )
+  }
 
   implicit def MDUMLHelper(p: Project): MDUML = {
     require(
@@ -321,14 +334,28 @@ object MDUML {
         }
     }
 
-  def elementPackageContainmentIterator( e: Element ): Iterator[Package] = new Iterator[Package] {
-    private var p = ModelHelper.findParentOfType( e, classOf[Package] )
+  /**
+    * Corresponds to the MD 18.0 Open API: ModelHelper.findParentOfType
+    */
+  final def findParentOfType[T <: Element : ClassTag](e: Element, metaClass: java.lang.Class[T]): Option[T]
+  = Option.apply(e.getOwner) match {
+      case Some(o: T) =>
+        Some(o)
+      case Some(o) =>
+        findParentOfType(o, metaClass)
+      case None =>
+        None
+    }
 
-    def hasNext: Boolean = p != null
+  def elementPackageContainmentIterator( e: Element ): Iterator[Package] = new Iterator[Package] {
+
+    private var p = findParentOfType( e, classOf[Package] )
+
+    def hasNext: Boolean = p.nonEmpty
 
     def next: Package = {
-      val result = p
-      p = p.getNestingPackage
+      val result = p.get
+      p = Option.apply(result.getNestingPackage)
       result
     }
   }
@@ -348,16 +375,20 @@ object MDUML {
     else collectImportedPackages( p.getPackageImport.toList, Set() )
   }
 
-  def getAllGeneralClassifiersIncludingSelf( cls: Classifier ): List[Classifier] = {
+  def getAllGeneralClassifiersIncludingSelf( cls: Classifier ): Set[Classifier] = {
 
-    def getAllGeneralClassifiers( cls: Classifier ): List[Classifier] = {
-      val generalClassifiers: java.util.List[Classifier] = new java.util.ArrayList[Classifier]()
-      ModelHelper.collectGeneralClassifiersRecursivelly( generalClassifiers, cls )
-      generalClassifiers.toList
+    def getAllGeneralClassifiers( queue: Set[Classifier], acc: Set[Classifier] )
+    : Set[Classifier]
+    = if (queue.isEmpty) acc
+    else {
+      val (h, t) = (queue.head, queue.tail)
+      val gs = h.getGeneral.to[Set]
+      val inc = gs -- acc
+      getAllGeneralClassifiers(t ++ inc, acc ++ gs + h)
     }
 
-    if ( cls == null ) List()
-    else List( cls ) ++ getAllGeneralClassifiers( cls )
+    if ( null == cls ) Set()
+    else getAllGeneralClassifiers( Set(cls), Set.empty )
   }
 
   def isAccessCompatibleWithElements( access: ScopeAccess.Value, elements: BaseElement* ): Boolean = {
@@ -368,4 +399,7 @@ object MDUML {
     val compatibleAccess = elements.forall { e => !mustBeEditable || e.isEditable }
     compatibleAccess
   }
+
+  def findElementWithPath[T <: Element: ClassTag](p: Project, qname: String, metaclass: java.lang.Class[_ <: T]): Option[T]
+  = p.findElementWithPath(qname, metaclass)
 }

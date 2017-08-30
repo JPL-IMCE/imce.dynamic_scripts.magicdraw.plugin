@@ -141,4 +141,71 @@ MagicDraw Dynamic Script files outside the `dynamicScripts` folder must be expli
 
 See [DynamicScripts Generic DSL](https://github.jpl.nasa.gov/imce/imce.dynamic_scripts.generic_dsl/tree/cae_md18_0_sp5)
 
+# MD Open API migration problems from MD 18.0 => MD 18.5
 
+## `com.nomagic.uml2.ext.jmi.helpers.ModelHelper`
+
+- MD 18.0 Open API
+
+```
+    findParentOfType
+    @CheckForNull
+    @OpenApi
+    public static <T extends Element> T 
+    findParentOfType(@CheckForNull Element element, java.lang.Class<? extends T> parentType)
+    
+    Searches for first direct or indirect element of the given type among parents of the given element. 
+    Checks if this element is an instance of given parentType. 
+    If yes, returns it, if no, looks for first parent of given instance in all element's hierarchy. 
+    If such parent does not exist, returns null.
+        
+    Parameters:
+        element - element.
+        parentType - the class of parent to find. Found parent must be instance of this class.
+          
+    Returns:      
+        found parent or null.
+```
+
+- MD 18.5 Open API
+
+    No such method
+    
+
+## `com.nomagic.uml2.ext.jmi.helpers.ModelHelper`
+   
+- MD 18.0 Internal API
+ 
+```
+    ModelHelper.collectGeneralClassifiersRecursively
+```
+
+- MD 18.5 Open/Internal API
+
+    No such method
+    
+## `com.nomagic.uml2.ext.jmi.helpers.ModelHelper`
+
+- MD 18.0 Open API
+
+```
+@OpenApi
+@CheckForNull
+public static Element findElementWithPath(Project project,
+                                               java.lang.String path,
+                                               @CheckForNull
+                                               java.lang.Class classType)
+Finds element with a given qualified name.
+Parameters:
+  project - a project
+  path - qualified name of Element
+  classType - type of element. Null mean any type.
+Returns:
+  Element or null
+```
+
+- MD 18.5 Open/Internal API
+
+    No longer in the MD 18.5 Open API
+    Part of the MD 18.5 Internal API
+    

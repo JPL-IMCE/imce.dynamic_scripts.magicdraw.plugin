@@ -118,7 +118,7 @@ object MagicDrawValidationDataResults {
   ( ID: String,
     message: String,
     var annotation: Option[Annotation] = None )
-    extends NMAction( ID, ID, 0 ) with AnnotationAction {
+  (implicit val p: Project) extends NMAction( ID, ID, 0 ) with AnnotationAction {
 
     setDescription( message )
 
@@ -138,16 +138,16 @@ object MagicDrawValidationDataResults {
     : Unit =
       if ( null != annotations && !annotations.isEmpty ) {
         val sm = SessionManager.getInstance
-        sm.createSession( getName )
+        sm.createSession( p, getName )
         try {
           annotations foreach execute
-          sm.closeSession()
+          sm.closeSession( p )
         }
         catch {
           case _: ReadOnlyElementException =>
-            sm.cancelSession()
+            sm.cancelSession(p)
           case _: java.lang.Throwable =>
-            sm.cancelSession()
+            sm.cancelSession(p)
         }
       }
 

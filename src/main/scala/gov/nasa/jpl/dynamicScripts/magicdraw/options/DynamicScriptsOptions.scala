@@ -23,7 +23,6 @@ import com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup
 import com.nomagic.magicdraw.properties.Property
 import com.nomagic.magicdraw.properties.PropertyResourceProvider
 import com.nomagic.magicdraw.properties.StringProperty
-import com.nomagic.ui.SwingImageIcon
 import gov.nasa.jpl.dynamicScripts.magicdraw.DynamicScriptsPlugin
 import gov.nasa.jpl.dynamicScripts.magicdraw.options.resources.DynamicScriptsResources
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
@@ -52,9 +51,6 @@ class DynamicScriptsOptions extends AbstractPropertyOptionsGroup( DynamicScripts
       case p: StringProperty => DynamicScriptsConfigurationProperty.getDynamicScriptConfigurationFiles( p )
       case _                 => List()
     }
-
-  override def getIcon: SwingImageIcon =
-    super.getIcon
 
 }
 

@@ -32,9 +32,9 @@ class SymbolHelper {}
 object SymbolHelper {
 
   def getAssociationOfView(av: AssociationView): Option[Association] =
-    Option(av.getAssociation)
+    Option(av.getElement)
 
   def getPackageOfView(pv: PackageView): Option[Package] =
-    Option(pv.getPackage)
+    Option(pv.getElement)
 
 }

@@ -37,19 +37,16 @@ import com.nomagic.magicdraw.plugins.PluginDescriptor
 import com.nomagic.magicdraw.plugins.ResourceDependentPlugin
 import com.nomagic.magicdraw.properties.Property
 import com.nomagic.magicdraw.properties.StringProperty
-import com.nomagic.magicdraw.ui.ImageMap16
-import com.nomagic.magicdraw.ui.MagicDrawProgressStatusRunner
+import com.nomagic.magicdraw.ui.{Icons, MagicDrawProgressStatusRunner}
 import com.nomagic.magicdraw.ui.dialogs.specifications.SpecificationDialogManager
 import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.magicdraw.uml.DiagramType
 import com.nomagic.ui.ResizableIcon
-import com.nomagic.ui.SwingImageIcon
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Diagram
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Element
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.InstanceSpecification
 import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package
 import com.nomagic.uml2.ext.magicdraw.compositestructures.mdinternalstructures.Connector
-
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsRegistry
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.ClassifiedInstanceDesignation
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes.DynamicActionScript
@@ -81,14 +78,14 @@ import scala.collection.TraversableOnce.OnceCanBuildFrom
 import scala.collection.TraversableOnce._
 import scala.language.implicitConversions
 import scala.language.postfixOps
-import scala.{AnyVal, Boolean, Int, Option, None, Some, StringContext, Unit}
+import scala.{AnyVal, Boolean, Int, None, Option, Some, StringContext, Unit}
 import scala.Predef.{Map => _, Set => _, _}
 
 @scala.deprecated("", "")
 class ImageMapHelper(@scala.transient val dsPlugin: DynamicScriptsPlugin) extends AnyVal {
 
   def linkImage(): ResizableIcon =
-    ImageMap16.LINK
+    Icons.LINK
 
 }
 
@@ -470,7 +467,7 @@ class DynamicScriptsPlugin
       else
         try {
           val jplIconURL: URL = customLinkIconFile.toURI.toURL
-          JPLcustomLink = new SwingImageIcon( jplIconURL )
+          JPLcustomLink = MDUML.createResizableIconFromURL( jplIconURL )
         }
         catch {
           case e: MalformedURLException =>

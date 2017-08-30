@@ -25,7 +25,6 @@ import com.nomagic.magicdraw.uml.ClassTypes
 import com.nomagic.magicdraw.uml.symbols.PresentationElement
 import com.nomagic.magicdraw.uml.symbols.paths._
 import com.nomagic.magicdraw.uml.symbols.shapes._
-import com.nomagic.uml2.ext.jmi.helpers.ModelHelper
 import com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper
 import com.nomagic.uml2.ext.magicdraw.actions.mdbasicactions._
 import com.nomagic.uml2.ext.magicdraw.activities.mdbasicactivities._
@@ -37,8 +36,9 @@ import com.nomagic.uml2.ext.magicdraw.auxiliaryconstructs.mdtemplates._
 import com.nomagic.uml2.ext.magicdraw.classes.mdassociationclasses._
 import com.nomagic.uml2.ext.magicdraw.classes.mddependencies._
 import com.nomagic.uml2.ext.magicdraw.classes.mdinterfaces._
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.{ Association, Class, Classifier, DataType, Diagram, Element, ElementImport, Enumeration, EnumerationLiteral, Generalization, InstanceSpecification, Operation, Package, PackageImport, PackageMerge, PrimitiveType, Slot }
+import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.{Association, Class, Classifier, DataType, Diagram, Element, ElementImport, Enumeration, EnumerationLiteral, Generalization, InstanceSpecification, Operation, Package, PackageImport, PackageMerge, PrimitiveType, Slot}
 import com.nomagic.uml2.ext.magicdraw.classes.mdpowertypes._
+import com.nomagic.uml2.ext.magicdraw.commonbehaviors.mdbasicbehaviors.BehavioredClassifier
 import com.nomagic.uml2.ext.magicdraw.commonbehaviors.mdcommunications._
 import com.nomagic.uml2.ext.magicdraw.commonbehaviors.mdsimpletime._
 import com.nomagic.uml2.ext.magicdraw.components.mdbasiccomponents._
@@ -54,16 +54,15 @@ import com.nomagic.uml2.ext.magicdraw.mdusecases._
 import com.nomagic.uml2.ext.magicdraw.statemachines.mdbehaviorstatemachines._
 import com.nomagic.uml2.impl.ElementsFactory
 import gov.nasa.jpl.dynamicScripts.DynamicScriptsTypes._
+
 import scala.collection.JavaConversions._
 import scala.language.postfixOps
 import scala.util.Success
 import scala.util.Failure
 import scala.util.Try
-
 import scala.collection.immutable._
-import scala.{Boolean, Option, Some, StringContext, Tuple2, Tuple5}
-import scala.Predef.{ArrowAssoc, classOf, require, String}
-
+import scala.{Boolean, None, Option, Some, StringContext, Tuple2, Tuple5}
+import scala.Predef.{ArrowAssoc, String, classOf, require}
 import gov.nasa.jpl.dynamicScripts.magicdraw.utils.MDUML
 
 /**
@@ -194,17 +193,50 @@ object MagicDrawElementKindDesignation {
 
   def resolveMagicDrawClassifier
   ( project: Project, metaclassName: String, classifierQName: String )
-  : Try[( ( ElementsFactory => Element ), java.lang.Class[_ <: Element], Classifier )] =
-    resolveMagicDrawMetaclass( metaclassName ) match {
+  : Try[( ( ElementsFactory => Element ), java.lang.Class[_ <: Element], Classifier )]
+  = resolveMagicDrawMetaclass( metaclassName ) match {
       case Failure( e ) =>
         Failure( e )
       case Success( ( creator, metaclass ) ) => {
-        val subTypes = ClassTypes.getSubtypes( classOf[Classifier], false ).toList
-        for ( subType <- subTypes ) {
-          ModelHelper.findElementWithPath( project, classifierQName, subType ) match {
-            case cls: Classifier => 
+        val subTypes
+        : List[java.lang.Class[_ <: Classifier]]
+        = ClassTypes.getSubtypes( classOf[Classifier], false )
+          .to[List]
+          .flatMap[java.lang.Class[_ <: Classifier], List[java.lang.Class[_ <: Classifier]]] { cls =>
+          if (cls.isAssignableFrom(classOf[Artifact])) {
+            val c = cls.asSubclass[Artifact](classOf[Artifact])
+            Some(c)
+          } else if (cls.isAssignableFrom(classOf[Association])) {
+            val c = cls.asSubclass[Association](classOf[Association])
+            Some(c)
+          } else if (cls.isAssignableFrom(classOf[BehavioredClassifier])) {
+            val c = cls.asSubclass[BehavioredClassifier](classOf[BehavioredClassifier])
+            Some(c)
+          } else if (cls.isAssignableFrom(classOf[DataType])) {
+            val c = cls.asSubclass[DataType](classOf[DataType])
+            Some(c)
+          } else if (cls.isAssignableFrom(classOf[InformationItem])) {
+            val c = cls.asSubclass[InformationItem](classOf[InformationItem])
+            Some(c)
+          } else if (cls.isAssignableFrom(classOf[Interface])) {
+            val c = cls.asSubclass[Interface](classOf[Interface])
+            Some(c)
+          } else if (cls.isAssignableFrom(classOf[Signal])) {
+            val c = cls.asSubclass[Signal](classOf[Signal])
+            Some(c)
+          } else if (cls.isAssignableFrom(classOf[StructuredClassifier])) {
+            val c = cls.asSubclass[StructuredClassifier](classOf[StructuredClassifier])
+            Some(c)
+          } else
+            return Failure(
+              new java.lang.IllegalArgumentException(
+                s"resolveMagicDrawClassifier: metaclassName=$metaclassName is not a kind of MD UML Classifier!"))
+        }
+        subTypes.foreach { subType: java.lang.Class[_ <: Classifier] =>
+          MDUML.findElementWithPath[Classifier]( project, classifierQName, subType ) match {
+            case Some(cls) =>
               return Success( ( creator, metaclass, cls ) )
-            case null =>
+            case None =>
               ()
           }
         }
