@@ -318,9 +318,13 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
         val weaverJar: File = {
           val weaverJars = ((root / "lib" / "imce.third_party.aspectj") * "aspectjweaver-*.jar").get
-          require(1 == weaverJars.size)
+          require(1 == weaverJars.size,
+            weaverJars
+              .map(_.toString)
+              .mkString(s"Got ${weaverJars.size} weaver libraries (there should be only 1):\n","\n","\n"))
           val relJar = weaverJars.head.relativeTo(root)
-          require(relJar.isDefined)
+          require(relJar.isDefined,
+            s"The weaver library, ${weaverJars.head} should be resolvable from the root: $root")
           relJar.get
         }
 
