@@ -92,7 +92,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults.ValidationAnnotationAction#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(ID:String,message:String,annotation:Option[com.nomagic.magicdraw.annotation.Annotation]):gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults.ValidationAnnotationAction"></a>
+      <a id="&lt;init&gt;(ID:String,message:String,annotation:Option[com.nomagic.magicdraw.annotation.Annotation])(implicitp:com.nomagic.magicdraw.core.Project):gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults.ValidationAnnotationAction"></a>
       <a id="&lt;init&gt;:ValidationAnnotationAction"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -100,10 +100,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ValidationAnnotationAction</span><span class="params">(<span name="ID">ID: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="annotation">annotation: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.nomagic.magicdraw.annotation.Annotation">Annotation</span>] = <span class="symbol">None</span></span>)</span>
+        <span class="name">ValidationAnnotationAction</span><span class="params">(<span name="ID">ID: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="annotation">annotation: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.nomagic.magicdraw.annotation.Annotation">Annotation</span>] = <span class="symbol">None</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="p">p: <span class="extype" name="com.nomagic.magicdraw.core.Project">Project</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@&lt;init&gt;(ID:String,message:String,annotation:Option[com.nomagic.magicdraw.annotation.Annotation]):gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults.ValidationAnnotationAction" title="Permalink" target="_top">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@&lt;init&gt;(ID:String,message:String,annotation:Option[com.nomagic.magicdraw.annotation.Annotation])(implicitp:com.nomagic.magicdraw.core.Project):gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults.ValidationAnnotationAction" title="Permalink" target="_top">
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -290,19 +290,19 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction → AbstractAction → Action</dd></dl></div>
-    </li><li name="com.nomagic.actions.NMAction#addShotcut" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="addShotcut(x$1:javax.swing.KeyStroke):Unit"></a>
-      <a id="addShotcut(KeyStroke):Unit"></a>
+    </li><li name="com.nomagic.actions.NMAction#addShortcut" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addShortcut(x$1:javax.swing.KeyStroke):Unit"></a>
+      <a id="addShortcut(KeyStroke):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addShotcut</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.KeyStroke">KeyStroke</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">addShortcut</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.KeyStroke">KeyStroke</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@addShotcut(x$1:javax.swing.KeyStroke):Unit" title="Permalink" target="_top">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@addShortcut(x$1:javax.swing.KeyStroke):Unit" title="Permalink" target="_top">
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -410,22 +410,25 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
     </li><li name="com.nomagic.actions.NMAction#createMenuItem" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="createMenuItem(x$1:com.nomagic.actions.c):javax.swing.JMenuItem"></a>
-      <a id="createMenuItem(c):JMenuItem"></a>
+      <a id="createMenuItem(x$1:com.nomagic.actions.e):javax.swing.JMenuItem"></a>
+      <a id="createMenuItem(e):JMenuItem"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">createMenuItem</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.actions.c">c</span></span>)</span><span class="result">: <span class="extype" name="javax.swing.JMenuItem">JMenuItem</span></span>
+        <span class="name">createMenuItem</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.actions.e">e</span></span>)</span><span class="result">: <span class="extype" name="javax.swing.JMenuItem">JMenuItem</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@createMenuItem(x$1:com.nomagic.actions.c):javax.swing.JMenuItem" title="Permalink" target="_top">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@createMenuItem(x$1:com.nomagic.actions.e):javax.swing.JMenuItem" title="Permalink" target="_top">
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -622,23 +625,6 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
-    </li><li name="com.nomagic.actions.NMAction#getIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getIcon():javax.swing.Icon"></a>
-      <a id="getIcon():Icon"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getIcon</span><span class="params">()</span><span class="result">: <span class="extype" name="javax.swing.Icon">Icon</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@getIcon():javax.swing.Icon" title="Permalink" target="_top">
-        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
     </li><li name="javax.swing.AbstractAction#getKeys" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getKeys():Array[Object]"></a>
       <a id="getKeys():Array[AnyRef]"></a>
@@ -672,7 +658,30 @@
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getLargeOrSmallIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getLargeOrSmallIcon():javax.swing.Icon"></a>
+      <a id="getLargeOrSmallIcon():Icon"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getLargeOrSmallIcon</span><span class="params">()</span><span class="result">: <span class="extype" name="javax.swing.Icon">Icon</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@getLargeOrSmallIcon():javax.swing.Icon" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.nomagic.actions.NMAction#getMnemonicKey" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getMnemonicKey():Int"></a>
       <a id="getMnemonicKey():Int"></a>
@@ -757,7 +766,30 @@
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getSmallOrLargeIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getSmallOrLargeIcon():javax.swing.Icon"></a>
+      <a id="getSmallOrLargeIcon():Icon"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getSmallOrLargeIcon</span><span class="params">()</span><span class="result">: <span class="extype" name="javax.swing.Icon">Icon</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@getSmallOrLargeIcon():javax.swing.Icon" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="javax.swing.AbstractAction#getValue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getValue(x$1:String):Object"></a>
       <a id="getValue(String):AnyRef"></a>
@@ -894,6 +926,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults.ValidationAnnotationAction#p" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="p:com.nomagic.magicdraw.core.Project"></a>
+      <a id="p:Project"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">p</span><span class="result">: <span class="extype" name="com.nomagic.magicdraw.core.Project">Project</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@p:com.nomagic.magicdraw.core.Project" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="javax.swing.AbstractAction#putValue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="putValue(x$1:String,x$2:Any):Unit"></a>
       <a id="putValue(String,Any):Unit"></a>
@@ -1274,7 +1323,56 @@
 
         
 
-        
+        <div id="values" class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.nomagic.actions.NMAction#addShotcut" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addShotcut(x$1:javax.swing.KeyStroke):Unit"></a>
+      <a id="addShotcut(KeyStroke):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">addShotcut</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="javax.swing.KeyStroke">KeyStroke</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@addShotcut(x$1:javax.swing.KeyStroke):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li><li name="com.nomagic.actions.NMAction#getIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getIcon():javax.swing.Icon"></a>
+      <a id="getIcon():Icon"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">getIcon</span><span class="params">()</span><span class="result">: <span class="extype" name="javax.swing.Icon">Icon</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.validation.MagicDrawValidationDataResults$$ValidationAnnotationAction@getIcon():javax.swing.Icon" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NMAction</dd><dt>Annotations</dt><dd>
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

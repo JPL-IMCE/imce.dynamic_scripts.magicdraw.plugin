@@ -355,23 +355,28 @@
       </a>
     </span>
       
-    </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions#getIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getIcon():com.nomagic.ui.SwingImageIcon"></a>
-      <a id="getIcon():SwingImageIcon"></a>
+    </li><li name="com.nomagic.magicdraw.core.options.OptionsGroup#getGroupIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getGroupIcon():javax.swing.Icon"></a>
+      <a id="getGroupIcon():Icon"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getIcon</span><span class="params">()</span><span class="result">: <span class="extype" name="com.nomagic.ui.SwingImageIcon">SwingImageIcon</span></span>
+        <span class="name">getGroupIcon</span><span class="params">()</span><span class="result">: <span class="extype" name="javax.swing.Icon">Icon</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@getIcon():com.nomagic.ui.SwingImageIcon" title="Permalink" target="_top">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@getGroupIcon():javax.swing.Icon" title="Permalink" target="_top">
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions">DynamicScriptsOptions</a> → OptionsGroup</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OptionsGroup</dd><dt>Annotations</dt><dd>
+                <span class="name">@OpenApi</span><span class="args">()</span>
+              
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions#getName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getName():String"></a>
       <a id="getName():String"></a>
@@ -427,6 +432,8 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractPropertyOptionsGroup</dd><dt>Annotations</dt><dd>
                 <span class="name">@OpenApi</span><span class="args">()</span>
+              
+                <span class="name">@CheckForNull</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li name="com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup#getVisibleOptions" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -741,19 +748,43 @@
 
         <div id="values" class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup#afterLoad" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="afterLoad(x$1:com.nomagic.magicdraw.e.h,x$2:Boolean):Unit"></a>
-      <a id="afterLoad(h,Boolean):Unit"></a>
+              <ol><li name="com.nomagic.magicdraw.core.options.OptionsGroup#add" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="add(x$1:com.nomagic.magicdraw.core.options.OptionsGroup):Unit"></a>
+      <a id="add(OptionsGroup):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">afterLoad</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.magicdraw.e.h">h</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">add</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.magicdraw.core.options.OptionsGroup">OptionsGroup</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@afterLoad(x$1:com.nomagic.magicdraw.e.h,x$2:Boolean):Unit" title="Permalink" target="_top">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@add(x$1:com.nomagic.magicdraw.core.options.OptionsGroup):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OptionsGroup</dd><dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@InternalApi</span><span class="args">()</span>
+              
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup#afterLoad" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="afterLoad(x$1:com.nomagic.magicdraw.d.d,x$2:Boolean):Unit"></a>
+      <a id="afterLoad(d,Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">afterLoad</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.magicdraw.d.d">d</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@afterLoad(x$1:com.nomagic.magicdraw.d.d,x$2:Boolean):Unit" title="Permalink" target="_top">
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -938,6 +969,30 @@
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.core.options.OptionsGroup#getChildren" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getChildren():java.util.List[com.nomagic.magicdraw.core.options.OptionsGroup]"></a>
+      <a id="getChildren():List[OptionsGroup]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">getChildren</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="com.nomagic.magicdraw.core.options.OptionsGroup">OptionsGroup</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@getChildren():java.util.List[com.nomagic.magicdraw.core.options.OptionsGroup]" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OptionsGroup</dd><dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@InternalApi</span><span class="args">()</span>
+              
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
     </li><li name="com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup#getCopy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getCopy():com.nomagic.magicdraw.core.options.AbstractPropertyOptionsGroup"></a>
       <a id="getCopy():AbstractPropertyOptionsGroup"></a>
@@ -958,6 +1013,34 @@
                 <span class="name">@Deprecated</span>
               
                 <span class="name">@InternalApi</span><span class="args">()</span>
+              
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.core.options.OptionsGroup#getIcon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getIcon():com.nomagic.ui.SwingImageIcon"></a>
+      <a id="getIcon():SwingImageIcon"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">getIcon</span><span class="params">()</span><span class="result">: <span class="extype" name="com.nomagic.ui.SwingImageIcon">SwingImageIcon</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@getIcon():com.nomagic.ui.SwingImageIcon" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OptionsGroup</dd><dt>Annotations</dt><dd>
+                <span class="name">@OpenApi</span><span class="args">()</span>
+              
+                <span class="name">@CheckForNull</span><span class="args">()</span>
+              
+                <span class="name">@Deprecated</span>
               
                 <span class="name">@deprecated</span>
               
@@ -1003,6 +1086,30 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AbstractPropertyOptionsGroup → OptionsGroup</dd><dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@InternalApi</span><span class="args">()</span>
+              
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.core.options.OptionsGroup#getParent" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getParent():com.nomagic.magicdraw.core.options.OptionsGroup"></a>
+      <a id="getParent():OptionsGroup"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">getParent</span><span class="params">()</span><span class="result">: <span class="extype" name="com.nomagic.magicdraw.core.options.OptionsGroup">OptionsGroup</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@getParent():com.nomagic.magicdraw.core.options.OptionsGroup" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OptionsGroup</dd><dt>Annotations</dt><dd>
                 <span class="name">@Deprecated</span>
               
                 <span class="name">@InternalApi</span><span class="args">()</span>
@@ -1082,6 +1189,54 @@
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.core.options.OptionsGroup#remove" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remove(x$1:com.nomagic.magicdraw.core.options.OptionsGroup):Unit"></a>
+      <a id="remove(OptionsGroup):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">remove</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="com.nomagic.magicdraw.core.options.OptionsGroup">OptionsGroup</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@remove(x$1:com.nomagic.magicdraw.core.options.OptionsGroup):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OptionsGroup</dd><dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@InternalApi</span><span class="args">()</span>
+              
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.core.options.OptionsGroup#resetCachedValues" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="resetCachedValues():Unit"></a>
+      <a id="resetCachedValues():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">resetCachedValues</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@resetCachedValues():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../com$nomagic$magicdraw$core$options.html" class="extype" name="com.nomagic.magicdraw.core.options">com.nomagic.magicdraw.core.options</a>] </dd><dt>Definition Classes</dt><dd>OptionsGroup</dd><dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@InternalApi</span><span class="args">()</span>
+              
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
     </li><li name="com.nomagic.magicdraw.core.options.OptionsGroup#setEnabled" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setEnabled(x$1:Boolean):Unit"></a>
       <a id="setEnabled(Boolean):Unit"></a>
@@ -1119,6 +1274,30 @@
       </span>
       </h4><span class="permalink">
       <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@setVisible(x$1:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OptionsGroup</dd><dt>Annotations</dt><dd>
+                <span class="name">@Deprecated</span>
+              
+                <span class="name">@InternalApi</span><span class="args">()</span>
+              
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version )</i> see corresponding Javadoc for more information.</p></dd></dl></div>
+    </li><li name="com.nomagic.magicdraw.core.options.OptionsGroup#sortChildren" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sortChildren(x$1:java.util.Comparator[com.nomagic.magicdraw.core.options.OptionsGroup]):Unit"></a>
+      <a id="sortChildren(Comparator[OptionsGroup]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version ) see corresponding Javadoc for more information.">sortChildren</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.util.Comparator">Comparator</span>[<span class="extype" name="com.nomagic.magicdraw.core.options.OptionsGroup">OptionsGroup</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#gov.nasa.jpl.dynamicScripts.magicdraw.options.DynamicScriptsOptions@sortChildren(x$1:java.util.Comparator[com.nomagic.magicdraw.core.options.OptionsGroup]):Unit" title="Permalink" target="_top">
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
