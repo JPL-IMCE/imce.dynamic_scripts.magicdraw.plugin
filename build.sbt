@@ -516,11 +516,11 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
         s.log.info(s"\n*** Created the zip: $zip")
 
-        // reduce the size to 240mb to force creating 2 zip files
+        // reduce the size to 200mb to force creating 2 zip files
         val result = sbt.Process(
           command = "/usr/bin/zipsplit",
           arguments = Seq[String](
-            "-n", "251658240",
+            "-n", "209715200",
             "-b", zip1.getParent,
             zip.getAbsolutePath
           )).!
