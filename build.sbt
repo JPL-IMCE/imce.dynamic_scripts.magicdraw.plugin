@@ -9,6 +9,7 @@ import net.virtualvoid.sbt.graph._
 import com.typesafe.sbt.pgp.PgpKeys
 import com.typesafe.sbt.SbtAspectj._
 import com.typesafe.sbt.SbtAspectj.AspectjKeys._
+import com.typesafe.sbt.packager.SettingsHelper
 
 import scala.xml.{Node => XNode}
 import scala.xml.transform._
@@ -39,12 +40,72 @@ lazy val zipInstall = TaskKey[Unit]("zip-install", "Zip the MD Installation dire
 
 val extractArchives: TaskKey[Unit] = TaskKey[Unit]("extract-archives", "Extracts ZIP files")
 
+lazy val mdLibs = taskKey[Seq[Attributed[File]]]("magidraw libraries")
+
+/**
+  * Constructs a jar name from components...(ModuleID/Artifact)
+  */
+def makeJarName(org: String,
+                name: String,
+                revision: String,
+                artifactName: String,
+                artifactClassifier: Option[String]): String =
+  org + "." +
+    name + "-" +
+    Option(artifactName.replace(name, "")).filterNot(_.isEmpty).map(_ + "-").getOrElse("") +
+    revision +
+    artifactClassifier.filterNot(_.isEmpty).map("-" + _).getOrElse("") +
+    ".jar"
+
+def getJarFullFilename(dep: Attributed[File]): String = {
+  val filename: Option[String] = for {
+    module <- dep.metadata
+      // sbt 0.13.x key
+      .get(AttributeKey[ModuleID]("module-id"))
+      // sbt 1.x key
+      .orElse(dep.metadata.get(AttributeKey[ModuleID]("moduleID")))
+    artifact <- dep.metadata.get(AttributeKey[Artifact]("artifact"))
+  } yield makeJarName(module.organization, module.name, module.revision, artifact.name, artifact.classifier)
+  filename.getOrElse(dep.data.getName)
+}
+
+def versionComparator
+(t1: (String, Module, String, ModuleGraph),
+ t2: (String, Module, String, ModuleGraph))
+: Boolean
+= t1._1.compare(t2._1) >= 0
+
+def GroupFile2Folder
+(group: String,
+ fileName: String)
+: String
+= group match {
+  case "imce.third_party.aspectj" =>
+    if (fileName.startsWith("aspectjrt-") || fileName.startsWith("aspectjweaver-"))
+      "bootstrap/" + group
+    else
+      group
+  case "imce.third_party.scala" =>
+    if (fileName.startsWith("scala-library-"))
+      "bootstrap/" + group
+    else
+      group
+  case "gov.nasa.jpl.imce" =>
+    if (fileName.startsWith("imce.magicdraw.library.enhanced_api_"))
+      "bootstrap/" + group
+    else
+      group
+  case _ =>
+    group
+}
+
 lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-magicdraw-plugin", file("."))
   .enablePlugins(IMCEGitPlugin)
+  .enablePlugins(UniversalPlugin)
   .settings(IMCEPlugin.aspectJSettings)
   .settings(IMCEPlugin.strictScalacFatalWarningsSettings)
   .settings(
-    IMCEKeys.licenseYearOrRange := "2014-2016",
+    IMCEKeys.licenseYearOrRange := "2014-2017",
     IMCEKeys.organizationInfo := IMCEPlugin.Organizations.cae,
     IMCEKeys.targetJDK := IMCEKeys.jdk18.value,
     git.baseVersion := Versions.version,
@@ -98,17 +159,21 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
         % Versions_dynamic_scripts_generic_dsl.version
         % "compile" withSources() withJavadoc(),
 
+      "gov.nasa.jpl.imce" %% "imce.dynamic_scripts.magicdraw.launcher"
+        % Versions_launcher.version artifacts
+        Artifact("imce.dynamic_scripts.magicdraw.launcher", "tgz", "tgz", "resource"),
+
       "gov.nasa.jpl.imce" %% "imce.third_party.scala_graph_libraries"
         % Versions_scala_graph_libraries.version artifacts
-        Artifact("imce.third_party.scala_graph_libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
+        Artifact("imce.third_party.scala_graph_libraries", "zip", "zip", "resource"),
 
       "gov.nasa.jpl.imce" %% "imce.third_party.jena_libraries"
         % Versions_jena_libraries.version artifacts
-        Artifact("imce.third_party.jena_libraries", "zip", "zip", Some("resource"), Seq(), None, Map()),
+        Artifact("imce.third_party.jena_libraries", "zip", "zip", "resource"),
 
       "gov.nasa.jpl.imce" %% "imce.third_party.owlapi_libraries"
         % Versions_owlapi_libraries.version artifacts
-        Artifact("imce.third_party.owlapi_libraries", "zip", "zip", Some("resource"), Seq(), None, Map())
+        Artifact("imce.third_party.owlapi_libraries", "zip", "zip", "resource")
 
     ),
 
@@ -132,38 +197,46 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           s"=> use existing md.install.dir=$mdInstallDir")
     },
 
-    compile in Compile := (compile in Compile).dependsOn(unmanagedJars in Compile).value,
-
-    compileIncremental in Compile := (compileIncremental in Compile).dependsOn(unmanagedJars in Compile).value,
-
-    doc in Compile := (doc in Compile).dependsOn(unmanagedJars in Compile).value,
-
     unmanagedJars in Compile := (unmanagedJars in Compile).dependsOn(extractArchives).value,
 
-    unmanagedJars in Compile ++= {
+    mdLibs := {
+      val _ = extractArchives.value
       val base = baseDirectory.value
       val up = update.value
       val s = streams.value
       val mdInstallDir = (mdInstallDirectory in ThisBuild).value
-
-      val _ = extractArchives.value
-
       val libJars = ((mdInstallDir / "lib") ** "*.jar").get
-      val mdJars = libJars.map { jar => Attributed.blank(jar) }
+      val mdJars = libJars.map { jar => Attributed.blank(jar) }.to[Seq]
 
       s.log.info(s"=> Adding ${mdJars.size} unmanaged jars")
 
       mdJars
     },
 
-    logLevel in AetherKeys.aetherDeploy := Level.Debug,
+    unmanagedJars in Compile ++= mdLibs.value,
+
+    // Needed to transitively get dependencies from the gov.nasa.jpl.imce:imce.third_party.* zip aggregates
+    classpathTypes += "zip",
+    classpathTypes += "tgz",
+
+    // Skip doc when building 'stage'
+    // @see http://www.scala-sbt.org/sbt-native-packager/formats/universal.html#skip-packagedoc-task-on-stage
+    mappings in (Compile, packageDoc) := Seq(),
+
+    mainClass in Compile := Some("gov.nasa.jpl.dynamicScripts.magicdraw.launcher.MagicDrawDynamicScriptsLauncher"),
+
+    executableScriptName := "magicdraw.imce",
+
+    SettingsHelper.makeDeploymentSettings(Universal, packageZipTarball in Universal, "tgz"),
+
+    SettingsHelper.makeDeploymentSettings(UniversalDocs, packageXzTarball in UniversalDocs, "tgz"),
 
     AetherKeys.aetherArtifact := AetherKeys.aetherArtifact.dependsOn(zipInstall).value,
 
     AetherKeys.aetherDeploy := AetherKeys.aetherDeploy.dependsOn(zipInstall).value,
 
-    // See the imce.sbt.plugin dependency:
-    // https://github.com/JPL-IMCE/imce.sbt.plugin/blob/4.12.0/src/main/scala/gov/nasa/jpl/imce/sbt/IMCEPlugin.scala#L155
+//    // See the imce.sbt.plugin dependency:
+//    // https://github.com/JPL-IMCE/imce.sbt.plugin/blob/4.12.0/src/main/scala/gov/nasa/jpl/imce/sbt/IMCEPlugin.scala#L155
     packagedArtifacts in Compile := (packagedArtifacts in Compile).dependsOn(zipInstall).value,
 
     zipInstall := {
@@ -192,6 +265,8 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
       } else {
         val mdInstallDir = base / "target" / "md.package"
         val root = base / "target" / s"imce_${Versions.md_version}_dynamic-scripts"
+        IO.createDirectory(root)
+
         s.log.info(s"\n*** top: $root")
 
         val compileConfig: ConfigurationReport = {
@@ -219,7 +294,23 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           acc(modules, Set()).to[Seq].sortBy(m => m.id.organisation + m.id.name)
         }
 
-        val zipRoots: Map[Module, (String, ModuleGraph)] = (for {
+        for {
+          oReport <- compileConfig.details
+          groupName = oReport.name.stripSuffix("_" + sbV)
+          mReport <- oReport.modules
+          (artifact, file) <- mReport.artifacts
+          if "imce.dynamic_scripts.magicdraw.launcher" == groupName && "tgz" == artifact.extension
+        } {
+          s.log.info(s"=> Extracting $groupName / ${artifact.name} from ${file.name}")
+          Process(Seq("tar", "--strip-components", "1", "-zxf", file.getAbsolutePath), Some(root)).! match {
+            case 0 =>
+              s.log.info(s"=> Extracted $groupName / ${artifact.name} from ${file.name}")
+            case n =>
+              sys.error(s"Error extracting $file; exit code: $n")
+          }
+        }
+
+        val zipGroups: Map[String, scala.collection.Seq[(String, (String, Module, String, ModuleGraph))]] = (for {
           oReport <- compileConfig.details
           groupName = oReport.name.stripSuffix("_" + sbV)
             .stripSuffix("_libraries")
@@ -235,7 +326,14 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
               m.id.name == mReport.module.name &&
               m.id.version == mReport.module.revision
           }
-        } yield root -> (groupName, graph)).toMap
+        } yield root.id.name -> (root.id.version, root, groupName, graph)).groupBy(_._1)
+
+        val zipRoots: Map[Module, (String, ModuleGraph)]
+        = zipGroups
+          .map { case (_, seq) =>
+            val rG = seq.map(_._2).sortWith(versionComparator).head
+            rG._2 -> (rG._3, rG._4)
+          }
 
         val allModules: Set[Module] = zipRoots.keySet
 
@@ -260,16 +358,17 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
           val files: Seq[File] = (allFiles -- others).to[Seq].sortBy(_.name)
           s.log.info(s"group: $group root: ${r.id.organisation} ${r.id.name} ${r.id.version} => group files: ${files.size}")
           files.foreach { f =>
-            IO.copyFile(f, root / "lib" / group / f.name)
+            val folder = GroupFile2Folder(group, f.name)
+            IO.copyFile(f, root / "lib" / folder / f.name)
             s.log.info(s" jar: ${f.name}")
             val fs = f.getParentFile.getParentFile / "srcs" / (f.name.stripSuffix(".jar") + "-sources.jar")
             if (fs.exists && fs.canRead) {
-              IO.copyFile(fs, root / "lib.sources" / group / fs.name)
+              IO.copyFile(fs, root / "lib.sources" / folder / fs.name)
 
             }
             //              val fd = f.getParentFile.getParentFile / "docs" / (f.name.stripSuffix(".jar") + "-javadoc.jar")
             //              if (fd.exists && fd.canRead) {
-            //                IO.copyFile(fd, root / "lib.javadoc" / group / fd.name)
+            //                IO.copyFile(fd, root / "lib.javadoc" / folder / fd.name)
             //              }
           }
           r -> files
@@ -299,175 +398,22 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
         jarArtifacts.foreach { case (o, jar) =>
           s.log.info(s"* copying jar: $o/${jar.name}")
-          IO.copyFile(jar, root / "lib" / o / jar.name)
+          val folder = GroupFile2Folder(o, jar.name)
+          IO.copyFile(jar, root / "lib" / folder / jar.name)
         }
 
         srcArtifacts.foreach { case (o, jar) =>
           s.log.info(s"* copying source: $o/${jar.name}")
-          IO.copyFile(jar, root / "lib.sources" / o / jar.name)
+          val folder = GroupFile2Folder(o, jar.name)
+          IO.copyFile(jar, root / "lib.sources" / folder / jar.name)
         }
 
         docArtifacts.foreach { case (o, jar) =>
           s.log.info(s"* copying javadoc: $o/${jar.name}")
-          IO.copyFile(jar, root / "lib.javadoc" / o / jar.name)
+          val folder = GroupFile2Folder(o, jar.name)
+          IO.copyFile(jar, root / "lib.javadoc" / folder / jar.name)
         }
 
-        val jars: Seq[File] = jarArtifacts.map { case (o, jar) =>
-          new File("lib") / o / jar.name
-        }
-
-        val weaverJar: File = {
-          val weaverJars = ((root / "lib" / "imce.third_party.aspectj") * "aspectjweaver-*.jar").get
-          require(1 == weaverJars.size,
-            weaverJars
-              .map(_.toString)
-              .mkString(s"Got ${weaverJars.size} weaver libraries (there should be only 1):\n","\n","\n"))
-          val relJar = weaverJars.head.relativeTo(root)
-          require(relJar.isDefined,
-            s"The weaver library, ${weaverJars.head} should be resolvable from the root: $root")
-          relJar.get
-        }
-
-        val rtJar: File = {
-          val rtJars = ((root / "lib" / "imce.third_party.aspectj") * "aspectjrt-*.jar").get
-          require(1 == rtJars.size)
-          val relJar = rtJars.head.relativeTo(root)
-          require(relJar.isDefined)
-          relJar.get
-        }
-
-        val aspectjJars: Seq[File] = {
-          val ajJars = ((root / "lib" / "imce.third_party.aspectj") * "*.jar").get
-          require(1 < ajJars.size)
-          (for {
-            jar <- ajJars
-            relJar <- jar.relativeTo(root)
-          } yield relJar).to[Seq]
-        }
-
-        val scalaLib: File = {
-          val scalaLibs = ((root / "lib" / "imce.third_party.scala") * "scala-library-*.jar").get
-          require(1 == scalaLibs.size)
-          val relJar = scalaLibs.head.relativeTo(root)
-          require(relJar.isDefined)
-          relJar.get
-        }
-
-        val scalaJars: Seq[File] = {
-          val sJars = ((root / "lib" / "imce.third_party.scala") * "*.jar").get
-          require(1 < sJars.size)
-          (for {
-            jar <- sJars
-            relJar <- jar.relativeTo(root)
-          } yield relJar).to[Seq]
-        }
-
-        val otherJars: Seq[File] = {
-          val oJars = ((root / "lib" / "imce.third_party.other_scala") * "*.jar").get
-          require(1 < oJars.size)
-          (for {
-            jar <- oJars
-            relJar <- jar.relativeTo(root)
-          } yield relJar).to[Seq]
-        }
-
-        val bootJars = Seq(weaverJar, rtJar, scalaLib)
-
-        val bootClasspathPrefix = bootJars.mkString("", "\\\\\\\\:", "\\\\\\\\:")
-
-        val classpathPrefix =
-          (aspectjJars.sorted ++ scalaJars.sorted ++ otherJars.sorted ++ jars.sorted)
-            .mkString("", "\\\\\\\\:", "\\\\\\\\:")
-
-        val md_imce_script = root / "bin" / "magicdraw.imce"
-        IO.copyFile(
-          mdInstallDir / "bin" / "magicdraw",
-          md_imce_script)
-        md_imce_script.toScala.addPermission(PosixFilePermission.OWNER_EXECUTE)
-        md_imce_script.toScala.addPermission(PosixFilePermission.GROUP_EXECUTE)
-        md_imce_script.toScala.addPermission(PosixFilePermission.OTHERS_EXECUTE)
-
-        val md_imce_exe = root / "bin" / "magicdraw.imce.exe"
-        IO.copyFile(
-          mdInstallDir / "bin" / "magicdraw.exe",
-          md_imce_exe)
-        md_imce_exe.toScala.addPermission(PosixFilePermission.OWNER_EXECUTE)
-        md_imce_exe.toScala.addPermission(PosixFilePermission.GROUP_EXECUTE)
-        md_imce_exe.toScala.addPermission(PosixFilePermission.OTHERS_EXECUTE)
-
-        val magicdraw_imce_properties =
-          s"""# The contents of this file will be created from bin/magicdraw.properties
-             |# by the bin/magicdraw.imce.setup.sh script.
-             |# Since this file is tracked as part of the IMCE DynamicScripts plugin resource,
-             |# MagicDraw will delete it when that plugin is removed through MagicDraw's Resource/Plugin Manager.
-             |"""
-            .stripMargin
-        IO.write(root / "bin" / "magicdraw.imce.properties", magicdraw_imce_properties)
-
-        val configPattern =
-          "\\-Dlocal\\.config\\.dir\\.ext\\(\\\\\\\\=\\|=\\)[a-zA-Z0-9_\\.\\\\-]*"
-        val configReplace =
-          "-Dlocal.config.dir.ext\\\\\\\\=${IMCE_CONFIG_DIR}"
-
-        val magicdraw_imce_setup =
-          s"""#!/usr/bin/env bash
-             |
-             |pushd `dirname $$0` > /dev/null
-             |MD_INSTALL_BIN=`pwd -P`
-             |popd > /dev/null
-             |MD_INSTALL_DIR=$$(dirname $$MD_INSTALL_BIN)
-             |
-             |# The original 'bin/magicdraw.properties' file.
-             |# The contents of this file varies depending on which MagicDraw
-             |# package is installed (NoMagic's, CAE Vendor, CAE Lib_patches, CAE MDK)
-             |MD_ORIG_PROPERTIES=$$MD_INSTALL_BIN/magicdraw.properties
-             |
-             |# The imce-specific MagicDraw properties adapted from 'bin/magicdraw.properties'
-             |MD_IMCE_PROPERTIES=$$MD_INSTALL_BIN/magicdraw.imce.properties
-             |
-             |if test ! -e "$$MD_ORIG_PROPERTIES"; then
-             | echo "There is no 'bin/magicdraw.properties' file!"
-             | exit -1
-             |fi
-             |
-             |IMCE_CONFIG_DIR="-imce-$ver"
-             |
-             |IMCE_JAVA_ARGS_PREFIX="\\
-             |-javaagent:$weaverJar \\
-             |-Daj.weaving.verbose\\\\\\\\=true \\
-             |-Dorg.aspectj.weaver.showWeaveInfo\\\\\\\\=true \\
-             |-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
-             |
-             |IMCE_BOOT_CLASSPATH_PREFIX="$bootClasspathPrefix"
-             |
-             |IMCE_CLASSPATH_PREFIX="$classpathPrefix"
-             |
-             |cat $$MD_ORIG_PROPERTIES \\
-             | | sed -e "s!$configPattern!$configReplace!" \\
-             | | sed -e "s|^JAVA_ARGS=|JAVA_ARGS=$${IMCE_JAVA_ARGS_PREFIX} |" \\
-             | | sed -e "s|BOOT_CLASSPATH=|BOOT_CLASSPATH=$${IMCE_BOOT_CLASSPATH_PREFIX}|" \\
-             | | sed -e "s|^CLASSPATH=|CLASSPATH=$${IMCE_CLASSPATH_PREFIX}|" \\
-             | > $$MD_IMCE_PROPERTIES
-             |
-             |chmod 755 $$MD_IMCE_PROPERTIES
-             |
-             |echo "Wrote $$MD_IMCE_PROPERTIES"
-             |
-             |grep -q "log4j\\.category\\.i18n" $$MD_INSTALL_DIR/data/debug.properties
-             |if test $$? -eq 1; then
-             |  echo -e "\\nlog4j.category.i18n=OFF" >> $$MD_INSTALL_DIR/data/debug.properties
-             |  echo "Turned off i18n logging"
-             |fi
-             |""".stripMargin
-
-        val setup
-        = root / "bin" / "magicdraw.imce.setup.sh"
-
-        IO.write(setup, magicdraw_imce_setup)
-
-        setup.toScala.addPermission(PosixFilePermission.OWNER_EXECUTE)
-        setup.toScala.addPermission(PosixFilePermission.GROUP_EXECUTE)
-        setup.toScala.addPermission(PosixFilePermission.OTHERS_EXECUTE)
         IO.copyDirectory(
           base / "profiles", root / "profiles",
           overwrite=true,
@@ -482,6 +428,10 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
         IO.copyFile(libSrc, pluginDir / "lib" / libSrc.getName)
         IO.copyFile(libDoc, pluginDir / "lib" / libDoc.getName)
 
+        val blibs = ((root / "lib" / "bootstrap") ** "*.jar").get.to[Set]
+        val libs = (((root / "lib") ** "*.jar").get.to[Set] -- blibs).to[Seq].sortBy(_.name)
+        val libResources = (libs pair relativeTo(root)).map(_._2).sorted
+
         val pluginInfo =
           <plugin id="gov.nasa.jpl.magicdraw.dynamicScripts"
                   name="IMCE Dynamic Scripts Plugin"
@@ -494,6 +444,10 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
             </requires>
             <runtime>
               <library name={"lib/" + libJar.getName}/>
+              { libResources.map { r =>
+                <library name={r}>
+                </library>
+              }}
             </runtime>
           </plugin>
 
@@ -517,7 +471,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
                               homePage="https://github.jpl.nasa.gov/imce/jpl-dynamicscripts-magicdraw-plugin"
                               id="72516"
                               mdVersionMax="higher"
-                              mdVersionMin="18.0"
+                              mdVersionMin="18.5"
                               name="IMCE Dynamic Scripts Plugin"
                               product="IMCE Dynamic Scripts Plugin"
                               restartMagicdraw="false" type="Plugin">
@@ -579,5 +533,7 @@ lazy val imce_dynamic_scripts_magicdraw_plugin = Project("imce-dynamic_scripts-m
 
         ()
       }
-    }  
+    }
+
+
   )

@@ -20,6 +20,7 @@ git config --global user.name "Travis CI (on behalf of Nicolas F. Rouquette)"
 sbt \
     -jvm-opts travis/jvmopts.compile \
     -Dproject.version=$TRAVIS_TAG \
+    -DMagicDrawDownloader.progress=false \
     --warn \
     zipInstall
 
